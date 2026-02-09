@@ -232,70 +232,19 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-800/50 p-1 rounded-xl border border-slate-700">
-              <button
-                onClick={() => setStorageType('local')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${storageType === 'local' ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Local
-              </button>
-              <button
-                onClick={() => setStorageType('gdrive')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${storageType === 'gdrive' ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                G-Drive
-              </button>
-            </div>
-
             <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all">
-              {storageType === 'local' ? (
-                <>
-                  <FolderOpen className="text-orange-500 w-5 h-5 shrink-0" />
-                  <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                      Target Folder Organisasi:
-                      {outputPath && (
-                        <span className="ml-2 text-slate-200 normal-case font-bold tracking-normal text-sm">
-                          {outputPath.split('/').filter(Boolean).pop()}
-                        </span>
-                      )}
-                    </span>
-                    <button
-                      onClick={async () => {
-                        try {
-                          const res = await fetch('/api/browse');
-                          const data = await res.json();
-                          if (data.success) {
-                            setOutputPath(data.path);
-                          } else if (data.error !== 'Canceled by user') {
-                            alert('Gagal membuka folder picker: ' + data.error);
-                          }
-                        } catch (e) {
-                          alert('Error koneksi ke server');
-                        }
-                      }}
-                      className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-lg transition-all active:scale-95 shadow-lg shadow-orange-500/20"
-                    >
-                      Browse
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center gap-3 w-64">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                      Folder ID:
-                    </span>
-                    <input
-                      type="text"
-                      value={outputPath}
-                      onChange={(e) => setOutputPath(e.target.value)}
-                      placeholder="Masukkan Root Folder ID G-Drive"
-                      className="bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500 w-full"
-                    />
-                  </div>
-                </>
-              )}
+              <div className="flex items-center gap-3 w-64">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                  G-Drive Folder ID:
+                </span>
+                <input
+                  type="text"
+                  value={outputPath}
+                  onChange={(e) => setOutputPath(e.target.value)}
+                  placeholder="Masukkan Folder ID G-Drive"
+                  className="bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500 w-full"
+                />
+              </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer transition-colors border border-slate-700">
               <Cog className="w-5 h-5" />
