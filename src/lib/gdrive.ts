@@ -24,32 +24,47 @@ export class GoogleDriveService {
      * Finds a folder by name under a parent folder.
      */
     async findFolder(name: string, parentId: string): Promise<string | null> {
-        const response = await this.drive.files.list({
-            q: `name = '${name}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-            fields: 'files(id)',
-            spaces: 'drive',
-        });
+        console.log(`GDrive: Searching for folder "${name}" under parent "${parentId}"`);
+        try {
+            const response = await this.drive.files.list({
+                q: `name = '${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                fields: 'files(id)',
+                spaces: 'drive',
+            });
 
-        const files = response.data.files;
-        return files && files.length > 0 ? files[0].id || null : null;
+            const files = response.data.files;
+            const id = files && files.length > 0 ? files[0].id || null : null;
+            console.log(`GDrive: Found folder ID: ${id}`);
+            return id;
+        } catch (error: any) {
+            console.error(`GDrive: Error in findFolder:`, error.message);
+            throw error;
+        }
     }
 
     /**
      * Creates a folder under a parent folder.
      */
     async createFolder(name: string, parentId: string): Promise<string> {
-        const fileMetadata = {
-            name: name,
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [parentId],
-        };
+        console.log(`GDrive: Creating folder "${name}" under parent "${parentId}"`);
+        try {
+            const fileMetadata = {
+                name: name,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [parentId],
+            };
 
-        const folder = await this.drive.files.create({
-            requestBody: fileMetadata,
-            fields: 'id',
-        });
+            const folder = await this.drive.files.create({
+                requestBody: fileMetadata,
+                fields: 'id',
+            });
 
-        return folder.data.id!;
+            console.log(`GDrive: Created folder ID: ${folder.data.id}`);
+            return folder.data.id!;
+        } catch (error: any) {
+            console.error(`GDrive: Error in createFolder:`, error.message);
+            throw error;
+        }
     }
 
     /**
@@ -78,25 +93,32 @@ export class GoogleDriveService {
         mimeType: string,
         parentId: string
     ): Promise<{ id: string; webViewLink?: string | null }> {
-        const fileMetadata = {
-            name: fileName,
-            parents: [parentId],
-        };
+        console.log(`GDrive: Uploading "${fileName}" to parent "${parentId}"`);
+        try {
+            const fileMetadata = {
+                name: fileName,
+                parents: [parentId],
+            };
 
-        const media = {
-            mimeType: mimeType,
-            body: Readable.from(Buffer.from(file)),
-        };
+            const media = {
+                mimeType: mimeType,
+                body: Readable.from(Buffer.from(file)),
+            };
 
-        const response = await this.drive.files.create({
-            requestBody: fileMetadata,
-            media: media,
-            fields: 'id, webViewLink',
-        });
+            const response = await this.drive.files.create({
+                requestBody: fileMetadata,
+                media: media,
+                fields: 'id, webViewLink',
+            });
 
-        return {
-            id: response.data.id!,
-            webViewLink: response.data.webViewLink
-        };
+            console.log(`GDrive: Upload successful, ID: ${response.data.id}`);
+            return {
+                id: response.data.id!,
+                webViewLink: response.data.webViewLink
+            };
+        } catch (error: any) {
+            console.error(`GDrive: Error in uploadFile:`, error.message);
+            throw error;
+        }
     }
 }
