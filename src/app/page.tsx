@@ -20,6 +20,7 @@ export default function Home() {
   const [progress, setProgress] = useState('10');
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -35,7 +36,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (outputPath) localStorage.setItem('nk_output_path', outputPath);
+    if (!outputPath) {
+      setSaveStatus('idle');
+      return;
+    }
+
+    setSaveStatus('saving');
+    const timer = setTimeout(() => {
+      localStorage.setItem('nk_output_path', outputPath);
+      setSaveStatus('saved');
+
+      const hideTimer = setTimeout(() => setSaveStatus('idle'), 2000);
+      return () => clearTimeout(hideTimer);
+    }, 600);
+
+    return () => clearTimeout(timer);
   }, [outputPath]);
 
   useEffect(() => {
@@ -232,7 +247,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all">
+            <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all relative">
               <div className="flex items-center gap-3 w-64">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
                   G-Drive Folder ID:
@@ -242,8 +257,40 @@ export default function Home() {
                   value={outputPath}
                   onChange={(e) => setOutputPath(e.target.value)}
                   placeholder="Masukkan Folder ID G-Drive"
-                  className="bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500 w-full"
+                  className="bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500 w-full pr-8"
                 />
+              </div>
+
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+                {saveStatus === 'saving' && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+                  />
+                )}
+                {saveStatus === 'saved' && outputPath && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/50">
+                      <motion.svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        className="w-3 h-3 text-green-500"
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </motion.svg>
+                    </div>
+                    <span className="text-[8px] font-black text-green-500 uppercase tracking-tighter">Saved</span>
+                  </motion.div>
+                )}
               </div>
             </div>
             <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer transition-colors border border-slate-700">
