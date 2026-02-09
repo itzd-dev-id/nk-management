@@ -34,3 +34,10 @@ export function getFileExtension(filename: string): string {
 export function getDefaultDate(): string {
     return format(new Date(), 'yyyy-MM-dd');
 }
+
+export function extractGDriveId(idOrUrl: string): string {
+    if (!idOrUrl) return '';
+    // If it's a URL, extract the ID
+    const match = idOrUrl.match(/[-\w]{25,}/);
+    return match ? match[0] : idOrUrl;
+}

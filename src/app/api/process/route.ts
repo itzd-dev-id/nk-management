@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sanitizePath } from '@/lib/utils';
+import { sanitizePath, extractGDriveId } from '@/lib/utils';
 import { GoogleDriveService } from '@/lib/gdrive';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
@@ -47,13 +47,14 @@ export async function POST(req: NextRequest) {
         const progressPart = progress ? `${progress}%_` : '';
         const prefix = `${detectedDate}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}`;
 
-        console.log('API: Preparing GDrive upload under Folder ID:', outputPath);
+        const folderId = extractGDriveId(outputPath);
+        console.log('API: Preparing GDrive upload under Folder ID:', folderId);
         // GOOGLE DRIVE LOGIC
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
         const folderParts = [sanitizedBuilding, sanitizedWork];
-        const targetFolderId = await gdrive.ensureFolderStructure(folderParts, outputPath);
+        const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 
         const finalName = `${prefix}${Date.now().toString().slice(-3)}.${extension}`;
@@ -75,7 +76,8 @@ export async function POST(req: NextRequest) {
         console.error('Processing error:', error);
         return NextResponse.json({
             success: false,
-            error: error.message || 'Internal server error'
+            error: error.message || 'Internal server error',
+            details: error.response?.data || null
         }, { status: 500 });
     }
 }

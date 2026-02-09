@@ -165,6 +165,17 @@ export default function Home() {
 
     for (let i = 0; i < updatedFiles.length; i++) {
       const fileMeta = updatedFiles[i];
+
+      // Vercel Limit Check
+      if (fileMeta.file.size > 4.5 * 1024 * 1024) {
+        setFiles(prev => prev.map(f => f.id === fileMeta.id ? {
+          ...f,
+          status: 'error',
+          error: 'Ukuran file terlalu besar (> 4.5MB). Harap kompres atau kecilkan resolusi foto.'
+        } : f));
+        continue;
+      }
+
       setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'processing' } : f));
 
       const formData = new FormData();
@@ -193,10 +204,14 @@ export default function Home() {
             newName: result.finalName || f.newName
           } : f));
         } else {
-          setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: result.error } : f));
+          let errorMsg = result.error;
+          if (result.details?.error?.message) {
+            errorMsg = `${result.error}: ${result.details.error.message}`;
+          }
+          setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: errorMsg } : f));
         }
-      } catch (e) {
-        setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: 'Upload failed' } : f));
+      } catch (e: any) {
+        setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: 'Upload failed: ' + e.message } : f));
       }
     }
 
