@@ -23,7 +23,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('archive');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [workName, setWorkName] = useState('');
-  const [progress, setProgress] = useState('10');
+  const [progress, setProgress] = useState('0');
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
