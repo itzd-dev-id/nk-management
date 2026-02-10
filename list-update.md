@@ -44,37 +44,31 @@ Berikut adalah daftar peningkatan fitur dan perbaikan yang telah diimplementasik
 | **T** | Lapangan Basket/Bola |
 | **T01** | Direksi Keet |
 
-### 5. Daftar Pekerjaan Ringkas (Concise V2.0)
-Sistem sekarang menggunakan penamaan yang lebih ringkas dan langsung (Direct Naming) namun tetap mencakup seluruh fase proyek.
+### 5. Daftar Pekerjaan Ringkas & Bersih (V2.1 Final)
+Pembaruan terakhir memastikan antarmuka yang bersih dengan spasi pada kategori, namun tetap menggunakan underscore pada nama file untuk kompatibilitas sistem.
 
-**PENTING**: Sesuai permintaan, item seperti **Bondek** dan **Wiremesh** kini sudah termasuk dalam kategori **`Struktur_Atas_Bekisting`** agar pelaporan lebih simpel.
+**Format Penamaan:**
+- **Kategori (Display UI)**: Menggunakan spasi (contoh: `Struktur Atas`, `Material On Site`).
+- **Pekerjaan (File Name)**: Menggunakan underscore untuk pemisahan kata (contoh: `Toolbox_Meeting`, `Paving_Block`).
+- **Struktur File**: `[Tanggal]_[Kategori]-[Pekerjaan]_[Gedung]_[Progress]_[No].jpg`
+
+**Contoh Daftar Terkini:**
+
+**Struktur Atas & Struktur Bawah**
+- **Kategori**: `Struktur Atas`, `Struktur Bawah`
+- **Pekerjaan**: `Bekisting` (Sudah termasuk Bondek/Wiremesh), `Pembesian`, `Pengecoran`, `Pedestal`, `Tie_Beam`, `Finish_Trowel`.
 
 **K3 & Persiapan**
-- K3: `K3_Induction`, `K3_Toolbox_Meeting`, `K3_Rambu_Safety`, `K3_Safety_Net`, `K3_Audit_Mingguan`.
-- Persiapan: `Persiapan_Pembersihan_Lahan`, `Persiapan_Pagar_Proyek`, `Persiapan_Bouwplank`, `Persiapan_Direksi_Keet`, `Persiapan_Mobilisasi_Alat`.
+- **Kategori**: `K3 dan Keselamatan`, `Persiapan`
+- **Pekerjaan**: `Induction`, `Toolbox_Meeting`, `Rambu_Safety`, `Pembersihan_Lahan`, `Bouwplank`, `Direksi_Keet`.
 
-**Pekerjaan Tanah & Struktur Bawah**
-- Tanah: `Tanah_Galian`, `Tanah_Urugan_Pasir`, `Tanah_Lantai_Kerja`, `Tanah_Pemadatan`.
-- Struktur Bawah: `Struktur_Bawah_Pancang`, `Struktur_Bawah_Pile_Cap`, `Struktur_Bawah_Tie_Beam`, `Struktur_Bawah_Pedestal`, `Struktur_Bawah_Pembesian`, `Struktur_Bawah_Bekisting`, `Struktur_Bawah_Pengecoran`.
+**Arsitektur & MEP**
+- **Kategori**: `Arsitektur`, `MEP`
+- **Pekerjaan**: `Pasangan_Bata`, `Plesteran`, `Acian`, `Keramik_Lantai`, `Sanitary`, `Instalasi_Listrik`, `Instalasi_Air`, `Fire_Alarm`.
 
-**Struktur Atas (Fokus Kemudahan Field)**
-- `Struktur_Atas_Bekisting` (Termasuk Bondek/Wiremesh)
-- `Struktur_Atas_Pembesian`
-- `Struktur_Atas_Pengecoran`
-- `Struktur_Atas_Finish_Trowel`
-- `Struktur_Atas_Bongkar_Bekisting`
-
-**Arsitektur & Atap**
-- Arsitektur: `Arsitektur_Pasangan_Bata`, `Arsitektur_Plesteran`, `Arsitektur_Acian`, `Arsitektur_Keramik_Lantai/Dinding`, `Arsitektur_Pengecatan`, `Arsitektur_Plafon`, `Arsitektur_Kusen_Pintu_Jendela`, `Arsitektur_Sanitary`.
-- Atap: `Atap_Rangka_Baja`, `Atap_Penutup_Genteng/Spandek`, `Atap_Lisplang`, `Atap_Talang`.
-
-**MEP, Lansekap & Material**
-- MEP: `MEP_Instalasi_Listrik`, `MEP_Instalasi_Air`, `MEP_Instalasi_AC`, `MEP_Fire_Alarm`, `MEP_CCTV`.
-- Lansekap: `Lansekap_Paving_Block`, `Lansekap_Saluran`, `Lansekap_Taman`.
-- Material: `Material_Pasir_Batu`, `Material_Semen`, `Material_Besi_Beton`, `Material_Bata_Ringan`, `Material_Beton_Ready_Mix`.
-
-**Dokumentasi**
-- `Dokumentasi_Progress_Mingguan`, `Dokumentasi_Drone_View`, `Dokumentasi_Joint_Inspection`.
+**Lansekap, Material & Dokumentasi**
+- **Kategori**: `Lansekap`, `Material On Site`, `Dokumentasi`
+- **Pekerjaan**: `Paving_Block`, `Taman`, `Pasir_Batu`, `Besi_Beton`, `Beton_Ready_Mix`, `Progress_Mingguan`, `Drone_View`.
 
 ---
-*Status: Operasional & Tersinkronisasi ke GitHub (Versi Ringkas 2.0)*
+*Status: Operasional & Tersinkronisasi ke GitHub (V2.1 Final Clean)*

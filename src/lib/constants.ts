@@ -41,112 +41,112 @@ export const WORK_HIERARCHY = [
     {
         category: 'K3 dan Keselamatan',
         tasks: [
-            'K3_Induction',
-            'K3_Toolbox_Meeting',
-            'K3_Rambu_Safety',
-            'K3_Safety_Net',
-            'K3_Audit_Mingguan'
+            'Induction',
+            'Toolbox_Meeting',
+            'Rambu_Safety',
+            'Safety_Net',
+            'Audit_Mingguan'
         ]
     },
     {
         category: 'Persiapan',
         tasks: [
-            'Persiapan_Pembersihan_Lahan',
-            'Persiapan_Pagar_Proyek',
-            'Persiapan_Bouwplank',
-            'Persiapan_Direksi_Keet',
-            'Persiapan_Mobilisasi_Alat'
+            'Pembersihan_Lahan',
+            'Pagar_Proyek',
+            'Bouwplank',
+            'Direksi_Keet',
+            'Mobilisasi_Alat'
         ]
     },
     {
         category: 'Tanah',
         tasks: [
-            'Tanah_Galian',
-            'Tanah_Urugan_Pasir',
-            'Tanah_Lantai_Kerja',
-            'Tanah_Pemadatan'
+            'Galian',
+            'Urugan_Pasir',
+            'Lantai_Kerja',
+            'Pemadatan'
         ]
     },
     {
         category: 'Struktur Bawah',
         tasks: [
-            'Struktur_Bawah_Pancang',
-            'Struktur_Bawah_Pile_Cap',
-            'Struktur_Bawah_Tie_Beam',
-            'Struktur_Bawah_Pedestal',
-            'Struktur_Bawah_Pembesian',
-            'Struktur_Bawah_Bekisting',
-            'Struktur_Bawah_Pengecoran'
+            'Pancang',
+            'Pile_Cap',
+            'Tie_Beam',
+            'Pedestal',
+            'Pembesian',
+            'Bekisting',
+            'Pengecoran'
         ]
     },
     {
         category: 'Struktur Atas',
         tasks: [
-            'Struktur_Atas_Bekisting',
-            'Struktur_Atas_Pembesian',
-            'Struktur_Atas_Pengecoran',
-            'Struktur_Atas_Finish_Trowel',
-            'Struktur_Atas_Bongkar_Bekisting'
+            'Bekisting',
+            'Pembesian',
+            'Pengecoran',
+            'Finish_Trowel',
+            'Bongkar_Bekisting'
         ]
     },
     {
         category: 'Arsitektur',
         tasks: [
-            'Arsitektur_Pasangan_Bata',
-            'Arsitektur_Plesteran',
-            'Arsitektur_Acian',
-            'Arsitektur_Keramik_Lantai',
-            'Arsitektur_Keramik_Dinding',
-            'Arsitektur_Pengecatan',
-            'Arsitektur_Plafon',
-            'Arsitektur_Kusen_Pintu_Jendela',
-            'Arsitektur_Sanitary'
+            'Pasangan_Bata',
+            'Plesteran',
+            'Acian',
+            'Keramik_Lantai',
+            'Keramik_Dinding',
+            'Pengecatan',
+            'Plafon',
+            'Kusen_Pintu_Jendela',
+            'Sanitary'
         ]
     },
     {
         category: 'Atap',
         tasks: [
-            'Atap_Rangka_Baja',
-            'Atap_Penutup_Genteng',
-            'Atap_Penutup_Spandek',
-            'Atap_Lisplang',
-            'Atap_Talang'
+            'Rangka_Baja',
+            'Penutup_Genteng',
+            'Penutup_Spandek',
+            'Lisplang',
+            'Talang'
         ]
     },
     {
         category: 'MEP',
         tasks: [
-            'MEP_Instalasi_Listrik',
-            'MEP_Instalasi_Air',
-            'MEP_Instalasi_AC',
-            'MEP_Fire_Alarm',
-            'MEP_CCTV'
+            'Instalasi_Listrik',
+            'Instalasi_Air',
+            'Instalasi_AC',
+            'Fire_Alarm',
+            'CCTV'
         ]
     },
     {
         category: 'Lansekap',
         tasks: [
-            'Lansekap_Paving_Block',
-            'Lansekap_Saluran',
-            'Lansekap_Taman'
+            'Paving_Block',
+            'Saluran',
+            'Taman'
         ]
     },
     {
         category: 'Material On Site',
         tasks: [
-            'Material_Pasir_Batu',
-            'Material_Semen',
-            'Material_Besi_Beton',
-            'Material_Bata_Ringan',
-            'Material_Beton_Ready_Mix'
+            'Pasir_Batu',
+            'Semen',
+            'Besi_Beton',
+            'Bata_Ringan',
+            'Beton_Ready_Mix'
         ]
     },
     {
         category: 'Dokumentasi',
         tasks: [
-            'Dokumentasi_Progress_Mingguan',
-            'Dokumentasi_Drone_View',
-            'Dokumentasi_Joint_Inspection'
+            'Progress_Mingguan',
+            'Drone_View',
+            'Joint_Inspection'
         ]
     }
 ];
