@@ -44,35 +44,37 @@ Berikut adalah daftar peningkatan fitur dan perbaikan yang telah diimplementasik
 | **T** | Lapangan Basket/Bola |
 | **T01** | Direksi Keet |
 
-### 5. Daftar Pekerjaan Master (Versi 2.0 - 180+ Item)
-Sistem sekarang menggunakan daftar pekerjaan tingkat profesional yang disinkronkan dengan standar **SNI & RAB Nindya Karya**.
+### 5. Daftar Pekerjaan Ringkas (Concise V2.0)
+Sistem sekarang menggunakan penamaan yang lebih ringkas dan langsung (Direct Naming) namun tetap mencakup seluruh fase proyek.
+
+**PENTING**: Sesuai permintaan, item seperti **Bondek** dan **Wiremesh** kini sudah termasuk dalam kategori **`Struktur_Atas_Bekisting`** agar pelaporan lebih simpel.
 
 **K3 & Persiapan**
-- K3: `Safety_Induction`, `Toolbox_Meeting`, `Safety_Morning`, `Audit_Internal`, `Inspeksi_APD`, `Rambu_K3`, `Safety_Net`, `Railing_Pengaman`, `Barikade`, `Inspeksi_Alat`, `Izin_Kerja_Panas/Ketinggian`, `Tanggap_Darurat`, `Kotak_P3K`, `Fogging`.
-- Persiapan: `Site_Clearing`, `Pagar_Proyek`, `Bouwplank`, `Direksi_Keet`, `Gudang`, `Barak`, `Papan_Nama`, `Air_Listrik_Kerja`, `Mobilisasi`, `Survey_Topografi`, `Jalan_Akses`.
+- K3: `K3_Induction`, `K3_Toolbox_Meeting`, `K3_Rambu_Safety`, `K3_Safety_Net`, `K3_Audit_Mingguan`.
+- Persiapan: `Persiapan_Pembersihan_Lahan`, `Persiapan_Pagar_Proyek`, `Persiapan_Bouwplank`, `Persiapan_Direksi_Keet`, `Persiapan_Mobilisasi_Alat`.
 
-**Struktur Bawah (Substructure)**
-- Pondasi: `Tiang_Pancang_Pemancangan/Sambungan/Chipping`, `Bore_Pile_Pengeboran/Pembesian/Tremie`, `PDA_Test`, `Sondir`.
-- Komponen: `Pile_Cap`, `Tie_Beam`, **`Kolom_Pedestal`**, `Pondasi_Batu_Kali`, `Pondasi_Tapak` (Pembesian, Bekisting, Pengecoran).
+**Pekerjaan Tanah & Struktur Bawah**
+- Tanah: `Tanah_Galian`, `Tanah_Urugan_Pasir`, `Tanah_Lantai_Kerja`, `Tanah_Pemadatan`.
+- Struktur Bawah: `Struktur_Bawah_Pancang`, `Struktur_Bawah_Pile_Cap`, `Struktur_Bawah_Tie_Beam`, `Struktur_Bawah_Pedestal`, `Struktur_Bawah_Pembesian`, `Struktur_Bawah_Bekisting`, `Struktur_Bawah_Pengecoran`.
 
-**Struktur Atas (Superstructure)**
-- Kolom/Balok/Plat: `Kolom_Utama`, `Kolom_Praktis`, `Balok_Utama`, `Balok_Anak`, `Plat_Lantai` (Bondek, Wiremesh, Pembesian, Bekisting, Pengecoran, Finish_Trowel).
-- Lainnya: `ShearWall`, `Tangga`, `Ring_Balok`, `Bongkar_Bekisting`, `Curing_Beton_Watering/Compound`.
+**Struktur Atas (Fokus Kemudahan Field)**
+- `Struktur_Atas_Bekisting` (Termasuk Bondek/Wiremesh)
+- `Struktur_Atas_Pembesian`
+- `Struktur_Atas_Pengecoran`
+- `Struktur_Atas_Finish_Trowel`
+- `Struktur_Atas_Bongkar_Bekisting`
 
 **Arsitektur & Atap**
-- Dinding/Lantai: `Bata_Merah/Ringan`, `Plesteran`, `Sponengan`, `Acian_Semen/Skimcoat`, `Cat_Interior/Eksterior/Plamir`, `Granit`, `Keramik`, `Vinyl`, `Plint`.
-- Plafon/Pintu: `Rangka_Galfum`, `Gypsum`, `PVC`, `GRC`, `Kusen_Aluminium/Kayu`, `Pintu_Engineering`, `Kaca_Tempered`, `Hardware_Kunci`.
-- Atap: `Rangka_Baja_Ringan`, `Gording_Steel`, `Aluminium_Foil`, `Genteng_Metal/Keramik`, `Spandek`, `Bubungan`, `Lisplang`, `Talang`, `Flashings`.
+- Arsitektur: `Arsitektur_Pasangan_Bata`, `Arsitektur_Plesteran`, `Arsitektur_Acian`, `Arsitektur_Keramik_Lantai/Dinding`, `Arsitektur_Pengecatan`, `Arsitektur_Plafon`, `Arsitektur_Kusen_Pintu_Jendela`, `Arsitektur_Sanitary`.
+- Atap: `Atap_Rangka_Baja`, `Atap_Penutup_Genteng/Spandek`, `Atap_Lisplang`, `Atap_Talang`.
 
-**MEP & Perlindungan**
-- Elektrikal: `Kabel_TR/Power`, `Tray_Kabel`, `Panel_LVMDP/SDP`, `Pipa_Conduit`, `Titik_Lampu`, `Armatur`, `Saklar`.
-- Plumbing/HVAC: `Pipa_Air_Bersih/Kotor/Vent`, `Pompa_Booster`, `Roof_Tank`, `Bio_Septic_Tank`, `Pipa_Refrigerant`, `Indoor_Outdoor_AC`.
-- Spesifik: `Fire_Alarm`, `Hydrant`, `APAR`, `CCTV_IP`, `Wifi_AP`, `Sound_System`, `Sistem_Penangkal_Petir`, **`Waterproofing_Toilet/Dak`**.
+**MEP, Lansekap & Material**
+- MEP: `MEP_Instalasi_Listrik`, `MEP_Instalasi_Air`, `MEP_Instalasi_AC`, `MEP_Fire_Alarm`, `MEP_CCTV`.
+- Lansekap: `Lansekap_Paving_Block`, `Lansekap_Saluran`, `Lansekap_Taman`.
+- Material: `Material_Pasir_Batu`, `Material_Semen`, `Material_Besi_Beton`, `Material_Bata_Ringan`, `Material_Beton_Ready_Mix`.
 
-**Lansekap, Material & Dokumentasi**
-- Lansekap: `Paving_Block`, `Cansteen`, `Grass_Block`, `Saluran_U_Ditch/Cover`, `Lampu_Taman`, `Rumput_Pohon`, `Signage_Marking`.
-- Material: `Pasir`, `Batu_Split`, `Semen`, `Besi_Polos/Ulir`, `Bata_Ringan`, `Keramik`, `Beton_Ready_Mix`, `Besi_Wiremesh`, `Bondek`.
-- Monitoring: `Titik_Nol`, `Progress_Mingguan/Bulanan`, `Drone_Aerial`, `Uji_Kubus/Baja/Hydro`, `Joint_Inspection`, `Kunjungan_Direksi`, `STH-1`.
+**Dokumentasi**
+- `Dokumentasi_Progress_Mingguan`, `Dokumentasi_Drone_View`, `Dokumentasi_Joint_Inspection`.
 
 ---
-*Status: Operasional & Tersinkronisasi ke GitHub (Versi Master 2.0)*
+*Status: Operasional & Tersinkronisasi ke GitHub (Versi Ringkas 2.0)*
