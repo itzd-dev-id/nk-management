@@ -43,7 +43,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                 {/* Dropdown Toggle & Display - NARROWED */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="w-full md:w-64 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
+                    className="w-full md:w-40 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
                 >
                     <div className="flex flex-col truncate">
                         <span className={`text-[10px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
