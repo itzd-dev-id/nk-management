@@ -87,21 +87,30 @@ export default function Home() {
     }
   };
 
-  // Sync config on mount or output path change
+  // Separate saves for buildings and hierarchy
   useEffect(() => {
-    if (outputPath) fetchConfig(outputPath);
-  }, [outputPath, fetchConfig]);
+    if (outputPath && session?.accessToken) {
+      if (skipNextSave.current) {
+        // Handled by the next effect for reset
+      } else {
+        saveConfig('buildings.json', allBuildings);
+      }
+    }
+  }, [allBuildings, outputPath, session?.accessToken]);
 
-  // Persist state to Drive
   useEffect(() => {
     if (outputPath && session?.accessToken) {
       if (skipNextSave.current) {
         skipNextSave.current = false;
       } else {
-        saveConfig(allBuildings, allHierarchy);
+        saveConfig('works.json', allHierarchy);
       }
     }
-  }, [allBuildings, allHierarchy, outputPath, session?.accessToken]);
+  }, [allHierarchy, outputPath, session?.accessToken]);
+
+  useEffect(() => {
+    if (outputPath) loadAllConfigs(outputPath);
+  }, [outputPath, loadAllConfigs]);
 
   // UI helpers and other persistence
   useEffect(() => {
