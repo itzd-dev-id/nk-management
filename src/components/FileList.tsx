@@ -139,10 +139,16 @@ function StatusBadge({ status }: { status: FileMetadata['status'] }) {
                     <Circle className="w-3 h-3" /> Siap
                 </span>
             );
+        case 'compressing':
+            return (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-sky-100 text-sky-600">
+                    <Loader2 className="w-3 h-3 animate-pulse" /> Kompres
+                </span>
+            );
         case 'processing':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Proses
+                    <Loader2 className="w-3 h-3 animate-spin" /> Upload
                 </span>
             );
         case 'success':

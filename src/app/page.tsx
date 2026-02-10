@@ -8,13 +8,16 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
+import imageCompression from 'browser-image-compression';
+import { BottomNav, TabId } from '@/components/BottomNav';
 
 export default function Home() {
   const { data: session } = useSession();
   // State
+  const [activeTab, setActiveTab] = useState<TabId>('archive');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [workName, setWorkName] = useState('');
   const [progress, setProgress] = useState('10');
@@ -168,26 +171,36 @@ export default function Home() {
 
     setIsProcessing(true);
 
-    // Process files one by one (or in batches)
     const updatedFiles = [...files];
 
     for (let i = 0; i < updatedFiles.length; i++) {
       const fileMeta = updatedFiles[i];
+      if (fileMeta.status === 'success') continue;
 
-      // Vercel Limit Check
-      if (fileMeta.file.size > 4.5 * 1024 * 1024) {
-        setFiles(prev => prev.map(f => f.id === fileMeta.id ? {
-          ...f,
-          status: 'error',
-          error: 'Ukuran file terlalu besar (> 4.5MB). Harap kompres atau kecilkan resolusi foto.'
-        } : f));
-        continue;
+      let fileToUpload = fileMeta.file;
+
+      // 1. Automatic Compression for Images
+      if (fileMeta.file.type.startsWith('image/')) {
+        setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'compressing' } : f));
+
+        try {
+          const options = {
+            maxSizeMB: 1.2,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true
+          };
+          fileToUpload = await imageCompression(fileMeta.file, options);
+          console.log(`Compressed: ${fileMeta.file.size} -> ${fileToUpload.size}`);
+        } catch (error) {
+          console.error("Compression Error:", error);
+          // Fallback to original if compression fails
+        }
       }
 
       setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'processing' } : f));
 
       const formData = new FormData();
-      formData.append('file', fileMeta.file);
+      formData.append('file', fileToUpload);
       formData.append('metadata', JSON.stringify({
         detectedDate: fileMeta.detectedDate,
         workName: fileMeta.workName,
@@ -227,297 +240,214 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC]">
-      {/* Header */}
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg transform md:rotate-3 hover:rotate-0 transition-transform cursor-pointer">
-              <HardHat className="text-white w-6 h-6 md:w-7 md:h-7" />
-            </div>
-            <div>
-              <h1 className="text-lg md:text-xl font-black tracking-tight flex items-center gap-2">
-                NK-MANAGEMENT <span className="hidden sm:inline-block text-[10px] bg-sky-500 px-1.5 py-0.5 rounded text-white font-bold tracking-widest uppercase">PRO</span>
-              </h1>
-              <p className="hidden md:block text-xs text-slate-400 font-medium">Sistem Pengarsipan Dokumentasi Konstruksi v2.0</p>
+    <main className="min-h-screen bg-[#F2F2F7] pb-24">
+      {/* iOS Style Sticky Header */}
+      <header className="sticky top-0 z-[90] bg-white/80 backdrop-blur-xl border-b border-slate-200/50 pt-safe-area-inset-top">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="w-10 h-10 flex items-center justify-start">
+            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <HardHat className="text-white w-5 h-5" />
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full md:w-auto">
-            <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-              {session ? (
-                <div className="flex items-center gap-3 bg-slate-800/50 rounded-2xl pl-2 pr-4 py-1.5 border border-slate-700">
-                  {session.user?.image ? (
-                    <img src={session.user.image} alt="User" className="w-8 h-8 rounded-full border border-slate-600" />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                      <User className="w-4 h-4 text-slate-400" />
-                    </div>
-                  )}
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-slate-200 leading-tight">{session.user?.name}</span>
-                    <button onClick={() => signOut()} className="text-[8px] font-black text-slate-500 hover:text-orange-500 uppercase tracking-widest text-left">Logout</button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => signIn('google')}
-                  className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl border border-slate-700 transition-all text-xs font-bold"
-                >
-                  <LogIn className="w-4 h-4 text-orange-500" />
-                  Login Google
-                </button>
-              )}
-            </div>
+          <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
+            {activeTab === 'archive' && (selectedBuilding?.code || 'NK-ARCHIVE')}
+            {activeTab === 'buildings' && 'GEDUNG'}
+            {activeTab === 'queue' && 'ANTREAN'}
+            {activeTab === 'profile' && 'PROFIL'}
+          </h1>
 
-            <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all w-full md:w-auto">
-              <div className="flex items-center gap-3 w-full md:w-64">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                  G-Drive Folder ID:
-                </span>
-                <div className="relative w-full">
-                  <input
-                    type="text"
-                    value={outputPath}
-                    onChange={(e) => setOutputPath(e.target.value)}
-                    placeholder="Masukkan Folder ID G-Drive"
-                    className="bg-slate-900/50 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-orange-500 w-full pr-10"
-                  />
-
-                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
-                    {saveStatus === 'saving' && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="w-3.5 h-3.5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
-                      />
-                    )}
-                    {saveStatus === 'saved' && outputPath && (
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="flex items-center gap-1"
-                      >
-                        <div className="w-4 h-4 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/50">
-                          <motion.svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                            className="w-2.5 h-2.5 text-green-500"
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </motion.svg>
-                        </div>
-                        <span className="text-[7px] font-black text-green-500 uppercase tracking-tighter">Saved</span>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
+          <div className="w-10 h-10 flex items-center justify-end">
+            {activeTab === 'archive' && files.length > 0 && (
+              <div className="bg-orange-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+                {files.length}
               </div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white cursor-pointer transition-colors border border-slate-700">
-              <Cog className="w-5 h-5" />
-            </div>
+            )}
+            {activeTab !== 'archive' && (
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                <LayoutDashboard className="w-4 h-4 text-slate-400" />
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
-        {/* Sidebar */}
-        <motion.aside
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="col-span-1 md:col-span-3 space-y-4"
-        >
-          {/* Step 1: Building (Mobile Collapsible) */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all">
-            <button
-              onClick={() => setActiveStep(activeStep === 'building' ? 'upload' : 'building')}
-              className="w-full md:hidden flex items-center justify-between p-5 bg-slate-50 border-b border-slate-100"
+      <div className="max-w-md mx-auto px-5 py-6">
+        <AnimatePresence mode="wait">
+          {activeTab === 'archive' && (
+            <motion.div
+              key="archive"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
             >
-              <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${selectedBuilding ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>1</div>
-                <span className="font-bold text-slate-800">{selectedBuilding?.name || 'Pilih Gedung'}</span>
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Mulai Arsip</h2>
+                <p className="text-slate-500 text-sm font-medium">Pilih pekerjaan dan upload dokumentasi.</p>
               </div>
-              <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${activeStep === 'building' ? 'rotate-90' : ''}`} />
-            </button>
-            <div className={`${activeStep === 'building' ? 'block' : 'hidden md:block'} p-6`}>
-              <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
-            </div>
-          </div>
 
-          <div className="hidden md:block h-px bg-slate-100 mx-6" />
-        </motion.aside>
+              {/* Step 2: Work & Progress */}
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6">
+                <WorkSelector value={workName} onChange={setWorkName} />
 
-        {/* Main Content */}
-        <section className="col-span-1 md:col-span-9 space-y-6">
-          {/* Step 2: Work & Progress (Mobile Collapsible) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
-          >
-            <button
-              onClick={() => setActiveStep(activeStep === 'work' ? 'upload' : 'work')}
-              className="w-full md:hidden flex items-center justify-between p-5 bg-slate-50 border-b border-slate-100"
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${workName ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>2</div>
-                <span className="font-bold text-slate-800 truncate max-w-[200px]">{workName?.split(' / ')[1] || workName || 'Nama Pekerjaan'}</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${activeStep === 'work' ? 'rotate-90' : ''}`} />
-            </button>
-
-            <div className={`${activeStep === 'work' ? 'block' : 'hidden md:block'} p-6 md:p-8`}>
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-8">
-                <div className="col-span-1 md:col-span-8">
-                  <WorkSelector value={workName} onChange={setWorkName} />
-                </div>
-                <div className="col-span-1 md:col-span-4 h-full flex flex-col justify-end">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Progres & Milestone</label>
-                  <div className="grid grid-cols-5 gap-3 h-[74px]">
-                    {/* Progress Input Frame - Bento 1 */}
-                    <div className="col-span-2 relative group bg-slate-50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
-                      <div className="h-full flex items-center justify-center">
-                        <div className="flex items-baseline gap-1">
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={progress}
-                            onChange={(e) => setProgress(e.target.value)}
-                            placeholder="0"
-                            className="bg-transparent text-right text-3xl font-black text-slate-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                            style={{ width: `${Math.max(progress.toString().length || 1, 1)}ch` }}
-                          />
-                          <span className="text-3xl font-black text-slate-400">%</span>
-                        </div>
+                <div className="space-y-4">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block">Progres & Milestone</label>
+                  <div className="grid grid-cols-5 gap-2 h-16">
+                    <div className="col-span-2 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center">
+                      <div className="flex items-baseline gap-1">
+                        <input
+                          type="number"
+                          value={progress}
+                          onChange={(e) => setProgress(e.target.value)}
+                          className="bg-transparent text-right text-2xl font-black text-slate-800 w-10 outline-none"
+                        />
+                        <span className="text-lg font-black text-slate-400">%</span>
                       </div>
                     </div>
-
-                    {/* Milestone Bento Grid */}
-                    <div className="col-span-3 grid grid-cols-3 gap-1.5 h-full">
-                      {['0', '25', '50', '75', '100'].map((val) => (
+                    <div className="col-span-3 grid grid-cols-3 gap-1.5">
+                      {['0', '50', '100'].map((val) => (
                         <button
                           key={val}
                           onClick={() => setProgress(val)}
-                          className={`flex items-center justify-center text-[10px] font-black rounded-xl border transition-all ${progress === val ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-500'}`}
+                          className={`flex items-center justify-center text-[10px] font-black rounded-xl border transition-all ${progress === val ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-slate-200 text-slate-400'}`}
                         >
                           {val}%
                         </button>
                       ))}
-                      <div className="bg-slate-50/50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center opacity-40">
-                        <div className="w-1 h-1 bg-slate-300 rounded-full" />
-                      </div>
                     </div>
                   </div>
                 </div>
+
+                <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
               </div>
 
-              <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
-            </div>
-          </motion.div>
-
-          {/* Action Header */}
-          {files.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center justify-between pb-2 bg-[#F8FAFC]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-xs font-black uppercase tracking-tight">
-                  Queue: {files.length} Files
-                </div>
-                {selectedBuilding && (
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <ChevronRight className="w-4 h-4" />
-                    <span className="text-sm font-bold text-slate-600">{selectedBuilding.name} ({selectedBuilding.code})</span>
-                  </div>
-                )}
-              </div>
-              <motion.button
-                whileHover={{ scale: 1.02, boxShadow: "0 10px 15px -3px rgba(249, 115, 22, 0.3)" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={processFiles}
-                disabled={isProcessing || files.length === 0}
-                className="hidden md:flex bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg shadow-orange-500/20 transition-all items-center gap-3 uppercase tracking-wider text-sm"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" /> Sedang Memproses...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-5 h-5 fill-current" /> Mulai Pengarsipan
-                  </>
-                )}
-              </motion.button>
+              {files.length > 0 && (
+                <button
+                  onClick={processFiles}
+                  disabled={isProcessing}
+                  className="w-full bg-orange-500 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all uppercase tracking-widest text-sm"
+                >
+                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
+                  {isProcessing ? 'Memproses...' : 'Mulai Pengarsipan'}
+                </button>
+              )}
             </motion.div>
           )}
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <FileList
-              files={files}
-              onRemove={removeFile}
-              onUpdateDate={handleUpdateDate}
-            />
-          </motion.div>
-        </section>
+          {activeTab === 'buildings' && (
+            <motion.div
+              key="buildings"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pilih Gedung</h2>
+                <p className="text-slate-500 text-sm font-medium">Gedung akan digunakan untuk penamaan file.</p>
+              </div>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'queue' && (
+            <motion.div
+              key="queue"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Antrean File</h2>
+                <p className="text-slate-500 text-sm font-medium">{files.length} file dalam daftar.</p>
+              </div>
+              <FileList
+                files={files}
+                onRemove={removeFile}
+                onUpdateDate={handleUpdateDate}
+              />
+            </motion.div>
+          )}
+
+          {activeTab === 'profile' && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengaturan</h2>
+              </div>
+
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+                {/* User Section */}
+                {session ? (
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    {session.user?.image ? (
+                      <img src={session.user.image} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
+                        <User className="w-6 h-6 text-slate-400" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-black text-slate-900 leading-tight">{session.user?.name}</p>
+                      <button onClick={() => signOut()} className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Logout Akun</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => signIn('google')}
+                    className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all"
+                  >
+                    <LogIn className="w-4 h-4 text-orange-500" />
+                    Login with Google
+                  </button>
+                )}
+
+                <div className="h-px bg-slate-100" />
+
+                {/* Storage Config */}
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">G-Drive Folder ID</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={outputPath}
+                      onChange={(e) => setOutputPath(e.target.value)}
+                      placeholder="Masukkan Folder ID"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 transition-all"
+                    />
+                    {saveStatus === 'saved' && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500">
+                        <Check className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase tracking-tight">Saved</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-4 py-8 opacity-40">
+                <div className="flex items-center gap-2 grayscale">
+                  <HardHat className="w-5 h-5" />
+                  <span className="font-black tracking-widest text-base">NK-SYSTEMS</span>
+                </div>
+                <p className="text-slate-400 text-xs font-medium">Built for Construction Excellence</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Footer Branding */}
-      <footer className="mt-20 border-t border-slate-200 py-12 px-8">
-        <div className="max-w-[1600px] mx-auto flex flex-col items-center justify-center gap-4 text-center">
-          <div className="flex items-center gap-2 grayscale brightness-50 opacity-30">
-            <HardHat className="w-6 h-6" />
-            <span className="font-black tracking-widest text-lg">NK-SYSTEMS</span>
-          </div>
-          <p className="text-slate-400 text-sm font-medium">PT. Nindya Karya (Persero) - Built for Construction Excellence</p>
-        </div>
-      </footer>
-      {/* Floating Bottom Bar (Mobile Only) */}
-      <AnimatePresence>
-        {files.length > 0 && !isProcessing && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-[60] shadow-[0_-10px_20px_rgba(0,0,0,0.05)]"
-          >
-            <div className="flex items-center gap-3 mb-3">
-              <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight">
-                {files.length} Files Diantrekan
-              </div>
-              <span className="text-xs font-bold text-slate-400">Siap Proses?</span>
-            </div>
-            <button
-              onClick={processFiles}
-              className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all text-sm uppercase tracking-wider"
-            >
-              <Play className="w-5 h-5 fill-current" /> Mulai Pengarsipan
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Spacer for FAB on mobile */}
-      <div className="h-32 md:hidden" />
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </main>
   );
 }
 
-function Loader2({ className }: { className?: string }) {
-  return (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
-  )
-}

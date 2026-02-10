@@ -9,7 +9,7 @@ export interface FileMetadata {
     originalName: string;
     newName: string;
     detectedDate: string; // YYYY-MM-DD
-    status: 'pending' | 'processing' | 'success' | 'error';
+    status: 'pending' | 'compressing' | 'processing' | 'success' | 'error';
     error?: string;
     building: Building;
     workName: string;
