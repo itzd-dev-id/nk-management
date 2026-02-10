@@ -9,10 +9,19 @@ import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Home() {
+  const { data: session } = useSession();
+  // State
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [workName, setWorkName] = useState('');
+  const [progress, setProgress] = useState('10');
+  const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
+  const [outputPath, setOutputPath] = useState('');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
 
@@ -411,6 +420,7 @@ export default function Home() {
               </div>
 
               <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
+            </div>
           </motion.div>
 
           {/* Action Header */}

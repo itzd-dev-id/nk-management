@@ -57,11 +57,11 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                 </button>
 
                 {/* Search Input Built-in - WIDER */}
-                <div className="flex items-center px-4 py-3 md:py-0 flex-1">
+                <div className="flex items-center px-4 py-3 md:py-0 flex-1 border-t md:border-t-0 border-slate-100">
                     <Search className="w-4 h-4 text-slate-400 mr-2" />
                     <input
                         type="text"
-                        placeholder="Cari kategori atau jenis pekerjaan..."
+                        placeholder="Ketik untuk cari..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
