@@ -446,16 +446,16 @@ export default function Home() {
 
                 <div className="space-y-4">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-3xl py-6 flex flex-col items-center justify-center gap-2">
-                    <div className="flex items-baseline gap-1">
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl py-10 flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-center justify-center gap-1">
                       <input
                         type="number"
                         value={progress}
                         onChange={(e) => setProgress(e.target.value)}
-                        className="bg-transparent text-center text-5xl font-black text-slate-900 w-32 outline-none"
+                        className="bg-transparent text-right text-6xl font-black text-slate-900 w-24 outline-none"
                         placeholder="0"
                       />
-                      <span className="text-2xl font-black text-slate-400">%</span>
+                      <span className="text-3xl font-black text-slate-400 mt-2">%</span>
                     </div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Manual Input from Report</p>
                   </div>
