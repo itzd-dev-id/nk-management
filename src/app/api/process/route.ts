@@ -57,7 +57,9 @@ export async function POST(req: NextRequest) {
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 
-        const finalName = `${prefix}${Date.now().toString().slice(-3)}.${extension}`;
+        // 2. Calculate Sequence
+        const sequence = await gdrive.getNextSequence(targetFolderId, prefix, extension);
+        const finalName = `${prefix}${sequence}.${extension}`;
 
         console.log('API: Uploading file as:', finalName);
         const arrayBuffer = await file.arrayBuffer();
