@@ -20,9 +20,9 @@ export function FileList({ files, onRemove, onUpdateDate }: FileListProps) {
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-slate-50/80 border-bottom border-slate-200">
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">File Original</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tanggal</th>
-                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Baru (Preview)</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Original File</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">New Name (Preview)</th>
                             <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-4"></th>
                         </tr>
@@ -112,7 +112,7 @@ export function FileList({ files, onRemove, onUpdateDate }: FileListProps) {
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Baru (Preview)</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">New Name (Preview)</label>
                             <p className="text-[10px] font-mono bg-slate-900 text-orange-400 p-3 rounded-lg break-all leading-normal">
                                 {file.newName}
                             </p>
@@ -136,31 +136,31 @@ function StatusBadge({ status }: { status: FileMetadata['status'] }) {
         case 'pending':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500">
-                    <Circle className="w-3 h-3" /> Siap
+                    <Circle className="w-3 h-3" /> Ready
                 </span>
             );
         case 'compressing':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-sky-100 text-sky-600">
-                    <Loader2 className="w-3 h-3 animate-pulse" /> Kompres
+                    <Loader2 className="w-3 h-3 animate-pulse" /> Compressing
                 </span>
             );
         case 'processing':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600">
-                    <Loader2 className="w-3 h-3 animate-spin" /> Upload
+                    <Loader2 className="w-3 h-3 animate-spin" /> Uploading
                 </span>
             );
         case 'success':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-green-100 text-green-700">
-                    <CheckCircle2 className="w-3 h-3" /> Berhasil
+                    <CheckCircle2 className="w-3 h-3" /> Success
                 </span>
             );
         case 'error':
             return (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide bg-red-100 text-red-600">
-                    <XCircle className="w-3 h-3" /> Gagal
+                    <XCircle className="w-3 h-3" /> Failed
                 </span>
             );
     }

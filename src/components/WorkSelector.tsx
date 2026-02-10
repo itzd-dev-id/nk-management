@@ -35,7 +35,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Kategori & Nama Pekerjaan</label>
+            <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Category & Work Name</label>
             <div
                 className={`flex flex-col md:flex-row items-stretch md:items-center bg-slate-50 border rounded-2xl transition-all ${isOpen ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-sm' : 'border-slate-200'
                     }`}
@@ -47,10 +47,10 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                 >
                     <div className="flex flex-col truncate">
                         <span className={`text-[10px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
-                            {value ? value.split(' / ')[0] : 'Kategori'}
+                            {value ? value.split(' / ')[0] : 'Category'}
                         </span>
                         <span className={`font-bold truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>
-                            {value ? value.split(' / ')[1] || value : 'Pilih Pekerjaan...'}
+                            {value ? value.split(' / ')[1] || value : 'Select Work...'}
                         </span>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
@@ -61,7 +61,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                     <Search className="w-4 h-4 text-slate-400 mr-2" />
                     <input
                         type="text"
-                        placeholder="Ketik untuk cari..."
+                        placeholder="Type to search..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -141,7 +141,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                                     }}
                                     className="px-5 py-8 text-center"
                                 >
-                                    <p className="text-sm text-slate-400 mb-2">Pekerjaan tidak ditemukan</p>
+                                    <p className="text-sm text-slate-400 mb-2">Work not found</p>
                                     <button
                                         onClick={() => {
                                             onChange(`Custom / ${search}`);
@@ -150,7 +150,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                                         }}
                                         className="text-xs font-bold text-orange-500 uppercase tracking-wider hover:underline"
                                     >
-                                        Gunakan "{search}" klik di sini
+                                        Use "{search}" click here
                                     </button>
                                 </motion.div>
                             )}

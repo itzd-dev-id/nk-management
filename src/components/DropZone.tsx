@@ -48,12 +48,12 @@ export function DropZone({ onFilesAdded, fileCount }: DropZoneProps) {
             )}
 
             <h3 className="text-lg font-black text-slate-900 mb-1">
-                {isDragActive ? 'Lepaskan file' : fileCount > 0 ? 'Tambah Dokumen' : 'Mulai Upload'}
+                {isDragActive ? 'Release to drop' : fileCount > 0 ? 'Add more documents' : 'Start upload'}
             </h3>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-tight max-w-[200px]">
                 {fileCount > 0
-                    ? `Klik di sini untuk menambah file ke antrean ini.`
-                    : 'Tarik foto, video, atau PDF di sini.'}
+                    ? `Click here to add more files to this queue.`
+                    : 'Drag photos, videos, or PDFs here.'}
             </p>
 
             <div className="mt-8 flex gap-6 text-slate-300">

@@ -13,10 +13,10 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     const tabs = [
-        { id: 'archive', label: 'Arsip', icon: Archive },
-        { id: 'buildings', label: 'Gedung', icon: LayoutGrid },
-        { id: 'queue', label: 'Antrean', icon: Clock },
-        { id: 'profile', label: 'Profil', icon: User },
+        { id: 'archive', label: 'Archive', icon: Archive },
+        { id: 'buildings', label: 'Location', icon: LayoutGrid },
+        { id: 'queue', label: 'Status', icon: Clock },
+        { id: 'profile', label: 'Settings', icon: User },
     ] as const;
 
     return (

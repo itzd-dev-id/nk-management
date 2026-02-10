@@ -103,8 +103,8 @@ export default function Home() {
           newName: '', // Calculated later
           detectedDate,
           status: 'pending',
-          building: selectedBuilding || { code: '?-?', name: 'Pilih Gedung' },
-          workName: workName || 'Nama Pekerjaan',
+          building: selectedBuilding || { code: '?-?', name: 'Select Building' },
+          workName: workName || 'Work Name',
           progress,
           sequence: 1, // Default sequence, server will adjust
         };
@@ -124,8 +124,8 @@ export default function Home() {
         progress: progress || f.progress,
         newName: generateNewName(
           f.detectedDate,
-          workName || 'Pekerjaan',
-          selectedBuilding?.name || 'Gedung',
+          workName || 'Work',
+          selectedBuilding?.name || 'Building',
           selectedBuilding?.code || 'X',
           progress,
           index + 1, // Visual preview index
@@ -165,7 +165,7 @@ export default function Home() {
 
   const processFiles = async () => {
     if (!selectedBuilding || !workName || !outputPath) {
-      alert('Pilih gedung, isi nama pekerjaan, dan tentukan folder output!');
+      alert('Select building, enter work name, and set output folder!');
       return;
     }
 
@@ -252,9 +252,9 @@ export default function Home() {
 
           <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
             {activeTab === 'archive' && (selectedBuilding?.code || 'NK-ARCHIVE')}
-            {activeTab === 'buildings' && 'GEDUNG'}
-            {activeTab === 'queue' && 'ANTREAN'}
-            {activeTab === 'profile' && 'PROFIL'}
+            {activeTab === 'buildings' && 'LOCATION'}
+            {activeTab === 'queue' && 'STATUS'}
+            {activeTab === 'profile' && 'SETTINGS'}
           </h1>
 
           <div className="w-10 h-10 flex items-center justify-end">
@@ -284,7 +284,7 @@ export default function Home() {
             >
               <div className="space-y-2 text-center pb-2">
                 <h2 className="text-4xl font-black text-slate-900 tracking-tight">Post Archive</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Dokumentasi Harian Konstruksi</p>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Daily Construction Documentation</p>
               </div>
 
               {/* Step 2: Work & Progress */}
@@ -292,7 +292,7 @@ export default function Home() {
                 <WorkSelector value={workName} onChange={setWorkName} />
 
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Progres Pekerjaan (%)</label>
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl py-6 flex flex-col items-center justify-center gap-2">
                     <div className="flex items-baseline gap-1">
                       <input
@@ -304,7 +304,7 @@ export default function Home() {
                       />
                       <span className="text-2xl font-black text-slate-400">%</span>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Input Manual Sesuai Laporan</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Manual Input from Report</p>
                   </div>
                 </div>
 
@@ -318,7 +318,7 @@ export default function Home() {
                   className="w-full bg-orange-500 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all uppercase tracking-widest text-sm"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                  {isProcessing ? 'Memproses...' : 'Mulai Pengarsipan'}
+                  {isProcessing ? 'Processing...' : 'Start Archiving'}
                 </button>
               )}
             </motion.div>
@@ -334,7 +334,7 @@ export default function Home() {
             >
               <div className="space-y-2 text-center pb-2">
                 <h2 className="text-4xl font-black text-slate-900 tracking-tight">Location</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Lokasi Gedung / Proyek</p>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Building / Project Location</p>
               </div>
               <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6">
                 <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
@@ -352,7 +352,7 @@ export default function Home() {
             >
               <div className="space-y-2 text-center pb-2">
                 <h2 className="text-4xl font-black text-slate-900 tracking-tight">Status</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{files.length} Item dalam Antrean</p>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{files.length} Items in Queue</p>
               </div>
               <FileList
                 files={files}
@@ -372,13 +372,13 @@ export default function Home() {
             >
               <div className="space-y-2 text-center pb-2">
                 <h2 className="text-4xl font-black text-slate-900 tracking-tight">Settings</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Konfigurasi & Akun</p>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Account & Configuration</p>
               </div>
 
               <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-8">
                 {/* User Section */}
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Akun Terhubung</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Connected Account</label>
                   {session ? (
                     <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-3xl">
                       {session.user?.image ? (
@@ -406,7 +406,7 @@ export default function Home() {
 
                 {/* Storage Config */}
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Cloud Storage Destinasi</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Destination Cloud Storage</label>
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
                     <div className="flex items-center gap-3 text-slate-400">
                       <FolderOpen className="w-5 h-5 text-orange-500" />
@@ -417,7 +417,7 @@ export default function Home() {
                         type="text"
                         value={outputPath}
                         onChange={(e) => setOutputPath(e.target.value)}
-                        placeholder="Masukkan ID Folder..."
+                        placeholder="Enter Folder ID..."
                         className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-300"
                       />
                       {saveStatus === 'saved' && (
@@ -427,7 +427,7 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data akan disimpan secara otomatis ke folder cloud yang ditentukan di atas.</p>
+                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data will be automatically saved to the cloud folder specified above.</p>
                   </div>
                 </div>
               </div>
