@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2 } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -30,6 +30,16 @@ export default function Home() {
   const [isSyncing, setIsSyncing] = useState(false);
   const skipNextSave = React.useRef(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
+  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
+
+  // Toast Helper
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  }, []);
 
   // Unified Data State (Dynamic Database)
   const [allBuildings, setAllBuildings] = useState<Building[]>(BUILDINGS);
@@ -47,45 +57,70 @@ export default function Home() {
   }, []);
 
   // Sync Config from Drive
-  const fetchConfig = useCallback(async (path: string) => {
-    if (!path || !session?.accessToken) return;
-    setIsSyncing(true);
+  const fetchConfig = useCallback(async (path: string, filename: string) => {
+    if (!path || !session?.accessToken) return null;
     try {
-      const res = await fetch(`/api/config?outputPath=${encodeURIComponent(path)}`);
+      const res = await fetch(`/api/config?outputPath=${encodeURIComponent(path)}&filename=${filename}`);
       const { success, data } = await res.json();
-      if (success && data) {
-        // If data from drive is valid, use it. Otherwise keep defaults.
-        if (data.buildings && data.buildings.length > 0) {
-          setAllBuildings(data.buildings);
-        } else {
-          // Initialize Drive with defaults if empty
-          saveConfig(BUILDINGS, WORK_HIERARCHY);
-        }
-
-        if (data.works && data.works.length > 0) {
-          setAllHierarchy(data.works);
-        }
-        skipNextSave.current = true;
-      }
+      return success ? data : null;
     } catch (e) {
-      console.error('Failed to sync config', e);
-    } finally {
-      setIsSyncing(false);
+      console.error(`Failed to sync ${filename}`, e);
+      return null;
     }
   }, [session?.accessToken]);
 
-  const saveConfig = async (buildings: Building[], works: any[]) => {
+  const saveConfig = async (filename: string, data: any) => {
     if (!outputPath || !session?.accessToken) return;
     try {
-      await fetch('/api/config', {
+      const res = await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outputPath, data: { buildings, works } })
+        body: JSON.stringify({ outputPath, filename, data })
       });
+      const resData = await res.json();
+      if (resData.success) {
+        showToast(`Saved ${filename} to Cloud`, 'success');
+      }
     } catch (e) {
-      console.error('Failed to save config', e);
+      console.error(`Failed to save ${filename}`, e);
+      showToast(`Error saving ${filename}`, 'error');
     }
   };
+
+  const loadAllConfigs = useCallback(async (path: string) => {
+    setIsSyncing(true);
+    try {
+      const bData = await fetchConfig(path, 'buildings.json');
+      const wData = await fetchConfig(path, 'works.json');
+
+      if (bData) {
+        setAllBuildings(bData);
+      } else {
+        const legacy = await fetchConfig(path, 'nk-management.json');
+        if (legacy?.buildings) {
+          setAllBuildings(legacy.buildings);
+          saveConfig('buildings.json', legacy.buildings);
+        } else {
+          saveConfig('buildings.json', BUILDINGS);
+        }
+      }
+
+      if (wData) {
+        setAllHierarchy(wData);
+      } else {
+        const legacy = await fetchConfig(path, 'nk-management.json');
+        if (legacy?.works) {
+          setAllHierarchy(legacy.works);
+          saveConfig('works.json', legacy.works);
+        } else {
+          saveConfig('works.json', WORK_HIERARCHY);
+        }
+      }
+      skipNextSave.current = true;
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [fetchConfig, session?.accessToken]);
 
   // Separate saves for buildings and hierarchy
   useEffect(() => {
@@ -111,6 +146,13 @@ export default function Home() {
   useEffect(() => {
     if (outputPath) loadAllConfigs(outputPath);
   }, [outputPath, loadAllConfigs]);
+
+  // Re-sync when switching to settings/profile tab
+  useEffect(() => {
+    if (activeTab === 'profile' && outputPath) {
+      loadAllConfigs(outputPath);
+    }
+  }, [activeTab, outputPath, loadAllConfigs]);
 
   // UI helpers and other persistence
   useEffect(() => {
@@ -548,8 +590,16 @@ export default function Home() {
                             <span className="text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{b.code}</span>
                             <span className="text-xs font-bold text-slate-700">{b.name}</span>
                           </div>
-                          <button onClick={() => setAllBuildings(allBuildings.filter((_, idx) => idx !== i))} className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity">
-                            <Check className="w-3 h-3 rotate-45" />
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to delete building "${b.name}"?`)) {
+                                setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
+                                showToast(`Deleted ${b.name}`, 'info');
+                              }
+                            }}
+                            className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       ))}
@@ -608,16 +658,22 @@ export default function Home() {
                             {w.tasks.map((t, ti) => (
                               <div key={ti} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100">
                                 <span className="text-xs font-bold text-slate-700">{t}</span>
-                                <button onClick={() => {
-                                  const next = [...allHierarchy];
-                                  next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
-                                  if (next[i].tasks.length === 0) {
-                                    setAllHierarchy(next.filter((_, idx) => idx !== i));
-                                  } else {
-                                    setAllHierarchy(next);
-                                  }
-                                }} className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity">
-                                  <Check className="w-3 h-3 rotate-45" />
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm(`Are you sure you want to delete task "${t}"?`)) {
+                                      const next = [...allHierarchy];
+                                      next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
+                                      if (next[i].tasks.length === 0) {
+                                        setAllHierarchy(next.filter((_, idx) => idx !== i));
+                                      } else {
+                                        setAllHierarchy(next);
+                                      }
+                                      showToast(`Deleted task: ${t}`, 'info');
+                                    }
+                                  }}
+                                  className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             ))}
@@ -642,6 +698,31 @@ export default function Home() {
       </div>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Toast Notifications */}
+      <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+        <AnimatePresence>
+          {toasts.map(toast => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+              className={`
+                pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md
+                ${toast.type === 'success' ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800' :
+                  toast.type === 'error' ? 'bg-red-50/90 border-red-200 text-red-800' :
+                    'bg-slate-900/90 border-slate-800 text-white'}
+              `}
+            >
+              {toast.type === 'success' && <Check className="w-4 h-4" />}
+              {toast.type === 'error' && <XCircle className="w-4 h-4" />}
+              {toast.type === 'info' && <Info className="w-4 h-4" />}
+              <span className="text-xs font-bold">{toast.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
     </main>
   );
 }
