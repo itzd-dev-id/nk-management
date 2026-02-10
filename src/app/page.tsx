@@ -490,8 +490,14 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col justify-end">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight">Manual Input<br />from Report</p>
+                  <div className="flex flex-col justify-end gap-1.5 pb-1">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Live Data</span>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight">
+                      Actual Field<br />Progress Percentage
+                    </p>
                   </div>
                 </div>
 
