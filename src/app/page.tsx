@@ -16,7 +16,7 @@ import { BottomNav, TabId } from '@/components/BottomNav';
 import { BUILDINGS, WORK_HIERARCHY } from '@/lib/constants';
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session } = useSession() as any;
   // State
   const [activeTab, setActiveTab] = useState<TabId>('archive');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
