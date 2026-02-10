@@ -45,12 +45,24 @@ export const WORK_HIERARCHY = [
             'Toolbox_Meeting',
             'Pemasangan_Safety_Net',
             'Pemasangan_Railing_Pengaman',
-            'Audit_K3_Internal'
+            'Audit_K3_Internal',
+            'Penggunaan_APD_Lengkap'
+        ]
+    },
+    {
+        category: 'Persiapan',
+        tasks: [
+            'Persiapan_Pekerjaan_Pemasangan_Bouwplank',
+            'Persiapan_Pekerjaan_Pembersihan_Lahan',
+            'Persiapan_Pekerjaan_Direksi_Keet',
+            'Persiapan_Pekerjaan_Gudang_Material',
+            'Persiapan_Pekerjaan_Mobilisasi_Alat'
         ]
     },
     {
         category: 'Struktur',
         tasks: [
+            'Struktur_Pekerjaan_Lantai_Kerja',
             'Struktur_Pekerjaan_Pemasangan_Bekisting',
             'Struktur_Pekerjaan_Pembesian',
             'Struktur_Pekerjaan_Pengecoran_Beton',
@@ -58,14 +70,15 @@ export const WORK_HIERARCHY = [
             'Struktur_Pekerjaan_Curing_Beton',
             'Struktur_Pekerjaan_Galian_Tanah',
             'Struktur_Pekerjaan_Urugan_Pasir',
-            'Struktur_Pekerjaan_Lantai_Kerja'
+            'Struktur_Pekerjaan_Urugan_Tanah_Kembali'
         ]
     },
     {
         category: 'Arsitektur',
         tasks: [
             'Arsitektur_Pekerjaan_Pasangan_Bata',
-            'Arsitektur_Pekerjaan_Plesteran_Acian',
+            'Arsitektur_Pekerjaan_Plesteran_Dinding',
+            'Arsitektur_Pekerjaan_Acian_Dinding',
             'Arsitektur_Pekerjaan_Pasang_Keramik_Lantai',
             'Arsitektur_Pekerjaan_Pasang_Keramik_Dinding',
             'Arsitektur_Pekerjaan_Pengecatan_Dinding',
@@ -81,7 +94,8 @@ export const WORK_HIERARCHY = [
             'MEP_Pekerjaan_Instalasi_Kabel_Listrik',
             'MEP_Pekerjaan_Pasang_Armature_Lampu',
             'MEP_Pekerjaan_Pasang_Panel_Listrik',
-            'MEP_Pekerjaan_Instalasi_Fire_Alarm'
+            'MEP_Pekerjaan_Instalasi_Fire_Alarm',
+            'MEP_Pekerjaan_Instalasi_Air_Conditioning'
         ]
     },
     {
@@ -91,7 +105,8 @@ export const WORK_HIERARCHY = [
             'Material_On_Site_Semen_Pasir',
             'Material_On_Site_Bata_Ringan',
             'Material_On_Site_Keramik',
-            'Material_On_Site_Pipa_MEP'
+            'Material_On_Site_Pipa_MEP',
+            'Material_On_Site_Beton_Ready_Mix'
         ]
     },
     {
@@ -100,7 +115,8 @@ export const WORK_HIERARCHY = [
             'Dokumentasi_Progress_Mingguan',
             'Dokumentasi_Kondisi_Lapang',
             'Dokumentasi_Drone_View',
-            'Dokumentasi_Kunjungan_Direksi'
+            'Dokumentasi_Kunjungan_Direksi',
+            'Dokumentasi_Joint_Inspection'
         ]
     }
 ];

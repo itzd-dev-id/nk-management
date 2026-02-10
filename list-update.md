@@ -45,28 +45,31 @@ Berikut adalah daftar peningkatan fitur dan perbaikan yang telah diimplementasik
 | **T01** | Direksi Keet |
 
 ### 5. Daftar Pekerjaan (Granular)
+**Persiapan**
+- `Persiapan_Pekerjaan_Pemasangan_Bouwplank`
+- `Persiapan_Pekerjaan_Pembersihan_Lahan`
+- `Persiapan_Pekerjaan_Direksi_Keet`
+
 **Struktur**
+- `Struktur_Pekerjaan_Lantai_Kerja`
 - `Struktur_Pekerjaan_Pemasangan_Bekisting`
 - `Struktur_Pekerjaan_Pembesian`
 - `Struktur_Pekerjaan_Pengecoran_Beton`
 - `Struktur_Pekerjaan_Bongkar_Bekisting`
-- `Struktur_Pekerjaan_Curing_Beton`
 - `Struktur_Pekerjaan_Galian_Tanah`
-- `Struktur_Pekerjaan_Lantai_Kerja`
 
 **Arsitektur**
 - `Arsitektur_Pekerjaan_Pasangan_Bata`
-- `Arsitektur_Pekerjaan_Plesteran_Acian`
-- `Arsitektur_Pekerjaan_Pasang_Keramik_Lantai`
-- `Arsitektur_Pekerjaan_Pasang_Keramik_Dinding`
+- `Arsitektur_Pekerjaan_Plesteran_Dinding`
+- `Arsitektur_Pekerjaan_Acian_Dinding`
+- `Arsitektur_Pekerjaan_Pasang_Keramik`
 - `Arsitektur_Pekerjaan_Pengecatan_Dinding`
-- `Arsitektur_Pekerjaan_Pasang_Plafon`
 
 **MEP & Material**
 - `MEP_Pekerjaan_Instalasi_Pipa_Air`
 - `MEP_Pekerjaan_Instalasi_Kabel_Listrik`
 - `Material_On_Site_Besi_Beton`
-- `Material_On_Site_Bata_Ringan`
+- `Material_On_Site_Beton_Ready_Mix`
 
 ---
 *Status: Operasional & Tersinkronisasi ke GitHub*
