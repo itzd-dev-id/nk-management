@@ -120,41 +120,43 @@ export class GoogleDriveService {
             console.error(`GDrive: Error in uploadFile:`, error.message);
             throw error;
         }
+    }
+
     /**
      * Finds the next sequence number (001, 002, ...) for files in a folder with a given prefix.
      */
-    async getNextSequence(folderId: string, prefix: string, extension: string): Promise < string > {
-            console.log(`GDrive: Calculating next sequence for prefix "${prefix}" in folder "${folderId}"`);
-            try {
-                // List files that start with the prefix and have the matching extension
-                const response = await this.drive.files.list({
-                    q: `'${folderId}' in parents and name contains '${prefix}' and trashed = false`,
-                    fields: 'files(name)',
-                    spaces: 'drive',
-                });
+    async getNextSequence(folderId: string, prefix: string, extension: string): Promise<string> {
+        console.log(`GDrive: Calculating next sequence for prefix "${prefix}" in folder "${folderId}"`);
+        try {
+            // List files that start with the prefix and have the matching extension
+            const response = await this.drive.files.list({
+                q: `'${folderId}' in parents and name contains '${prefix}' and trashed = false`,
+                fields: 'files(name)',
+                spaces: 'drive',
+            });
 
-                const files = response.data.files || [];
-                let maxSeq = 0;
-                const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                // Regex to match prefix followed by 3 digits and the extension
-                const seqRegex = new RegExp(`^${escapedPrefix}(\\d+)\\.${extension}$`, 'i');
+            const files = response.data.files || [];
+            let maxSeq = 0;
+            const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Regex to match prefix followed by 3 digits and the extension
+            const seqRegex = new RegExp(`^${escapedPrefix}(\\d+)\\.${extension}$`, 'i');
 
-                for(const f of files) {
-                    if (!f.name) continue;
-                    const match = f.name.match(seqRegex);
-                    if (match) {
-                        const seq = parseInt(match[1], 10);
-                        if (seq > maxSeq) maxSeq = seq;
-                    }
+            for (const f of files) {
+                if (!f.name) continue;
+                const match = f.name.match(seqRegex);
+                if (match) {
+                    const seq = parseInt(match[1], 10);
+                    if (seq > maxSeq) maxSeq = seq;
                 }
+            }
 
             const nextSeq = (maxSeq + 1).toString().padStart(3, '0');
-                console.log(`GDrive: Next sequence calculated: ${nextSeq}`);
-                return nextSeq;
-            } catch(error: any) {
-                console.error(`GDrive: Error calculating sequence:`, error.message);
-                // Fallback to timestamp to avoid failing the upload if listing fails
-                return Date.now().toString().slice(-3);
-            }
+            console.log(`GDrive: Next sequence calculated: ${nextSeq}`);
+            return nextSeq;
+        } catch (error: any) {
+            console.error(`GDrive: Error calculating sequence:`, error.message);
+            // Fallback to timestamp to avoid failing the upload if listing fails
+            return Date.now().toString().slice(-3);
         }
     }
+}
