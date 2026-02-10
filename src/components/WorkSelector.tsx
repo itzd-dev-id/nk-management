@@ -37,13 +37,13 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
         <div className="relative" ref={dropdownRef}>
             <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Kategori & Nama Pekerjaan</label>
             <div
-                className={`flex items-center bg-slate-50 border rounded-2xl transition-all ${isOpen ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-sm' : 'border-slate-200'
+                className={`flex flex-col md:flex-row items-stretch md:items-center bg-slate-50 border rounded-2xl transition-all ${isOpen ? 'border-orange-500 ring-2 ring-orange-500/20 shadow-sm' : 'border-slate-200'
                     }`}
             >
                 {/* Dropdown Toggle & Display - NARROWED */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="w-64 flex items-center justify-between px-5 py-4 text-left border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-l-2xl"
+                    className="w-full md:w-64 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
                 >
                     <div className="flex flex-col truncate">
                         <span className={`text-[10px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
@@ -57,7 +57,7 @@ export function WorkSelector({ value, onChange }: WorkSelectorProps) {
                 </button>
 
                 {/* Search Input Built-in - WIDER */}
-                <div className="flex items-center px-4 flex-1">
+                <div className="flex items-center px-4 py-3 md:py-0 flex-1">
                     <Search className="w-4 h-4 text-slate-400 mr-2" />
                     <input
                         type="text"

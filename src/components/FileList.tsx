@@ -15,7 +15,8 @@ export function FileList({ files, onRemove, onUpdateDate }: FileListProps) {
 
     return (
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="overflow-x-auto">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="bg-slate-50/80 border-bottom border-slate-200">
@@ -73,6 +74,58 @@ export function FileList({ files, onRemove, onUpdateDate }: FileListProps) {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden divide-y divide-slate-100">
+                {files.map((file) => (
+                    <div key={file.id} className="p-4 space-y-4">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600 shrink-0">
+                                    <FileType className="w-5 h-5" />
+                                </div>
+                                <div className="truncate max-w-[200px]">
+                                    <p className="text-sm font-semibold text-slate-800 truncate">{file.originalName}</p>
+                                    <p className="text-[11px] text-slate-400">{(file.file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => onRemove(file.id)}
+                                className="p-2 text-slate-400 hover:text-red-500"
+                            >
+                                <XCircle className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Deteksi</label>
+                            <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 w-full">
+                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                                <input
+                                    type="date"
+                                    value={file.detectedDate}
+                                    onChange={(e) => onUpdateDate(file.id, e.target.value)}
+                                    className="bg-transparent text-sm font-medium text-slate-700 outline-none w-full"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Baru (Preview)</label>
+                            <p className="text-[10px] font-mono bg-slate-900 text-orange-400 p-3 rounded-lg break-all leading-normal">
+                                {file.newName}
+                            </p>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                            <StatusBadge status={file.status} />
+                            {file.error && (
+                                <span className="text-[10px] text-red-500 font-medium max-w-[150px] truncate">{file.error}</span>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

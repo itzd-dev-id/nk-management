@@ -222,7 +222,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-8 py-4 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform cursor-pointer">
               <HardHat className="text-white w-7 h-7" />
@@ -235,8 +235,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full md:w-auto">
+            <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
               {session ? (
                 <div className="flex items-center gap-3 bg-slate-800/50 rounded-2xl pl-2 pr-4 py-1.5 border border-slate-700">
                   {session.user?.image ? (
@@ -262,8 +262,8 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all">
-              <div className="flex items-center gap-3 w-64">
+            <div className="flex items-center gap-4 bg-slate-800/80 rounded-2xl px-5 py-2.5 border border-slate-700/50 hover:border-slate-600 transition-all w-full md:w-auto">
+              <div className="flex items-center gap-3 w-full md:w-64">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
                   G-Drive Folder ID:
                 </span>
@@ -317,13 +317,13 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="max-w-[1600px] mx-auto px-8 py-8 grid grid-cols-12 gap-8">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-6 md:py-8 grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8">
         {/* Sidebar */}
         <motion.aside
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="col-span-3"
+          className="col-span-1 md:col-span-3"
         >
           <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm sticky top-28">
             <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
@@ -331,7 +331,7 @@ export default function Home() {
         </motion.aside>
 
         {/* Main Content */}
-        <section className="col-span-9 space-y-6">
+        <section className="col-span-1 md:col-span-9 space-y-6">
           {/* Top Config Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -339,11 +339,11 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm"
           >
-            <div className="grid grid-cols-12 gap-8 mb-8">
-              <div className="col-span-8">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-8">
+              <div className="col-span-1 md:col-span-8">
                 <WorkSelector value={workName} onChange={setWorkName} />
               </div>
-              <div className="col-span-4 h-full flex flex-col justify-end">
+              <div className="col-span-1 md:col-span-4 h-full flex flex-col justify-end">
                 <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Progres & Milestone</label>
                 <div className="grid grid-cols-5 gap-3 h-[74px]">
                   {/* Progress Input Frame - Bento 1 */}
