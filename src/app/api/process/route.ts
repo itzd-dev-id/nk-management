@@ -39,21 +39,29 @@ export async function POST(req: NextRequest) {
 
         const extension = file.name.split('.').pop() || '';
         const sanitizedWork = sanitizePath(workName);
-        const sanitizedBuilding = `${sanitizePath(buildingName)} (${buildingCode})`;
+        const folderWorkParts = sanitizedWork.split(' / ').map(p => p.trim().replace(/_/g, ' '));
 
+        const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
+        const sanitizedBuildingCode = sanitizePath(buildingCode);
+        const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
+
+        // Filename parts - KEEP underscores for filenames
         const fileWork = sanitizedWork.replace(/\s+/g, '_').replace(/\//g, '-');
         const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
         const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
+
         const progressPart = progress ? `${progress}%_` : '';
         const prefix = `${detectedDate}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}`;
 
         const folderId = extractGDriveId(outputPath);
         console.log('API: Preparing GDrive upload under Folder ID:', folderId);
+
         // GOOGLE DRIVE LOGIC
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        const folderParts = [sanitizedBuilding, sanitizedWork];
+        // Create hierarchy: [Building (Code)] -> [Category] -> [Task Name]
+        const folderParts = [buildingFolder, ...folderWorkParts];
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 

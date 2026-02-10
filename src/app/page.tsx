@@ -329,14 +329,14 @@ export default function Home() {
           const options = {
             maxSizeMB: 1.2,
             maxWidthOrHeight: 1920,
-            useWebWorker: true,
+            useWebWorker: false,
             fileType: 'image/jpeg',
             preserveExif: true
           };
           const compressedBlob = await imageCompression(fileMeta.file, options);
           fileToUpload = new File([compressedBlob], fileMeta.originalName.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: 'image/jpeg',
-            lastModified: Date.now()
+            lastModified: fileMeta.file.lastModified
           });
           addLog(`[INFO] Kompresi selesai (${(fileMeta.file.size / 1024 / 1024).toFixed(2)}MB -> ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`);
         } catch (error) {
