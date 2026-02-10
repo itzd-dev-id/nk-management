@@ -251,7 +251,7 @@ export default function Home() {
           selectedBuilding?.code || 'X',
           progress,
           index + 1, // Visual preview index
-          getFileExtension(f.originalName)
+          f.file.type.startsWith('image/') ? 'jpg' : getFileExtension(f.originalName)
         )
       }))
     );
@@ -309,10 +309,16 @@ export default function Home() {
           const options = {
             maxSizeMB: 1.2,
             maxWidthOrHeight: 1920,
-            useWebWorker: true
+            useWebWorker: true,
+            fileType: 'image/jpeg'
           };
-          fileToUpload = await imageCompression(fileMeta.file, options);
-          console.log(`Compressed: ${fileMeta.file.size} -> ${fileToUpload.size}`);
+          const compressedBlob = await imageCompression(fileMeta.file, options);
+          // Force .jpg extension and image/jpeg type
+          fileToUpload = new File([compressedBlob], fileMeta.originalName.replace(/\.[^/.]+$/, "") + ".jpg", {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+          });
+          console.log(`Compressed: ${fileMeta.file.size} -> ${fileToUpload.size} as ${fileToUpload.name}`);
         } catch (error) {
           console.error("Compression Error:", error);
           // Fallback to original if compression fails

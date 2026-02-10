@@ -40,49 +40,67 @@ export const BUILDINGS: Building[] = [
 export const WORK_HIERARCHY = [
     {
         category: 'K3 dan Keselamatan',
-        tasks: ['Safety Induction', 'Toolbox Meeting', 'Toolbox Talks', 'Audit K3', 'Pemasangan Safety Sign']
-    },
-    {
-        category: 'Pekerjaan Persiapan',
-        tasks: ['Pembersihan Lahan', 'Pemasangan Bowplank', 'Direksi Keet', 'Barak Pekerja', 'Gudang Material']
-    },
-    {
-        category: 'Pekerjaan Tanah',
-        tasks: ['Galian Tanah', 'Urugan Tanah', 'Urugan Pasir', 'Lantai Kerja', 'Pemadatan Tanah']
-    },
-    {
-        category: 'Pekerjaan Struktur Bawah',
-        tasks: ['Tiang Pancang', 'Bored Pile', 'Pile Cap', 'Tie Beam', 'Galian Fondasi']
-    },
-    {
-        category: 'Pekerjaan Struktur Atas',
-        tasks: ['Kolom', 'Balok', 'Plat Lantai', 'Tangga', 'Ring Balok']
-    },
-    {
-        category: 'Pekerjaan Arsitektur',
-        tasks: ['Pasangan Dinding', 'Plesteran & Acian', 'Kusen Pintu & Jendela', 'Plavon', 'Lantai & Keramik', 'Pengecatan']
-    },
-    {
-        category: 'Pekerjaan MEP',
-        tasks: ['Instalasi Listrik', 'Instalasi Air Bersih', 'Instalasi Air Kotor', 'Fire Alarm', 'CCTV']
-    },
-    {
-        category: 'Material On Site',
         tasks: [
-            'Pengiriman Tanah',
-            'Pengiriman Tiang Pancang',
-            'Pengiriman Material Direksi Keet',
-            'Pengiriman Besi',
-            'Pengiriman Pasir',
-            'Pengiriman Semen',
-            'Pengiriman Batu',
-            'Pengiriman Beton',
-            'Pengiriman Toren',
-            'Pengiriman Pipa'
+            'Safety_Induction',
+            'Toolbox_Meeting',
+            'Pemasangan_Safety_Net',
+            'Pemasangan_Railing_Pengaman',
+            'Audit_K3_Internal'
         ]
     },
     {
-        category: 'Dokumentasi & Monitoring',
-        tasks: ['Kondisi Lapangan', 'Drone View', 'Evaluasi Proyek', 'Laporan Mingguan']
+        category: 'Struktur',
+        tasks: [
+            'Struktur_Pekerjaan_Pemasangan_Bekisting',
+            'Struktur_Pekerjaan_Pembesian',
+            'Struktur_Pekerjaan_Pengecoran_Beton',
+            'Struktur_Pekerjaan_Bongkar_Bekisting',
+            'Struktur_Pekerjaan_Curing_Beton',
+            'Struktur_Pekerjaan_Galian_Tanah',
+            'Struktur_Pekerjaan_Urugan_Pasir',
+            'Struktur_Pekerjaan_Lantai_Kerja'
+        ]
+    },
+    {
+        category: 'Arsitektur',
+        tasks: [
+            'Arsitektur_Pekerjaan_Pasangan_Bata',
+            'Arsitektur_Pekerjaan_Plesteran_Acian',
+            'Arsitektur_Pekerjaan_Pasang_Keramik_Lantai',
+            'Arsitektur_Pekerjaan_Pasang_Keramik_Dinding',
+            'Arsitektur_Pekerjaan_Pengecatan_Dinding',
+            'Arsitektur_Pekerjaan_Pasang_Plafon',
+            'Arsitektur_Pekerjaan_Pasang_Kusen_Pintu',
+            'Arsitektur_Pekerjaan_Pasang_Sanitair'
+        ]
+    },
+    {
+        category: 'MEP',
+        tasks: [
+            'MEP_Pekerjaan_Instalasi_Pipa_Air',
+            'MEP_Pekerjaan_Instalasi_Kabel_Listrik',
+            'MEP_Pekerjaan_Pasang_Armature_Lampu',
+            'MEP_Pekerjaan_Pasang_Panel_Listrik',
+            'MEP_Pekerjaan_Instalasi_Fire_Alarm'
+        ]
+    },
+    {
+        category: 'Material',
+        tasks: [
+            'Material_On_Site_Besi_Beton',
+            'Material_On_Site_Semen_Pasir',
+            'Material_On_Site_Bata_Ringan',
+            'Material_On_Site_Keramik',
+            'Material_On_Site_Pipa_MEP'
+        ]
+    },
+    {
+        category: 'Lain-lain',
+        tasks: [
+            'Dokumentasi_Progress_Mingguan',
+            'Dokumentasi_Kondisi_Lapang',
+            'Dokumentasi_Drone_View',
+            'Dokumentasi_Kunjungan_Direksi'
+        ]
     }
 ];
