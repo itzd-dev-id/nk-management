@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -28,8 +28,11 @@ export default function Home() {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
   const skipNextSave = React.useRef(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
+  const [editingBuilding, setEditingBuilding] = useState<{ index: number; name: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<{ catIndex: number; taskIndex: number; name: string } | null>(null);
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
 
   // Toast Helper
@@ -69,8 +72,9 @@ export default function Home() {
     }
   }, [session?.accessToken]);
 
-  const saveConfig = async (filename: string, data: any) => {
+  const saveConfig = async (filename: string, data: any, message?: string) => {
     if (!outputPath || !session?.accessToken) return;
+    setIsSavingCloud(true);
     try {
       const res = await fetch('/api/config', {
         method: 'POST',
@@ -79,11 +83,13 @@ export default function Home() {
       });
       const resData = await res.json();
       if (resData.success) {
-        showToast(`Saved ${filename} to Cloud`, 'success');
+        showToast(message || `Berhasil sinkronisasi ${filename}`, 'success');
       }
     } catch (e) {
       console.error(`Failed to save ${filename}`, e);
-      showToast(`Error saving ${filename}`, 'error');
+      showToast(`Gagal menyimpan ${filename}`, 'error');
+    } finally {
+      setIsSavingCloud(false);
     }
   };
 
@@ -99,9 +105,9 @@ export default function Home() {
         const legacy = await fetchConfig(path, 'nk-management.json');
         if (legacy?.buildings) {
           setAllBuildings(legacy.buildings);
-          saveConfig('buildings.json', legacy.buildings);
+          saveConfig('buildings.json', legacy.buildings, 'Database gedung dimigrasi dari file lama');
         } else {
-          saveConfig('buildings.json', BUILDINGS);
+          setAllBuildings(BUILDINGS); // Use defaults but don't save to cloud yet
         }
       }
 
@@ -111,12 +117,13 @@ export default function Home() {
         const legacy = await fetchConfig(path, 'nk-management.json');
         if (legacy?.works) {
           setAllHierarchy(legacy.works);
-          saveConfig('works.json', legacy.works);
+          saveConfig('works.json', legacy.works, 'Database pekerjaan dimigrasi dari file lama');
         } else {
-          saveConfig('works.json', WORK_HIERARCHY);
+          setAllHierarchy(WORK_HIERARCHY); // Use defaults but don't save to cloud yet
         }
       }
       skipNextSave.current = true;
+      showToast('Database sinkron dengan Cloud', 'info');
     } finally {
       setIsSyncing(false);
     }
@@ -569,38 +576,87 @@ export default function Home() {
                       />
                     </div>
                     <button
+                      disabled={isSavingCloud}
                       onClick={() => {
                         const codeInput = document.getElementById('new-building-code') as HTMLInputElement;
                         const nameInput = document.getElementById('new-building-name') as HTMLInputElement;
                         if (codeInput.value && nameInput.value) {
                           setAllBuildings([{ code: codeInput.value, name: nameInput.value }, ...allBuildings]);
+                          showToast(`Gedung ${codeInput.value} ditambahkan`, 'success');
                           codeInput.value = '';
                           nameInput.value = '';
                         }
                       }}
-                      className="w-full bg-slate-900 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                      className="w-full bg-slate-900 text-white py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      Add New Building
+                      {isSavingCloud ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                      {isSavingCloud ? 'Saving...' : 'Add New Building'}
                     </button>
 
                     <div className="pt-4 border-t border-slate-200 space-y-2 max-h-[300px] overflow-y-auto pr-1">
                       {allBuildings.map((b, i) => (
                         <div key={i} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100">
-                          <div className="flex items-center gap-2">
+                          <div className="flex-1 flex items-center gap-2">
                             <span className="text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{b.code}</span>
-                            <span className="text-xs font-bold text-slate-700">{b.name}</span>
+                            {editingBuilding?.index === i ? (
+                              <input
+                                type="text"
+                                value={editingBuilding.name}
+                                onChange={(e) => setEditingBuilding({ ...editingBuilding, name: e.target.value })}
+                                autoFocus
+                                className="flex-1 bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    const next = [...allBuildings];
+                                    next[i].name = editingBuilding.name;
+                                    setAllBuildings(next);
+                                    setEditingBuilding(null);
+                                    showToast(`Nama gedung ${b.code} diperbarui`, 'success');
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <span className="text-xs font-bold text-slate-700">{b.name}</span>
+                            )}
                           </div>
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete building "${b.name}"?`)) {
-                                setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
-                                showToast(`Deleted ${b.name}`, 'info');
-                              }
-                            }}
-                            className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            {editingBuilding?.index === i ? (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    const next = [...allBuildings];
+                                    next[i].name = editingBuilding.name;
+                                    setAllBuildings(next);
+                                    setEditingBuilding(null);
+                                    showToast(`Nama gedung ${b.code} diperbarui`, 'success');
+                                  }}
+                                  className="text-emerald-500 p-2"
+                                >
+                                  <Save className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => setEditingBuilding(null)} className="text-slate-400 p-2">
+                                  <XCircle className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button onClick={() => setEditingBuilding({ index: i, name: b.name })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (window.confirm(`Apakah Anda yakin ingin menghapus gedung "${b.name}"?`)) {
+                                      setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
+                                      showToast(`Gedung ${b.name} dihapus`, 'info');
+                                    }
+                                  }}
+                                  className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -629,6 +685,7 @@ export default function Home() {
                       />
                     </div>
                     <button
+                      disabled={isSavingCloud}
                       onClick={() => {
                         const catInput = document.getElementById('new-work-cat') as HTMLInputElement;
                         const taskInput = document.getElementById('new-work-task') as HTMLInputElement;
@@ -641,13 +698,15 @@ export default function Home() {
                             next.unshift({ category: catInput.value, tasks: [taskInput.value] });
                           }
                           setAllHierarchy(next);
+                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catInput.value}`, 'success');
                           catInput.value = '';
                           taskInput.value = '';
                         }
                       }}
-                      className="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                      className="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      Add Work Task
+                      {isSavingCloud ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                      {isSavingCloud ? 'Saving Task...' : 'Add Work Task'}
                     </button>
 
                     <div className="pt-4 border-t border-slate-200 space-y-3 max-h-[400px] overflow-y-auto pr-1">
@@ -657,24 +716,72 @@ export default function Home() {
                           <div className="space-y-1">
                             {w.tasks.map((t, ti) => (
                               <div key={ti} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100">
-                                <span className="text-xs font-bold text-slate-700">{t}</span>
-                                <button
-                                  onClick={() => {
-                                    if (window.confirm(`Are you sure you want to delete task "${t}"?`)) {
-                                      const next = [...allHierarchy];
-                                      next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
-                                      if (next[i].tasks.length === 0) {
-                                        setAllHierarchy(next.filter((_, idx) => idx !== i));
-                                      } else {
-                                        setAllHierarchy(next);
-                                      }
-                                      showToast(`Deleted task: ${t}`, 'info');
-                                    }
-                                  }}
-                                  className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
+                                <div className="flex-1">
+                                  {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
+                                    <input
+                                      type="text"
+                                      value={editingTask.name}
+                                      onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                                      autoFocus
+                                      className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          const next = [...allHierarchy];
+                                          next[i].tasks[ti] = editingTask.name;
+                                          setAllHierarchy(next);
+                                          setEditingTask(null);
+                                          showToast(`Pekerjaan diperbarui`, 'success');
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    <span className="text-xs font-bold text-slate-700">{t}</span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
+                                    <>
+                                      <button
+                                        onClick={() => {
+                                          const next = [...allHierarchy];
+                                          next[i].tasks[ti] = editingTask.name;
+                                          setAllHierarchy(next);
+                                          setEditingTask(null);
+                                          showToast(`Pekerjaan diperbarui`, 'success');
+                                        }}
+                                        className="text-emerald-500 p-2"
+                                      >
+                                        <Save className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
+                                        <XCircle className="w-3.5 h-3.5" />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <button onClick={() => setEditingTask({ catIndex: i, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
+                                            const next = [...allHierarchy];
+                                            next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
+                                            if (next[i].tasks.length === 0) {
+                                              setAllHierarchy(next.filter((_, idx) => idx !== i));
+                                            } else {
+                                              setAllHierarchy(next);
+                                            }
+                                            showToast(`Tugas ${t} dihapus`, 'info');
+                                          }
+                                        }}
+                                        className="text-red-400 active:scale-90 px-2 opacity-30 hover:opacity-100 transition-opacity"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>
