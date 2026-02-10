@@ -38,14 +38,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Silakan login dengan Google terlebih dahulu' }, { status: 401 });
         }
 
-        const extension = file.name.split('.').pop() || '';
         const sanitizedWork = sanitizePath(workName);
-        const folderWorkParts = sanitizedWork.split(' / ').map(p => p.trim().replace(/_/g, ' '));
+        const combinedWorkFolder = sanitizedWork.replace(/_/g, ' ');
 
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
         const formattedIndex = (buildingIndex !== undefined) ? String(buildingIndex).padStart(2, '0') : '00';
         const buildingFolder = `${formattedIndex}. ${sanitizedBuildingName} (${sanitizedBuildingCode})`;
+
+        const extension = file.name.split('.').pop() || '';
 
         // Filename parts - KEEP underscores for filenames
         const fileWork = sanitizedWork.replace(/\s+/g, '_').replace(/\//g, '-');
@@ -62,8 +63,8 @@ export async function POST(req: NextRequest) {
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        // Create hierarchy: [Building (Code)] -> [Category] -> [Task Name]
-        const folderParts = [buildingFolder, ...folderWorkParts];
+        // Flatter hierarchy: [Building] -> [Category / Task Name]
+        const folderParts = [buildingFolder, combinedWorkFolder];
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 
