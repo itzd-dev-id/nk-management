@@ -447,15 +447,26 @@ export default function Home() {
                 <div className="space-y-4">
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl py-10 flex flex-col items-center justify-center gap-2">
-                    <div className="flex items-center justify-center gap-1">
-                      <input
-                        type="number"
-                        value={progress}
-                        onChange={(e) => setProgress(e.target.value)}
-                        className="bg-transparent text-right text-6xl font-black text-slate-900 w-24 outline-none"
-                        placeholder="0"
-                      />
-                      <span className="text-3xl font-black text-slate-400 mt-2">%</span>
+                    <div className="relative flex items-center justify-center gap-1">
+                      {/* Hidden Mirror for Auto-Width */}
+                      <span className="invisible absolute whitespace-pre text-6xl font-black px-2 min-w-[2ch]">
+                        {progress || '0'}
+                      </span>
+
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="number"
+                          value={progress}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val.length <= 3) setProgress(val);
+                          }}
+                          className="bg-transparent text-right text-6xl font-black text-slate-900 outline-none p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
+                          placeholder="0"
+                        />
+                        <span className="text-3xl font-black text-slate-400 mt-2 ml-1">%</span>
+                      </div>
                     </div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Manual Input from Report</p>
                   </div>
