@@ -35,6 +35,9 @@ export default function Home() {
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [editingBuilding, setEditingBuilding] = useState<{ index: number; name: string } | null>(null);
   const [editingTask, setEditingTask] = useState<{ catIndex: number; taskIndex: number; name: string } | null>(null);
+  const [editingCategory, setEditingCategory] = useState<{ index: number; name: string } | null>(null);
+  const [buildingSearch, setBuildingSearch] = useState('');
+  const [taskSearch, setTaskSearch] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
 
   // Toast Helper
@@ -116,26 +119,45 @@ export default function Home() {
       const wData = await fetchConfig(path, 'works.json');
 
       if (bData) {
-        setAllBuildings(bData);
+        // Ensure indices exist and sort
+        const sortedB = (bData as Building[]).map((b, idx) => ({
+          ...b,
+          index: b.index !== undefined ? b.index : idx
+        })).sort((a, b) => (a.index || 0) - (b.index || 0));
+        setAllBuildings(sortedB);
       } else {
         const legacy = await fetchConfig(path, 'nk-management.json');
         if (legacy?.buildings) {
-          setAllBuildings(legacy.buildings);
-          saveConfig('buildings.json', legacy.buildings, 'Database gedung dimigrasi dari file lama');
+          const sortedLegacyB = (legacy.buildings as Building[]).map((b, idx) => ({
+            ...b,
+            index: idx
+          }));
+          setAllBuildings(sortedLegacyB);
+          saveConfig('buildings.json', sortedLegacyB, 'Database gedung dimigrasi dari file lama');
         } else {
-          setAllBuildings(BUILDINGS); // Use defaults but don't save to cloud yet
+          setAllBuildings(BUILDINGS);
         }
       }
 
       if (wData) {
-        setAllHierarchy(wData);
+        // Sort categories and tasks
+        const sortedW = (wData as { category: string; tasks: string[] }[])
+          .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
+          .sort((a, b) => a.category.localeCompare(b.category));
+        setAllHierarchy(sortedW);
       } else {
         const legacy = await fetchConfig(path, 'nk-management.json');
         if (legacy?.works) {
-          setAllHierarchy(legacy.works);
-          saveConfig('works.json', legacy.works, 'Database pekerjaan dimigrasi dari file lama');
+          const sortedLegacyW = (legacy.works as { category: string; tasks: string[] }[])
+            .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
+            .sort((a, b) => a.category.localeCompare(b.category));
+          setAllHierarchy(sortedLegacyW);
+          saveConfig('works.json', sortedLegacyW, 'Database pekerjaan dimigrasi dari file lama');
         } else {
-          setAllHierarchy(WORK_HIERARCHY); // Use defaults but don't save to cloud yet
+          const sortedDefault = WORK_HIERARCHY
+            .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
+            .sort((a, b) => a.category.localeCompare(b.category));
+          setAllHierarchy(sortedDefault);
         }
       }
       skipNextSave.current = true;
@@ -354,6 +376,7 @@ export default function Home() {
         workName: fileMeta.workName,
         buildingCode: fileMeta.building.code,
         buildingName: fileMeta.building.name,
+        buildingIndex: fileMeta.building.index,
         progress: fileMeta.progress,
         outputPath: outputPath,
       }));
@@ -642,12 +665,42 @@ export default function Home() {
                     <span className="text-[10px] font-bold text-slate-300 uppercase">{allBuildings.length} Items</span>
                   </div>
 
+                  <div className="px-2">
+                    <input
+                      type="text"
+                      placeholder="Search buildings..."
+                      value={buildingSearch}
+                      onChange={(e) => setBuildingSearch(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-600 focus:outline-none focus:border-orange-500 transition-all placeholder:text-slate-300"
+                    />
+                  </div>
+
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
                     <div className="grid grid-cols-3 gap-2">
                       <input
                         id="new-building-code"
                         type="text"
                         placeholder="Code (ex: T02)"
+                        defaultValue={(() => {
+                          const last = allBuildings[allBuildings.length - 1];
+                          if (!last) return 'A';
+                          const code = last.code;
+                          const match = code.match(/([A-Z]+)(\d*)/);
+                          if (match) {
+                            const letter = match[1];
+                            const num = match[2];
+                            if (num) {
+                              return `${letter}${(parseInt(num) + 1).toString().padStart(num.length, '0')}`;
+                            } else {
+                              // If just a letter (like A), next letter (B) if it's single letter
+                              if (letter.length === 1 && letter !== 'Z') {
+                                return String.fromCharCode(letter.charCodeAt(0) + 1);
+                              }
+                              return `${letter}01`;
+                            }
+                          }
+                          return '';
+                        })()}
                         className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                       <input
@@ -663,9 +716,38 @@ export default function Home() {
                         const codeInput = document.getElementById('new-building-code') as HTMLInputElement;
                         const nameInput = document.getElementById('new-building-name') as HTMLInputElement;
                         if (codeInput.value && nameInput.value) {
-                          setAllBuildings([{ code: codeInput.value, name: nameInput.value }, ...allBuildings]);
-                          showToast(`Gedung ${codeInput.value} ditambahkan`, 'success');
-                          codeInput.value = '';
+                          const code = codeInput.value.toUpperCase();
+                          // Duplicate Validation
+                          if (allBuildings.some(b => b.code.toUpperCase() === code)) {
+                            showToast(`Gedung dengan kode ${code} sudah ada!`, 'error');
+                            return;
+                          }
+
+                          const newIndex = allBuildings.length > 0
+                            ? Math.max(...allBuildings.map(b => b.index || 0)) + 1
+                            : 0;
+
+                          const newBuilding = { code, name: nameInput.value, index: newIndex };
+                          const next = [...allBuildings, newBuilding].sort((a, b) => (a.index || 0) - (b.index || 0));
+
+                          setAllBuildings(next);
+                          showToast(`Gedung ${code} ditambahkan`, 'success');
+
+                          // Smart Reset: Suggest next code
+                          const match = code.match(/([A-Z]+)(\d*)/);
+                          if (match) {
+                            const letter = match[1];
+                            const num = match[2];
+                            if (num) {
+                              codeInput.value = `${letter}${(parseInt(num) + 1).toString().padStart(num.length, '0')}`;
+                            } else if (letter.length === 1 && letter !== 'Z') {
+                              codeInput.value = String.fromCharCode(letter.charCodeAt(0) + 1);
+                            } else {
+                              codeInput.value = '';
+                            }
+                          } else {
+                            codeInput.value = '';
+                          }
                           nameInput.value = '';
                         }
                       }}
@@ -676,71 +758,76 @@ export default function Home() {
                     </button>
 
                     <div className="pt-4 border-t border-slate-200 space-y-2 max-h-[300px] overflow-y-auto overflow-x-hidden pr-1">
-                      {allBuildings.map((b, i) => (
-                        <div key={i} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
-                          <div className="flex-1 flex items-center gap-2 min-w-0">
-                            <span className="shrink-0 text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{b.code}</span>
-                            {editingBuilding?.index === i ? (
-                              <input
-                                type="text"
-                                value={editingBuilding.name}
-                                onChange={(e) => setEditingBuilding({ ...editingBuilding, name: e.target.value })}
-                                autoFocus
-                                className="flex-1 min-w-0 bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    const next = [...allBuildings];
-                                    next[i].name = editingBuilding.name;
-                                    setAllBuildings(next);
-                                    setEditingBuilding(null);
-                                    showToast(`Nama gedung ${b.code} diperbarui`, 'success');
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{b.name}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {editingBuilding?.index === i ? (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    const next = [...allBuildings];
-                                    next[i].name = editingBuilding.name;
-                                    setAllBuildings(next);
-                                    setEditingBuilding(null);
-                                    showToast(`Nama gedung ${b.code} diperbarui`, 'success');
-                                  }}
-                                  className="text-emerald-500 p-2"
-                                >
-                                  <Save className="w-3.5 h-3.5" />
-                                </button>
-                                <button onClick={() => setEditingBuilding(null)} className="text-slate-400 p-2">
-                                  <XCircle className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button onClick={() => setEditingBuilding({ index: i, name: b.name })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    if (window.confirm(`Apakah Anda yakin ingin menghapus gedung "${b.name}"?`)) {
-                                      setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
-                                      showToast(`Gedung ${b.name} dihapus`, 'info');
+                      {allBuildings
+                        .filter(b =>
+                          b.code.toLowerCase().includes(buildingSearch.toLowerCase()) ||
+                          b.name.toLowerCase().includes(buildingSearch.toLowerCase())
+                        )
+                        .map((b, i) => (
+                          <div key={i} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
+                            <div className="flex-1 flex items-center gap-2 min-w-0">
+                              <span className="shrink-0 text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{b.code}</span>
+                              {editingBuilding?.index === i ? (
+                                <input
+                                  type="text"
+                                  value={editingBuilding.name}
+                                  onChange={(e) => setEditingBuilding({ ...editingBuilding, name: e.target.value })}
+                                  autoFocus
+                                  className="flex-1 min-w-0 bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const next = [...allBuildings];
+                                      next[i].name = editingBuilding.name;
+                                      setAllBuildings(next);
+                                      setEditingBuilding(null);
+                                      showToast(`Nama gedung ${b.code} diperbarui`, 'success');
                                     }
                                   }}
-                                  className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            )}
+                                />
+                              ) : (
+                                <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{b.name}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {editingBuilding?.index === i ? (
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      const next = [...allBuildings];
+                                      next[i].name = editingBuilding.name;
+                                      setAllBuildings(next);
+                                      setEditingBuilding(null);
+                                      showToast(`Nama gedung ${b.code} diperbarui`, 'success');
+                                    }}
+                                    className="text-emerald-500 p-2"
+                                  >
+                                    <Save className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={() => setEditingBuilding(null)} className="text-slate-400 p-2">
+                                    <XCircle className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button onClick={() => setEditingBuilding({ index: i, name: b.name })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (window.confirm(`Apakah Anda yakin ingin menghapus gedung "${b.name}"?`)) {
+                                        setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
+                                        showToast(`Gedung ${b.name} dihapus`, 'info');
+                                      }
+                                    }}
+                                    className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -749,6 +836,16 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Manage All Works</label>
+                  </div>
+
+                  <div className="px-2">
+                    <input
+                      type="text"
+                      placeholder="Search tasks or categories..."
+                      value={taskSearch}
+                      onChange={(e) => setTaskSearch(e.target.value)}
+                      className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-600 focus:outline-none focus:border-orange-500 transition-all placeholder:text-slate-300"
+                    />
                   </div>
 
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
@@ -773,14 +870,26 @@ export default function Home() {
                         const taskInput = document.getElementById('new-work-task') as HTMLInputElement;
                         if (catInput.value && taskInput.value) {
                           const next = [...allHierarchy];
-                          const existing = next.find(w => w.category === catInput.value);
-                          if (existing) {
-                            existing.tasks = [taskInput.value.replace(/\s+/g, '_'), ...existing.tasks];
+                          const catName = catInput.value.trim();
+                          const taskName = taskInput.value.trim().replace(/\s+/g, '_');
+
+                          const existingCat = next.find(w => w.category.toLowerCase() === catName.toLowerCase());
+
+                          if (existingCat) {
+                            // Duplicate Validation
+                            if (existingCat.tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
+                              showToast(`Pekerjaan "${taskInput.value}" sudah ada di kategori ini!`, 'error');
+                              return;
+                            }
+                            existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
-                            next.unshift({ category: catInput.value, tasks: [taskInput.value.replace(/\s+/g, '_')] });
+                            next.push({ category: catName, tasks: [taskName] });
+                            // Sort categories alphabetically
+                            next.sort((a, b) => a.category.localeCompare(b.category));
                           }
+
                           setAllHierarchy(next);
-                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catInput.value}`, 'success');
+                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName}`, 'success');
                           catInput.value = '';
                           taskInput.value = '';
                         }
@@ -792,83 +901,133 @@ export default function Home() {
                     </button>
 
                     <div className="pt-4 border-t border-slate-200 space-y-3 max-h-[400px] overflow-y-auto overflow-x-hidden pr-1">
-                      {allHierarchy.map((w, i) => (
-                        <div key={i} className="space-y-1">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{w.category}</span>
-                          <div className="space-y-1">
-                            {w.tasks.map((t, ti) => (
-                              <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
-                                <div className="flex-1 min-w-0">
-                                  {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
-                                    <input
-                                      type="text"
-                                      value={editingTask.name.replace(/_/g, ' ')}
-                                      onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                                      autoFocus
-                                      className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          const next = [...allHierarchy];
-                                          next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                          setAllHierarchy(next);
-                                          setEditingTask(null);
-                                          showToast(`Pekerjaan diperbarui`, 'success');
-                                        }
-                                      }}
-                                    />
-                                  ) : (
-                                    <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t.replace(/_/g, ' ')}</span>
-                                  )}
+                      {allHierarchy
+                        .filter(w =>
+                          w.category.toLowerCase().includes(taskSearch.toLowerCase()) ||
+                          w.tasks.some(t => t.toLowerCase().includes(taskSearch.toLowerCase()))
+                        )
+                        .map((w, i) => (
+                          <div key={i} className="space-y-1">
+                            <div className="flex items-center justify-between px-2">
+                              {editingCategory?.index === i ? (
+                                <div className="flex items-center gap-1 flex-1 min-w-0">
+                                  <input
+                                    type="text"
+                                    value={editingCategory.name}
+                                    onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                                    autoFocus
+                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[9px] font-black uppercase text-slate-900 focus:outline-none"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        const next = [...allHierarchy];
+                                        next[i].category = editingCategory.name.trim();
+                                        next.sort((a, b) => a.category.localeCompare(b.category));
+                                        setAllHierarchy(next);
+                                        setEditingCategory(null);
+                                        showToast(`Kategori diperbarui`, 'success');
+                                      }
+                                    }}
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const next = [...allHierarchy];
+                                      next[i].category = editingCategory.name.trim();
+                                      next.sort((a, b) => a.category.localeCompare(b.category));
+                                      setAllHierarchy(next);
+                                      setEditingCategory(null);
+                                      showToast(`Kategori diperbarui`, 'success');
+                                    }}
+                                    className="text-emerald-500"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                  </button>
                                 </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                  {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
-                                    <>
-                                      <button
-                                        onClick={() => {
-                                          const next = [...allHierarchy];
-                                          next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                          setAllHierarchy(next);
-                                          setEditingTask(null);
-                                          showToast(`Pekerjaan diperbarui`, 'success');
-                                        }}
-                                        className="text-emerald-500 p-2"
-                                      >
-                                        <Save className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
-                                        <XCircle className="w-3.5 h-3.5" />
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <button onClick={() => setEditingTask({ catIndex: i, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
-                                        <Edit3 className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button
-                                        onClick={() => {
-                                          if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
+                              ) : (
+                                <>
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{w.category}</span>
+                                  <button
+                                    onClick={() => setEditingCategory({ index: i, name: w.category })}
+                                    className="text-slate-300 hover:text-orange-500 px-1"
+                                  >
+                                    <Edit3 className="w-2.5 h-2.5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              {w.tasks.map((t, ti) => (
+                                <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
+                                  <div className="flex-1 min-w-0">
+                                    {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
+                                      <input
+                                        type="text"
+                                        value={editingTask.name.replace(/_/g, ' ')}
+                                        onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                                        autoFocus
+                                        className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
                                             const next = [...allHierarchy];
-                                            next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
-                                            if (next[i].tasks.length === 0) {
-                                              setAllHierarchy(next.filter((_, idx) => idx !== i));
-                                            } else {
-                                              setAllHierarchy(next);
-                                            }
-                                            showToast(`Tugas ${t} dihapus`, 'info');
+                                            next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
+                                            setAllHierarchy(next);
+                                            setEditingTask(null);
+                                            showToast(`Pekerjaan diperbarui`, 'success');
                                           }
                                         }}
-                                        className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    </>
-                                  )}
+                                      />
+                                    ) : (
+                                      <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t.replace(/_/g, ' ')}</span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
+                                      <>
+                                        <button
+                                          onClick={() => {
+                                            const next = [...allHierarchy];
+                                            next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
+                                            setAllHierarchy(next);
+                                            setEditingTask(null);
+                                            showToast(`Pekerjaan diperbarui`, 'success');
+                                          }}
+                                          className="text-emerald-500 p-2"
+                                        >
+                                          <Save className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
+                                          <XCircle className="w-3.5 h-3.5" />
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button onClick={() => setEditingTask({ catIndex: i, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                          <Edit3 className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
+                                              const next = [...allHierarchy];
+                                              next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
+                                              if (next[i].tasks.length === 0) {
+                                                setAllHierarchy(next.filter((_, idx) => idx !== i));
+                                              } else {
+                                                setAllHierarchy(next);
+                                              }
+                                              showToast(`Tugas ${t} dihapus`, 'info');
+                                            }
+                                          }}
+                                          className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   </div>
                 </div>

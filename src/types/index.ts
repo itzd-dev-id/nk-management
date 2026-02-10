@@ -1,6 +1,7 @@
 export interface Building {
     code: string;
     name: string;
+    index?: number;
 }
 
 export interface FileMetadata {

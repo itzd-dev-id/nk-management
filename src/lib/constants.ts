@@ -1,40 +1,28 @@
-export interface Building {
-    code: string;
-    name: string;
-}
+import { Building } from '@/types';
 
 export const BUILDINGS: Building[] = [
-    { code: 'GL', name: 'Global' },
-    { code: 'A', name: 'Rusun Guru' },
-    { code: 'A.1', name: 'Rusun Guru' },
-    { code: 'B', name: 'Asrama Putra SD' },
-    { code: 'B.1', name: 'Asrama Putra SD' },
-    { code: 'C', name: 'Asrama Putri SD' },
-    { code: 'C.1', name: 'Asrama Putri SD' },
-    { code: 'D', name: 'Asrama Putri SMP' },
-    { code: 'D.1', name: 'Asrama Putra SMP' },
-    { code: 'E', name: 'Asrama Putra SMA' },
-    { code: 'E.1', name: 'Asrama Putri SMA' },
-    { code: 'F', name: 'Kantin SD' },
-    { code: 'F.1', name: 'Kantin SMP' },
-    { code: 'F.2', name: 'Kantin SMA' },
-    { code: 'G', name: 'Dapur Gudang' },
-    { code: 'H', name: 'Guest House' },
-    { code: 'I', name: 'Gedung SMA' },
-    { code: 'J', name: 'Gedung SMP' },
-    { code: 'K', name: 'Gedung SD' },
-    { code: 'L', name: 'Masjid' },
-    { code: 'M', name: 'Gedung Serbaguna' },
-    { code: 'N', name: 'Lapangan Upacara' },
-    { code: 'O', name: 'Pos Keamanan' },
-    { code: 'P', name: 'Rumah Pompa' },
-    { code: 'Q', name: 'Power House' },
-    { code: 'R', name: 'TPS' },
-    { code: 'S', name: 'Gedung Ibadah' },
-    { code: 'T', name: 'Lapangan Basket' },
-    { code: 'U', name: 'Lapangan Sepak Bola' },
-    { code: 'V', name: 'Gudang Perawatan' },
-    { code: 'T01', name: 'Direksi Keet' },
+    { code: 'GL', name: 'Global', index: 0 },
+    { code: 'A', name: 'Rusun Guru', index: 1 },
+    { code: 'B', name: 'Asrama Putra SD', index: 2 },
+    { code: 'C', name: 'Asrama Putri SD', index: 3 },
+    { code: 'D', name: 'Asrama Putri SMP', index: 4 },
+    { code: 'E', name: 'Asrama Putra SMA', index: 5 },
+    { code: 'F', name: 'Kantin', index: 6 },
+    { code: 'G', name: 'Dapur Gudang', index: 7 },
+    { code: 'H', name: 'Guest House', index: 8 },
+    { code: 'I', name: 'Gedung SMA', index: 9 },
+    { code: 'J', name: 'Gedung SMP', index: 10 },
+    { code: 'K', name: 'Gedung SD', index: 11 },
+    { code: 'L', name: 'Masjid', index: 12 },
+    { code: 'M', name: 'Gedung Serbaguna', index: 13 },
+    { code: 'N', name: 'Lapangan Upacara', index: 14 },
+    { code: 'O', name: 'Pos Keamanan', index: 15 },
+    { code: 'P', name: 'Rumah Pompa', index: 16 },
+    { code: 'Q', name: 'Power House', index: 17 },
+    { code: 'R', name: 'TPS', index: 18 },
+    { code: 'S', name: 'Gedung Ibadah', index: 19 },
+    { code: 'T', name: 'Lapangan Basket/Bola', index: 20 },
+    { code: 'T01', name: 'Direksi Keet', index: 21 },
 ];
 
 export const WORK_HIERARCHY = [
@@ -133,11 +121,14 @@ export const WORK_HIERARCHY = [
     {
         category: 'Material On Site',
         tasks: [
-            'Pasir_Batu',
-            'Semen',
-            'Besi_Beton',
-            'Bata_Ringan',
-            'Beton_Ready_Mix'
+            'Pengiriman_Tanah',
+            'Pengiriman_Tiang_pancang',
+            'Pengiriman_Material_direksi_keet',
+            'Pengiriman_besi',
+            'Pengiriman_pasir',
+            'Pengiriman_semen',
+            'Pengiriman_batu',
+            'Pengiriman_beton'
         ]
     },
     {

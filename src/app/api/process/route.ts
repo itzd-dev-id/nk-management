@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
             workName,
             buildingCode,
             buildingName,
+            buildingIndex,
             progress,
             outputPath
         } = metadata;
@@ -43,7 +44,8 @@ export async function POST(req: NextRequest) {
 
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
-        const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
+        const formattedIndex = (buildingIndex !== undefined) ? String(buildingIndex).padStart(2, '0') : '00';
+        const buildingFolder = `${formattedIndex}. ${sanitizedBuildingName} (${sanitizedBuildingCode})`;
 
         // Filename parts - KEEP underscores for filenames
         const fileWork = sanitizedWork.replace(/\s+/g, '_').replace(/\//g, '-');
