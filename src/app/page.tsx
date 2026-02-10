@@ -28,6 +28,7 @@ export default function Home() {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const skipNextSave = React.useRef(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [customBuildings, setCustomBuildings] = useState<Building[]>([]);
   const [customWorks, setCustomWorks] = useState<{ category: string; tasks: string[] }[]>([]);
@@ -55,6 +56,7 @@ export default function Home() {
       const res = await fetch(`/api/config?outputPath=${encodeURIComponent(path)}`);
       const { success, data } = await res.json();
       if (success && data) {
+        skipNextSave.current = true;
         setCustomBuildings(data.buildings || []);
         setCustomWorks(data.works || []);
       }
@@ -99,7 +101,11 @@ export default function Home() {
 
     // Save custom data to Drive
     if (outputPath && session?.accessToken) {
-      saveConfig(customBuildings, customWorks);
+      if (skipNextSave.current) {
+        skipNextSave.current = false;
+      } else {
+        saveConfig(customBuildings, customWorks);
+      }
     }
   }, [customBuildings, customWorks, outputPath, session?.accessToken]);
 
