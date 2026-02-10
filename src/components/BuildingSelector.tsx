@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BUILDINGS, Building } from '@/lib/constants';
+import { BUILDINGS } from '@/lib/constants';
+import { Building } from '@/types';
 import { Search, X } from 'lucide-react';
 
 interface BuildingSelectorProps {
