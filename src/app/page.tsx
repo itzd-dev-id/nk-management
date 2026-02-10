@@ -18,6 +18,7 @@ import { ProcessLog } from '@/components/ProcessLog';
 
 export default function Home() {
   const { data: session } = useSession() as any;
+
   // State
   const [activeTab, setActiveTab] = useState<TabId>('archive');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
@@ -44,6 +45,14 @@ export default function Home() {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
   }, []);
+
+  // Handle Session Errors (e.g. Refresh Token Expired)
+  useEffect(() => {
+    if (session?.error === "RefreshAccessTokenError") {
+      showToast("Sesi Google Drive telah habis. Silakan login kembali.", "error");
+      signIn("google"); // Force re-login
+    }
+  }, [session, showToast]);
 
   const [processLogs, setProcessLogs] = useState<string[]>([]);
   const addLog = useCallback((message: string) => {
