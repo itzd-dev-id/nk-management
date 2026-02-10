@@ -27,6 +27,7 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [customBuildings, setCustomBuildings] = useState<Building[]>([]);
   const [customWorks, setCustomWorks] = useState<{ category: string; tasks: string[] }[]>([]);
@@ -40,24 +41,52 @@ export default function Home() {
     const savedPath = localStorage.getItem('nk_output_path');
     const savedBuilding = localStorage.getItem('nk_selected_building');
     const savedStorageType = localStorage.getItem('nk_storage_type') as 'local' | 'gdrive';
-    const savedCustomBuildings = localStorage.getItem('nk_custom_buildings');
-    const savedCustomWorks = localStorage.getItem('nk_custom_works');
 
     if (savedPath) setOutputPath(savedPath);
     if (savedBuilding) setSelectedBuilding(JSON.parse(savedBuilding));
     if (savedStorageType) setStorageType(savedStorageType);
-    if (savedCustomBuildings) setCustomBuildings(JSON.parse(savedCustomBuildings));
-    if (savedCustomWorks) setCustomWorks(JSON.parse(savedCustomWorks));
   }, []);
+
+  // Sync Config from Drive
+  const fetchConfig = useCallback(async (path: string) => {
+    if (!path || !session?.accessToken) return;
+    setIsSyncing(true);
+    try {
+      const res = await fetch(`/api/config?outputPath=${encodeURIComponent(path)}`);
+      const { success, data } = await res.json();
+      if (success && data) {
+        setCustomBuildings(data.buildings || []);
+        setCustomWorks(data.works || []);
+      }
+    } catch (e) {
+      console.error('Failed to sync config', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [session?.accessToken]);
+
+  const saveConfig = async (buildings: Building[], works: any[]) => {
+    if (!outputPath || !session?.accessToken) return;
+    try {
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outputPath, data: { buildings, works } })
+      });
+    } catch (e) {
+      console.error('Failed to save config', e);
+    }
+  };
+
+  useEffect(() => {
+    if (outputPath) fetchConfig(outputPath);
+  }, [outputPath, fetchConfig]);
 
   // Update merged data whenever state changes
   useEffect(() => {
     setMergedBuildings([...BUILDINGS, ...customBuildings]);
 
-    // Merge works: find existing categories or add new ones
-    // We create a deep copy to avoid mutating the original WORK_HIERARCHY
     const newHierarchy = JSON.parse(JSON.stringify(WORK_HIERARCHY));
-
     customWorks.forEach(custom => {
       const existing = newHierarchy.find((h: any) => h.category === custom.category);
       if (existing) {
@@ -68,9 +97,11 @@ export default function Home() {
     });
     setMergedHierarchy(newHierarchy);
 
-    localStorage.setItem('nk_custom_buildings', JSON.stringify(customBuildings));
-    localStorage.setItem('nk_custom_works', JSON.stringify(customWorks));
-  }, [customBuildings, customWorks]);
+    // Save custom data to Drive
+    if (outputPath && session?.accessToken) {
+      saveConfig(customBuildings, customWorks);
+    }
+  }, [customBuildings, customWorks, outputPath, session?.accessToken]);
 
   useEffect(() => {
     if (!outputPath) {
@@ -477,13 +508,13 @@ export default function Home() {
                         id="new-building-code"
                         type="text"
                         placeholder="Code (ex: T02)"
-                        className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-orange-500"
+                        className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                       <input
                         id="new-building-name"
                         type="text"
                         placeholder="Building Name"
-                        className="col-span-2 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-orange-500"
+                        className="col-span-2 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                     </div>
                     <button
@@ -491,7 +522,9 @@ export default function Home() {
                         const codeInput = document.getElementById('new-building-code') as HTMLInputElement;
                         const nameInput = document.getElementById('new-building-name') as HTMLInputElement;
                         if (codeInput.value && nameInput.value) {
-                          setCustomBuildings([...customBuildings, { code: codeInput.value, name: nameInput.value }]);
+                          const newList = [...customBuildings, { code: codeInput.value, name: nameInput.value }];
+                          setCustomBuildings(newList);
+                          saveConfig(newList, customWorks);
                           codeInput.value = '';
                           nameInput.value = '';
                         }
@@ -509,7 +542,11 @@ export default function Home() {
                               <span className="text-[9px] font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{b.code}</span>
                               <span className="text-xs font-bold text-slate-700">{b.name}</span>
                             </div>
-                            <button onClick={() => setCustomBuildings(customBuildings.filter((_, idx) => idx !== i))} className="text-red-400 active:scale-90 px-2">
+                            <button onClick={() => {
+                              const newList = customBuildings.filter((_, idx) => idx !== i);
+                              setCustomBuildings(newList);
+                              saveConfig(newList, customWorks);
+                            }} className="text-red-400 active:scale-90 px-2">
                               <Check className="w-3 h-3 rotate-45" />
                             </button>
                           </div>
@@ -531,13 +568,13 @@ export default function Home() {
                         id="new-work-cat"
                         type="text"
                         placeholder="Category (ex: Arsitektur)"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                       <input
                         id="new-work-task"
                         type="text"
                         placeholder="Task Name (ex: Cat Dinding)"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                     </div>
                     <button
@@ -553,6 +590,7 @@ export default function Home() {
                             newCustomWorks.push({ category: catInput.value, tasks: [taskInput.value] });
                           }
                           setCustomWorks(newCustomWorks);
+                          saveConfig(customBuildings, newCustomWorks);
                           catInput.value = '';
                           taskInput.value = '';
                         }
@@ -572,13 +610,13 @@ export default function Home() {
                                 <div key={ti} className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-slate-100">
                                   <span className="text-xs font-bold text-slate-700">{t}</span>
                                   <button onClick={() => {
-                                    const next = [...customWorks];
+                                    let next = [...customWorks];
                                     next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
                                     if (next[i].tasks.length === 0) {
-                                      setCustomWorks(next.filter((_, idx) => idx !== i));
-                                    } else {
-                                      setCustomWorks(next);
+                                      next = next.filter((_, idx) => idx !== i);
                                     }
+                                    setCustomWorks(next);
+                                    saveConfig(customBuildings, next);
                                   }} className="text-red-400 active:scale-90 px-2">
                                     <Check className="w-3 h-3 rotate-45" />
                                   </button>

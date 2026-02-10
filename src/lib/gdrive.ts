@@ -20,9 +20,6 @@ export class GoogleDriveService {
         }
     }
 
-    /**
-     * Finds a folder by name under a parent folder.
-     */
     async findFolder(name: string, parentId: string): Promise<string | null> {
         console.log(`GDrive: Searching for folder "${name}" under parent "${parentId}"`);
         try {
@@ -38,6 +35,28 @@ export class GoogleDriveService {
             return id;
         } catch (error: any) {
             console.error(`GDrive: Error in findFolder:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Finds a file by name under a parent folder.
+     */
+    async findFile(name: string, parentId: string): Promise<string | null> {
+        console.log(`GDrive: Searching for file "${name}" under parent "${parentId}"`);
+        try {
+            const response = await this.drive.files.list({
+                q: `name = '${name.replace(/'/g, "\\'")}' and '${parentId}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false`,
+                fields: 'files(id)',
+                spaces: 'drive',
+            });
+
+            const files = response.data.files;
+            const id = files && files.length > 0 ? files[0].id || null : null;
+            console.log(`GDrive: Found file ID: ${id}`);
+            return id;
+        } catch (error: any) {
+            console.error(`GDrive: Error in findFile:`, error.message);
             throw error;
         }
     }
@@ -157,6 +176,46 @@ export class GoogleDriveService {
             console.error(`GDrive: Error calculating sequence:`, error.message);
             // Fallback to timestamp to avoid failing the upload if listing fails
             return Date.now().toString().slice(-3);
+        }
+    }
+
+    /**
+     * Updates an existing file's content.
+     */
+    async updateFile(fileId: string, content: string | Buffer, mimeType: string): Promise<void> {
+        console.log(`GDrive: Updating file ID: ${fileId}`);
+        try {
+            const media = {
+                mimeType: mimeType,
+                body: Readable.from(typeof content === 'string' ? content : Buffer.from(content)),
+            };
+
+            await this.drive.files.update({
+                fileId: fileId,
+                media: media,
+            });
+            console.log(`GDrive: File update successful`);
+        } catch (error: any) {
+            console.error(`GDrive: Error in updateFile:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Gets a file's content as a string.
+     */
+    async getFileContent(fileId: string): Promise<string> {
+        console.log(`GDrive: Fetching content for file ID: ${fileId}`);
+        try {
+            const response = await this.drive.files.get({
+                fileId: fileId,
+                alt: 'media',
+            }, { responseType: 'text' });
+
+            return response.data as string;
+        } catch (error: any) {
+            console.error(`GDrive: Error in getFileContent:`, error.message);
+            throw error;
         }
     }
 }
