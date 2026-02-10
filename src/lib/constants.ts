@@ -34,6 +34,7 @@ export const BUILDINGS: Building[] = [
     { code: 'T', name: 'Lapangan Basket' },
     { code: 'U', name: 'Lapangan Sepak Bola' },
     { code: 'V', name: 'Gudang Perawatan' },
+    { code: 'T01', name: 'Direksi Keet' },
 ];
 
 export const WORK_HIERARCHY = [

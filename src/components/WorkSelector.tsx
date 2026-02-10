@@ -8,14 +8,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface WorkSelectorProps {
     value: string;
     onChange: (value: string) => void;
+    hierarchy?: typeof WORK_HIERARCHY;
 }
 
-export function WorkSelector({ value, onChange }: WorkSelectorProps) {
+export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: WorkSelectorProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const filteredHierarchy = WORK_HIERARCHY.map(group => ({
+    const filteredHierarchy = hierarchy.map(group => ({
         ...group,
         tasks: group.tasks.filter(task =>
             task.toLowerCase().includes(search.toLowerCase()) ||

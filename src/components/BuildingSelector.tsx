@@ -7,12 +7,13 @@ import { Search, X } from 'lucide-react';
 interface BuildingSelectorProps {
     selectedBuilding: Building | null;
     onSelect: (building: Building) => void;
+    buildings?: Building[];
 }
 
-export function BuildingSelector({ selectedBuilding, onSelect }: BuildingSelectorProps) {
+export function BuildingSelector({ selectedBuilding, onSelect, buildings = BUILDINGS }: BuildingSelectorProps) {
     const [search, setSearch] = useState('');
 
-    const filteredBuildings = BUILDINGS.filter(building =>
+    const filteredBuildings = buildings.filter(building =>
         building.name.toLowerCase().includes(search.toLowerCase()) ||
         building.code.toLowerCase().includes(search.toLowerCase())
     );
@@ -71,9 +72,10 @@ export function BuildingSelector({ selectedBuilding, onSelect }: BuildingSelecto
                         );
                     })
                 ) : (
-                    <div className="py-12 flex flex-col items-center justify-center text-center opacity-40">
-                        <Search className="w-8 h-8 mb-2" />
-                        <p className="text-sm font-bold">No results</p>
+                    <div className="py-12 flex flex-col items-center justify-center text-center text-slate-400">
+                        <Search className="w-8 h-8 mb-2 opacity-20" />
+                        <p className="text-sm font-bold uppercase tracking-widest text-slate-500">No results found</p>
+                        <p className="text-[10px] font-medium text-slate-400">Try a different building code or name</p>
                     </div>
                 )}
             </div>
