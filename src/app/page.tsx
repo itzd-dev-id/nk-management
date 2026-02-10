@@ -14,6 +14,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
 import { BottomNav, TabId } from '@/components/BottomNav';
 import { BUILDINGS, WORK_HIERARCHY } from '@/lib/constants';
+import { ProcessLog } from '@/components/ProcessLog';
 
 export default function Home() {
   const { data: session } = useSession() as any;
@@ -42,6 +43,12 @@ export default function Home() {
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
+  }, []);
+
+  const [processLogs, setProcessLogs] = useState<string[]>([]);
+  const addLog = useCallback((message: string) => {
+    const time = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    setProcessLogs(prev => [...prev, `[${time}] ${message}`]);
   }, []);
 
   // Unified Data State (Dynamic Database)
@@ -292,6 +299,8 @@ export default function Home() {
     }
 
     setIsProcessing(true);
+    setProcessLogs([]);
+    addLog(`[INFO] Memulai proses pengarsipan untuk ${files.length} file...`);
 
     const updatedFiles = [...files];
 
@@ -300,10 +309,12 @@ export default function Home() {
       if (fileMeta.status === 'success') continue;
 
       let fileToUpload = fileMeta.file;
+      addLog(`[INFO] Memproses: ${fileMeta.originalName}`);
 
       // 1. Automatic Compression for Images
       if (fileMeta.file.type.startsWith('image/')) {
         setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'compressing' } : f));
+        addLog(`[INFO] Mengompresi foto...`);
 
         try {
           const options = {
@@ -313,19 +324,18 @@ export default function Home() {
             fileType: 'image/jpeg'
           };
           const compressedBlob = await imageCompression(fileMeta.file, options);
-          // Force .jpg extension and image/jpeg type
           fileToUpload = new File([compressedBlob], fileMeta.originalName.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: 'image/jpeg',
             lastModified: Date.now()
           });
-          console.log(`Compressed: ${fileMeta.file.size} -> ${fileToUpload.size} as ${fileToUpload.name}`);
+          addLog(`[INFO] Kompresi selesai (${(fileMeta.file.size / 1024 / 1024).toFixed(2)}MB -> ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`);
         } catch (error) {
-          console.error("Compression Error:", error);
-          // Fallback to original if compression fails
+          addLog(`[ERROR] Gagal kompresi: ${fileMeta.originalName}`);
         }
       }
 
       setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'processing' } : f));
+      addLog(`[INFO] Mengunggah ke Google Drive...`);
 
       const formData = new FormData();
       formData.append('file', fileToUpload);
@@ -352,19 +362,24 @@ export default function Home() {
             status: 'success',
             newName: result.finalName || f.newName
           } : f));
+          addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
         } else {
           let errorMsg = result.error;
           if (result.details?.error?.message) {
             errorMsg = `${result.error}: ${result.details.error.message}`;
           }
           setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: errorMsg } : f));
+          addLog(`[ERROR] Gagal: ${errorMsg}`);
         }
       } catch (e: any) {
         setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: 'Upload failed: ' + e.message } : f));
+        addLog(`[ERROR] Gagal sistem: ${e.message}`);
       }
     }
 
     setIsProcessing(false);
+    addLog(`[SUCCESS] Seluruh proses selesai!`);
+    showToast('Seluruh file berhasil diproses dan diarsipkan!', 'success');
   };
 
   return (
@@ -811,6 +826,16 @@ export default function Home() {
       </div>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      <AnimatePresence>
+        {isProcessing || processLogs.length > 0 ? (
+          <ProcessLog
+            logs={processLogs}
+            isProcessing={isProcessing}
+            onClose={() => setProcessLogs([])}
+          />
+        ) : null}
+      </AnimatePresence>
 
       {/* Toast Notifications */}
       <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
