@@ -13,16 +13,8 @@ import { motion } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function Home() {
-  const { data: session } = useSession();
-  // State
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
-  const [workName, setWorkName] = useState('');
-  const [progress, setProgress] = useState('10');
-  const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
-  const [outputPath, setOutputPath] = useState('');
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const [files, setFiles] = useState<FileMetadata[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
 
   // Persistence
   useEffect(() => {
@@ -60,8 +52,15 @@ export default function Home() {
   useEffect(() => {
     if (selectedBuilding) {
       localStorage.setItem('nk_selected_building', JSON.stringify(selectedBuilding));
+      if (activeStep === 'building') setActiveStep('work');
     }
   }, [selectedBuilding]);
+
+  useEffect(() => {
+    if (workName && activeStep === 'work') {
+      setActiveStep('upload');
+    }
+  }, [workName]);
 
   // File Handlers
   const handleFilesAdded = useCallback(async (newFiles: File[]) => {
@@ -222,16 +221,16 @@ export default function Home() {
     <main className="min-h-screen bg-[#F8FAFC]">
       {/* Header */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform cursor-pointer">
-              <HardHat className="text-white w-7 h-7" />
+        <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-3 md:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg transform md:rotate-3 hover:rotate-0 transition-transform cursor-pointer">
+              <HardHat className="text-white w-6 h-6 md:w-7 md:h-7" />
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
-                NK-MANAGEMENT <span className="text-[10px] bg-sky-500 px-1.5 py-0.5 rounded text-white font-bold tracking-widest uppercase">PRO</span>
+              <h1 className="text-lg md:text-xl font-black tracking-tight flex items-center gap-2">
+                NK-MANAGEMENT <span className="hidden sm:inline-block text-[10px] bg-sky-500 px-1.5 py-0.5 rounded text-white font-bold tracking-widest uppercase">PRO</span>
               </h1>
-              <p className="text-xs text-slate-400 font-medium">Sistem Pengarsipan Dokumentasi Konstruksi v2.0</p>
+              <p className="hidden md:block text-xs text-slate-400 font-medium">Sistem Pengarsipan Dokumentasi Konstruksi v2.0</p>
             </div>
           </div>
 
@@ -323,68 +322,95 @@ export default function Home() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="col-span-1 md:col-span-3"
+          className="col-span-1 md:col-span-3 space-y-4"
         >
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm sticky top-28">
-            <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
+          {/* Step 1: Building (Mobile Collapsible) */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all">
+            <button
+              onClick={() => setActiveStep(activeStep === 'building' ? 'upload' : 'building')}
+              className="w-full md:hidden flex items-center justify-between p-5 bg-slate-50 border-b border-slate-100"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${selectedBuilding ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>1</div>
+                <span className="font-bold text-slate-800">{selectedBuilding?.name || 'Pilih Gedung'}</span>
+              </div>
+              <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${activeStep === 'building' ? 'rotate-90' : ''}`} />
+            </button>
+            <div className={`${activeStep === 'building' ? 'block' : 'hidden md:block'} p-6`}>
+              <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
+            </div>
           </div>
+
+          <div className="hidden md:block h-px bg-slate-100 mx-6" />
         </motion.aside>
 
         {/* Main Content */}
         <section className="col-span-1 md:col-span-9 space-y-6">
-          {/* Top Config Card */}
+          {/* Step 2: Work & Progress (Mobile Collapsible) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm"
+            className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
           >
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-8">
-              <div className="col-span-1 md:col-span-8">
-                <WorkSelector value={workName} onChange={setWorkName} />
+            <button
+              onClick={() => setActiveStep(activeStep === 'work' ? 'upload' : 'work')}
+              className="w-full md:hidden flex items-center justify-between p-5 bg-slate-50 border-b border-slate-100"
+            >
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${workName ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>2</div>
+                <span className="font-bold text-slate-800 truncate max-w-[200px]">{workName?.split(' / ')[1] || workName || 'Nama Pekerjaan'}</span>
               </div>
-              <div className="col-span-1 md:col-span-4 h-full flex flex-col justify-end">
-                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Progres & Milestone</label>
-                <div className="grid grid-cols-5 gap-3 h-[74px]">
-                  {/* Progress Input Frame - Bento 1 */}
-                  <div className="col-span-2 relative group bg-slate-50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
-                    <div className="h-full flex items-center justify-center">
-                      <div className="flex items-baseline gap-1">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={progress}
-                          onChange={(e) => setProgress(e.target.value)}
-                          placeholder="0"
-                          className="bg-transparent text-right text-3xl font-black text-slate-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          style={{ width: `${Math.max(progress.toString().length || 1, 1)}ch` }}
-                        />
-                        <span className="text-3xl font-black text-slate-400">%</span>
+              <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${activeStep === 'work' ? 'rotate-90' : ''}`} />
+            </button>
+
+            <div className={`${activeStep === 'work' ? 'block' : 'hidden md:block'} p-6 md:p-8`}>
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-8">
+                <div className="col-span-1 md:col-span-8">
+                  <WorkSelector value={workName} onChange={setWorkName} />
+                </div>
+                <div className="col-span-1 md:col-span-4 h-full flex flex-col justify-end">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 block">Progres & Milestone</label>
+                  <div className="grid grid-cols-5 gap-3 h-[74px]">
+                    {/* Progress Input Frame - Bento 1 */}
+                    <div className="col-span-2 relative group bg-slate-50 border border-slate-200 rounded-2xl transition-all hover:bg-slate-100/50 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+                      <div className="h-full flex items-center justify-center">
+                        <div className="flex items-baseline gap-1">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={progress}
+                            onChange={(e) => setProgress(e.target.value)}
+                            placeholder="0"
+                            className="bg-transparent text-right text-3xl font-black text-slate-800 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            style={{ width: `${Math.max(progress.toString().length || 1, 1)}ch` }}
+                          />
+                          <span className="text-3xl font-black text-slate-400">%</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Milestone Bento Grid */}
-                  <div className="col-span-3 grid grid-cols-3 gap-1.5 h-full">
-                    {['0', '25', '50', '75', '100'].map((val) => (
-                      <button
-                        key={val}
-                        onClick={() => setProgress(val)}
-                        className={`flex items-center justify-center text-[10px] font-black rounded-xl border transition-all ${progress === val ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-500'}`}
-                      >
-                        {val}%
-                      </button>
-                    ))}
-                    <div className="bg-slate-50/50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center opacity-40">
-                      <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                    {/* Milestone Bento Grid */}
+                    <div className="col-span-3 grid grid-cols-3 gap-1.5 h-full">
+                      {['0', '25', '50', '75', '100'].map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => setProgress(val)}
+                          className={`flex items-center justify-center text-[10px] font-black rounded-xl border transition-all ${progress === val ? 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-500'}`}
+                        >
+                          {val}%
+                        </button>
+                      ))}
+                      <div className="bg-slate-50/50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center opacity-40">
+                        <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
+              <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
           </motion.div>
 
           {/* Action Header */}
@@ -410,7 +436,7 @@ export default function Home() {
                 whileTap={{ scale: 0.98 }}
                 onClick={processFiles}
                 disabled={isProcessing || files.length === 0}
-                className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg shadow-orange-500/20 transition-all flex items-center gap-3 uppercase tracking-wider text-sm"
+                className="hidden md:flex bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-8 py-3.5 rounded-2xl font-black shadow-lg shadow-orange-500/20 transition-all items-center gap-3 uppercase tracking-wider text-sm"
               >
                 {isProcessing ? (
                   <>
@@ -449,6 +475,33 @@ export default function Home() {
           <p className="text-slate-400 text-sm font-medium">PT. Nindya Karya (Persero) - Built for Construction Excellence</p>
         </div>
       </footer>
+      {/* Floating Bottom Bar (Mobile Only) */}
+      <AnimatePresence>
+        {files.length > 0 && !isProcessing && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 z-[60] shadow-[0_-10px_20px_rgba(0,0,0,0.05)]"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight">
+                {files.length} Files Diantrekan
+              </div>
+              <span className="text-xs font-bold text-slate-400">Siap Proses?</span>
+            </div>
+            <button
+              onClick={processFiles}
+              className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black shadow-lg shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all text-sm uppercase tracking-wider"
+            >
+              <Play className="w-5 h-5 fill-current" /> Mulai Pengarsipan
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Spacer for FAB on mobile */}
+      <div className="h-32 md:hidden" />
     </main>
   );
 }
