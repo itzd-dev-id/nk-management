@@ -282,9 +282,9 @@ export default function Home() {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Mulai Arsip</h2>
-                <p className="text-slate-500 text-sm font-medium">Pilih pekerjaan dan upload dokumentasi.</p>
+              <div className="space-y-2 text-center pb-2">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Post Archive</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Dokumentasi Harian Konstruksi</p>
               </div>
 
               {/* Step 2: Work & Progress */}
@@ -292,30 +292,19 @@ export default function Home() {
                 <WorkSelector value={workName} onChange={setWorkName} />
 
                 <div className="space-y-4">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block">Progres & Milestone</label>
-                  <div className="grid grid-cols-5 gap-2 h-16">
-                    <div className="col-span-2 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center">
-                      <div className="flex items-baseline gap-1">
-                        <input
-                          type="number"
-                          value={progress}
-                          onChange={(e) => setProgress(e.target.value)}
-                          className="bg-transparent text-right text-2xl font-black text-slate-800 w-10 outline-none"
-                        />
-                        <span className="text-lg font-black text-slate-400">%</span>
-                      </div>
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Progres Pekerjaan (%)</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl py-6 flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-baseline gap-1">
+                      <input
+                        type="number"
+                        value={progress}
+                        onChange={(e) => setProgress(e.target.value)}
+                        className="bg-transparent text-center text-5xl font-black text-slate-900 w-32 outline-none"
+                        placeholder="0"
+                      />
+                      <span className="text-2xl font-black text-slate-400">%</span>
                     </div>
-                    <div className="col-span-3 grid grid-cols-3 gap-1.5">
-                      {['0', '50', '100'].map((val) => (
-                        <button
-                          key={val}
-                          onClick={() => setProgress(val)}
-                          className={`flex items-center justify-center text-[10px] font-black rounded-xl border transition-all ${progress === val ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-slate-200 text-slate-400'}`}
-                        >
-                          {val}%
-                        </button>
-                      ))}
-                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Input Manual Sesuai Laporan</p>
                   </div>
                 </div>
 
@@ -343,11 +332,11 @@ export default function Home() {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pilih Gedung</h2>
-                <p className="text-slate-500 text-sm font-medium">Gedung akan digunakan untuk penamaan file.</p>
+              <div className="space-y-2 text-center pb-2">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Location</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Lokasi Gedung / Proyek</p>
               </div>
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6">
                 <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} />
               </div>
             </motion.div>
@@ -361,9 +350,9 @@ export default function Home() {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Antrean File</h2>
-                <p className="text-slate-500 text-sm font-medium">{files.length} file dalam daftar.</p>
+              <div className="space-y-2 text-center pb-2">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Status</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{files.length} Item dalam Antrean</p>
               </div>
               <FileList
                 files={files}
@@ -381,55 +370,64 @@ export default function Home() {
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
-              <div className="space-y-2">
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Pengaturan</h2>
+              <div className="space-y-2 text-center pb-2">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Settings</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Konfigurasi & Akun</p>
               </div>
 
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-8">
                 {/* User Section */}
-                {session ? (
-                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    {session.user?.image ? (
-                      <img src={session.user.image} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
-                        <User className="w-6 h-6 text-slate-400" />
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Akun Terhubung</label>
+                  {session ? (
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-3xl">
+                      {session.user?.image ? (
+                        <img src={session.user.image} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
+                          <User className="w-6 h-6 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-slate-900 leading-tight truncate">{session.user?.name}</p>
+                        <button onClick={() => signOut()} className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Sign Out</button>
                       </div>
-                    )}
-                    <div className="flex-1">
-                      <p className="text-sm font-black text-slate-900 leading-tight">{session.user?.name}</p>
-                      <button onClick={() => signOut()} className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Logout Akun</button>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => signIn('google')}
-                    className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all"
-                  >
-                    <LogIn className="w-4 h-4 text-orange-500" />
-                    Login with Google
-                  </button>
-                )}
-
-                <div className="h-px bg-slate-100" />
+                  ) : (
+                    <button
+                      onClick={() => signIn('google')}
+                      className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-4 rounded-3xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest"
+                    >
+                      <LogIn className="w-4 h-4 text-orange-500" />
+                      Login with Google
+                    </button>
+                  )}
+                </div>
 
                 {/* Storage Config */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">G-Drive Folder ID</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={outputPath}
-                      onChange={(e) => setOutputPath(e.target.value)}
-                      placeholder="Masukkan Folder ID"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 transition-all"
-                    />
-                    {saveStatus === 'saved' && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500">
-                        <Check className="w-4 h-4" />
-                        <span className="text-[10px] font-black uppercase tracking-tight">Saved</span>
-                      </div>
-                    )}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Cloud Storage Destinasi</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                    <div className="flex items-center gap-3 text-slate-400">
+                      <FolderOpen className="w-5 h-5 text-orange-500" />
+                      <span className="text-xs font-black uppercase tracking-tight text-slate-900">Google Drive Folder ID</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={outputPath}
+                        onChange={(e) => setOutputPath(e.target.value)}
+                        placeholder="Masukkan ID Folder..."
+                        className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-300"
+                      />
+                      {saveStatus === 'saved' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500 bg-white pl-2">
+                          <Check className="w-4 h-4" />
+                          <span className="text-[9px] font-black uppercase">Saved</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data akan disimpan secara otomatis ke folder cloud yang ditentukan di atas.</p>
                   </div>
                 </div>
               </div>
