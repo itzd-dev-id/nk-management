@@ -240,7 +240,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F2F2F7] pb-24">
+    <main className="min-h-dvh bg-[#F2F2F7] pb-24 relative overflow-x-hidden">
       {/* iOS Style Sticky Header */}
       <header className="sticky top-0 z-[90] bg-white/80 backdrop-blur-xl border-b border-slate-200/50 pt-safe-area-inset-top">
         <div className="px-6 py-4 flex items-center justify-between">
