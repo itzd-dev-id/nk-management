@@ -85,8 +85,7 @@ export const WORK_HIERARCHY = [
             'Bekisting',
             'Pembesian',
             'Pengecoran',
-            'Finish_Trowel',
-            'Bongkar_Bekisting'
+            'Finish_Trowel'
         ]
     },
     {

@@ -330,7 +330,8 @@ export default function Home() {
             maxSizeMB: 1.2,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
-            fileType: 'image/jpeg'
+            fileType: 'image/jpeg',
+            preserveExif: true
           };
           const compressedBlob = await imageCompression(fileMeta.file, options);
           fileToUpload = new File([compressedBlob], fileMeta.originalName.replace(/\.[^/.]+$/, "") + ".jpg", {
