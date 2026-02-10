@@ -51,7 +51,7 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                             {value ? value.split(' / ')[0] : 'Category'}
                         </span>
                         <span className={`font-bold truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>
-                            {value ? value.split(' / ')[1] || value : 'Select Work...'}
+                            {value ? (value.split(' / ')[1] || value).replace(/_/g, ' ') : 'Select Work...'}
                         </span>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
@@ -125,7 +125,7 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                                                         className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-orange-50 text-left transition-colors group"
                                                     >
                                                         <span className={`text-sm font-medium ${isSelected ? 'text-orange-600' : 'text-slate-700'}`}>
-                                                            {task}
+                                                            {task.replace(/_/g, ' ')}
                                                         </span>
                                                         {isSelected && <Check className="w-4 h-4 text-orange-500" />}
                                                     </button>

@@ -473,6 +473,46 @@ export default function Home() {
                   {isProcessing ? 'Processing...' : 'Start Archiving'}
                 </button>
               )}
+
+              {/* Naming Preview & Logs Section */}
+              {(files.length > 0 || isProcessing || processLogs.length > 0) && (
+                <div className="space-y-4">
+                  {/* Preview Section */}
+                  {files.length > 0 && !isProcessing && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-3">
+                      <div className="flex items-center gap-2 px-1">
+                        <Info className="w-3.5 h-3.5 text-orange-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Naming Preview</span>
+                      </div>
+                      <div className="space-y-2">
+                        {files.slice(0, 3).map((f, i) => (
+                          <div key={i} className="bg-white border border-slate-100 rounded-xl px-4 py-2.5">
+                            <p className="text-[10px] font-mono text-slate-400 truncate mb-0.5">{f.originalName}</p>
+                            <p className="text-[11px] font-mono font-bold text-slate-800 break-all leading-tight">
+                              {f.newName}
+                            </p>
+                          </div>
+                        ))}
+                        {files.length > 3 && (
+                          <p className="text-[9px] font-bold text-slate-400 text-center uppercase tracking-tight">
+                            + {files.length - 3} more files in queue
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <AnimatePresence>
+                    {(isProcessing || processLogs.length > 0) && (
+                      <ProcessLog
+                        logs={processLogs}
+                        isProcessing={isProcessing}
+                        onClose={() => setProcessLogs([])}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -723,9 +763,9 @@ export default function Home() {
                           const next = [...allHierarchy];
                           const existing = next.find(w => w.category === catInput.value);
                           if (existing) {
-                            existing.tasks = [taskInput.value, ...existing.tasks];
+                            existing.tasks = [taskInput.value.replace(/\s+/g, '_'), ...existing.tasks];
                           } else {
-                            next.unshift({ category: catInput.value, tasks: [taskInput.value] });
+                            next.unshift({ category: catInput.value, tasks: [taskInput.value.replace(/\s+/g, '_')] });
                           }
                           setAllHierarchy(next);
                           showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catInput.value}`, 'success');
@@ -750,14 +790,14 @@ export default function Home() {
                                   {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
                                     <input
                                       type="text"
-                                      value={editingTask.name}
+                                      value={editingTask.name.replace(/_/g, ' ')}
                                       onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
                                       autoFocus
                                       className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
                                       onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                           const next = [...allHierarchy];
-                                          next[i].tasks[ti] = editingTask.name;
+                                          next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
                                           setAllHierarchy(next);
                                           setEditingTask(null);
                                           showToast(`Pekerjaan diperbarui`, 'success');
@@ -765,7 +805,7 @@ export default function Home() {
                                       }}
                                     />
                                   ) : (
-                                    <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t}</span>
+                                    <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t.replace(/_/g, ' ')}</span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
@@ -774,7 +814,7 @@ export default function Home() {
                                       <button
                                         onClick={() => {
                                           const next = [...allHierarchy];
-                                          next[i].tasks[ti] = editingTask.name;
+                                          next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
                                           setAllHierarchy(next);
                                           setEditingTask(null);
                                           showToast(`Pekerjaan diperbarui`, 'success');
@@ -835,16 +875,6 @@ export default function Home() {
       </div>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
-
-      <AnimatePresence>
-        {isProcessing || processLogs.length > 0 ? (
-          <ProcessLog
-            logs={processLogs}
-            isProcessing={isProcessing}
-            onClose={() => setProcessLogs([])}
-          />
-        ) : null}
-      </AnimatePresence>
 
       {/* Toast Notifications */}
       <div className="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
