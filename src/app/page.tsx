@@ -192,9 +192,9 @@ export default function Home() {
     if (outputPath) loadAllConfigs(outputPath);
   }, [outputPath, loadAllConfigs]);
 
-  // Re-sync when switching to settings/profile tab
+  // Re-sync when switching to settings tab
   useEffect(() => {
-    if (activeTab === 'profile' && outputPath) {
+    if (activeTab === 'settings' && outputPath) {
       loadAllConfigs(outputPath);
     }
   }, [activeTab, outputPath, loadAllConfigs]);
@@ -427,10 +427,10 @@ export default function Home() {
           </div>
 
           <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
-            {activeTab === 'archive' && (selectedBuilding?.code || 'NK-ARCHIVE')}
-            {activeTab === 'buildings' && 'LOCATION'}
+            {activeTab === 'archive' && (selectedBuilding?.code || 'NK-POST')}
+            {activeTab === 'edit' && 'EDIT DATABASE'}
             {activeTab === 'queue' && 'STATUS'}
-            {activeTab === 'profile' && 'SETTINGS'}
+            {activeTab === 'settings' && 'SETTINGS'}
           </h1>
 
           <div className="w-10 h-10 flex items-center justify-end">
@@ -463,35 +463,35 @@ export default function Home() {
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Daily Construction Documentation</p>
               </div>
 
-              {/* Step 2: Work & Progress */}
-              <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6">
+              {/* Step 1: Location & Work */}
+              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6">
+                <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
                 <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
 
-                <div className="space-y-4">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-3xl py-10 flex flex-col items-center justify-center gap-2">
-                    <div className="relative flex items-center justify-center gap-1">
-                      {/* Hidden Mirror for Auto-Width */}
-                      <span className="invisible absolute whitespace-pre text-6xl font-black px-2 min-w-[2ch]">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Work Progress (%)</label>
+                    <div className="bg-slate-50 border border-slate-200 rounded-2xl py-4 flex items-center justify-center gap-1 group relative">
+                      <span className="invisible absolute whitespace-pre text-2xl font-black px-1 min-w-[2ch]">
                         {progress || '0'}
                       </span>
-
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="number"
-                          value={progress}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val.length <= 3) setProgress(val);
-                          }}
-                          className="bg-transparent text-right text-6xl font-black text-slate-900 outline-none p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
-                          placeholder="0"
-                        />
-                        <span className="text-3xl font-black text-slate-400 mt-2 ml-1">%</span>
-                      </div>
+                      <input
+                        type="number"
+                        value={progress}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val.length <= 3) setProgress(val);
+                        }}
+                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
+                        placeholder="0"
+                      />
+                      <span className="text-lg font-black text-slate-400 mt-1">%</span>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Manual Input from Report</p>
+                  </div>
+
+                  <div className="flex flex-col justify-end">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight">Manual Input<br />from Report</p>
                   </div>
                 </div>
 
@@ -551,24 +551,6 @@ export default function Home() {
             </motion.div>
           )}
 
-          {activeTab === 'buildings' && (
-            <motion.div
-              key="buildings"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <div className="space-y-2 text-center pb-2">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Location</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Building / Project Location</p>
-              </div>
-              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6">
-                <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
-              </div>
-            </motion.div>
-          )}
-
           {activeTab === 'queue' && (
             <motion.div
               key="queue"
@@ -589,75 +571,20 @@ export default function Home() {
             </motion.div>
           )}
 
-          {activeTab === 'profile' && (
+          {activeTab === 'edit' && (
             <motion.div
-              key="profile"
+              key="edit"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
               <div className="space-y-2 text-center pb-2">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Settings</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Account & Configuration</p>
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Edit</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Manage Database Items</p>
               </div>
 
               <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-8">
-                {/* User Section */}
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Connected Account</label>
-                  {session ? (
-                    <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-3xl">
-                      {session.user?.image ? (
-                        <img src={session.user.image} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
-                          <User className="w-6 h-6 text-slate-400" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black text-slate-900 leading-tight truncate">{session.user?.name}</p>
-                        <button onClick={() => signOut()} className="text-[10px] font-black text-orange-500 uppercase tracking-widest">Sign Out</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => signIn('google')}
-                      className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-4 rounded-3xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest"
-                    >
-                      <LogIn className="w-4 h-4 text-orange-500" />
-                      Login with Google
-                    </button>
-                  )}
-                </div>
-
-                {/* Storage Config */}
-                <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Destination Cloud Storage</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
-                    <div className="flex items-center gap-3 text-slate-400">
-                      <FolderOpen className="w-5 h-5 text-orange-500" />
-                      <span className="text-xs font-black uppercase tracking-tight text-slate-900">Google Drive Folder ID</span>
-                    </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={outputPath}
-                        onChange={(e) => setOutputPath(e.target.value)}
-                        placeholder="Enter Folder ID..."
-                        className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-300"
-                      />
-                      {saveStatus === 'saved' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500 bg-white pl-2">
-                          <Check className="w-4 h-4" />
-                          <span className="text-[9px] font-black uppercase">Saved</span>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data will be automatically saved to the cloud folder specified above.</p>
-                  </div>
-                </div>
-
                 {/* Manage Buildings Section */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-2">
@@ -692,7 +619,6 @@ export default function Home() {
                             if (num) {
                               return `${letter}${(parseInt(num) + 1).toString().padStart(num.length, '0')}`;
                             } else {
-                              // If just a letter (like A), next letter (B) if it's single letter
                               if (letter.length === 1 && letter !== 'Z') {
                                 return String.fromCharCode(letter.charCodeAt(0) + 1);
                               }
@@ -717,23 +643,17 @@ export default function Home() {
                         const nameInput = document.getElementById('new-building-name') as HTMLInputElement;
                         if (codeInput.value && nameInput.value) {
                           const code = codeInput.value.toUpperCase();
-                          // Duplicate Validation
                           if (allBuildings.some(b => b.code.toUpperCase() === code)) {
                             showToast(`Gedung dengan kode ${code} sudah ada!`, 'error');
                             return;
                           }
-
                           const newIndex = allBuildings.length > 0
                             ? Math.max(...allBuildings.map(b => b.index || 0)) + 1
                             : 0;
-
                           const newBuilding = { code, name: nameInput.value, index: newIndex };
                           const next = [...allBuildings, newBuilding].sort((a, b) => (a.index || 0) - (b.index || 0));
-
                           setAllBuildings(next);
                           showToast(`Gedung ${code} ditambahkan`, 'success');
-
-                          // Smart Reset: Suggest next code
                           const match = code.match(/([A-Z]+)(\d*)/);
                           if (match) {
                             const letter = match[1];
@@ -872,11 +792,8 @@ export default function Home() {
                           const next = [...allHierarchy];
                           const catName = catInput.value.trim();
                           const taskName = taskInput.value.trim().replace(/\s+/g, '_');
-
                           const existingCat = next.find(w => w.category.toLowerCase() === catName.toLowerCase());
-
                           if (existingCat) {
-                            // Duplicate Validation
                             if (existingCat.tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
                               showToast(`Pekerjaan "${taskInput.value}" sudah ada di kategori ini!`, 'error');
                               return;
@@ -884,10 +801,8 @@ export default function Home() {
                             existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
                             next.push({ category: catName, tasks: [taskName] });
-                            // Sort categories alphabetically
                             next.sort((a, b) => a.category.localeCompare(b.category));
                           }
-
                           setAllHierarchy(next);
                           showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName}`, 'success');
                           catInput.value = '';
@@ -1033,15 +948,130 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center gap-4 py-8 opacity-40">
+            </motion.div>
+          )}
+
+          {activeTab === 'settings' && (
+            <motion.div
+              key="settings"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="space-y-2 text-center pb-2">
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Settings</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Global Configurations</p>
+              </div>
+
+              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-8">
+                {/* User Section */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Connected Account</label>
+                  {session ? (
+                    <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-3xl">
+                      {session.user?.image ? (
+                        <img src={session.user.image} alt="User" className="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center">
+                          <User className="w-6 h-6 text-slate-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black text-slate-900 leading-tight truncate">{session.user?.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate mb-1">{session.user?.email}</p>
+                        <button onClick={() => signOut()} className="text-[10px] font-black text-orange-500 uppercase tracking-widest hover:underline">Sign Out</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => signIn('google')}
+                      className="w-full flex items-center justify-center gap-3 bg-slate-900 text-white py-4 rounded-3xl font-black text-xs shadow-lg active:scale-95 transition-all uppercase tracking-widest"
+                    >
+                      <LogIn className="w-4 h-4 text-orange-500" />
+                      Login with Google
+                    </button>
+                  )}
+                </div>
+
+                {/* Storage Config */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Destination Cloud Storage</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                    <div className="flex items-center gap-3 text-slate-400">
+                      <FolderOpen className="w-5 h-5 text-orange-500" />
+                      <span className="text-xs font-black uppercase tracking-tight text-slate-900">Google Drive Folder ID</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={outputPath}
+                        onChange={(e) => setOutputPath(e.target.value)}
+                        placeholder="Enter Folder ID..."
+                        className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-300"
+                      />
+                      {saveStatus === 'saved' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500 bg-white pl-2">
+                          <Check className="w-4 h-4" />
+                          <span className="text-[9px] font-black uppercase">Saved</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data database (Gedung & Pekerjaan) akan otomatis tersimpan dalam folder Cloud ini.</p>
+                  </div>
+                </div>
+
+                {/* Recommendations & Stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 flex flex-col items-center justify-center text-center gap-1">
+                    <span className="text-xl font-black text-slate-900">{allBuildings.length}</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Gedung</span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 flex flex-col items-center justify-center text-center gap-1">
+                    <span className="text-xl font-black text-slate-900">{allHierarchy.reduce((acc, cat) => acc + cat.tasks.length, 0)}</span>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Pekerjaan</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      if (outputPath) loadAllConfigs(outputPath);
+                      else showToast("Masukkan Folder ID terlebih dahulu", "error");
+                    }}
+                    className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Play className="w-4 h-4 text-orange-500" />
+                      <span className="text-xs font-bold text-slate-700">Sync Original Database</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </button>
+                  <button className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl opacity-50 cursor-not-allowed">
+                    <div className="flex items-center gap-3">
+                      <Info className="w-4 h-4 text-slate-400" />
+                      <span className="text-xs font-bold text-slate-500">System Documentation</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-4 pt-8 pb-4 opacity-40">
                 <div className="flex items-center gap-2 grayscale">
                   <HardHat className="w-5 h-5" />
                   <span className="font-black tracking-widest text-base">NK-SYSTEMS</span>
                 </div>
-                <p className="text-slate-400 text-xs font-medium">Built for Construction Excellence</p>
+                <p className="text-slate-400 text-[10px] font-medium">Built for Construction Excellence</p>
+              </div>
+
+              <div className="flex flex-col items-center justify-center gap-2 py-4">
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">NK-MANAGEMENT v3.0</p>
+                <div className="h-1 w-10 bg-slate-200 rounded-full" />
               </div>
             </motion.div>
           )}
+
         </AnimatePresence>
       </div>
 

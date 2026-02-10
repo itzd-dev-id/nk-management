@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Archive, LayoutGrid, Clock, User, PlusCircle } from 'lucide-react';
+import { Archive, LayoutGrid, Clock, Settings as Cog, Edit3, PlusCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export type TabId = 'archive' | 'queue' | 'buildings' | 'profile';
+export type TabId = 'archive' | 'queue' | 'edit' | 'settings';
 
 interface BottomNavProps {
     activeTab: TabId;
@@ -13,10 +13,10 @@ interface BottomNavProps {
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
     const tabs = [
-        { id: 'archive', label: 'Archive', icon: Archive },
-        { id: 'buildings', label: 'Location', icon: LayoutGrid },
+        { id: 'archive', label: 'Post', icon: Archive },
+        { id: 'edit', label: 'Edit', icon: Edit3 },
         { id: 'queue', label: 'Status', icon: Clock },
-        { id: 'profile', label: 'Settings', icon: User },
+        { id: 'settings', label: 'Settings', icon: Cog },
     ] as const;
 
     return (
