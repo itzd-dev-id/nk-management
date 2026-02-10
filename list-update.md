@@ -44,32 +44,37 @@ Berikut adalah daftar peningkatan fitur dan perbaikan yang telah diimplementasik
 | **T** | Lapangan Basket/Bola |
 | **T01** | Direksi Keet |
 
-### 5. Daftar Pekerjaan (Granular)
-**Persiapan**
-- `Persiapan_Pekerjaan_Pemasangan_Bouwplank`
-- `Persiapan_Pekerjaan_Pembersihan_Lahan`
-- `Persiapan_Pekerjaan_Direksi_Keet`
+### 5. Daftar Pekerjaan Masif (100+ Item)
+Sistem sekarang memiliki 100+ pilihan pekerjaan yang sangat detail dengan format `[Kategori]_[Nama_Pekerjaan]_[Sub_Pekerjaan]`.
 
-**Struktur**
-- `Struktur_Pekerjaan_Lantai_Kerja`
-- `Struktur_Pekerjaan_Pemasangan_Bekisting`
-- `Struktur_Pekerjaan_Pembesian`
-- `Struktur_Pekerjaan_Pengecoran_Beton`
-- `Struktur_Pekerjaan_Bongkar_Bekisting`
-- `Struktur_Pekerjaan_Galian_Tanah`
+**PENTING**: **Struktur Bawah** kini mencakup **Kolom Pedestal** secara spesifik sesuai permintaan.
 
-**Arsitektur**
-- `Arsitektur_Pekerjaan_Pasangan_Bata`
-- `Arsitektur_Pekerjaan_Plesteran_Dinding`
-- `Arsitektur_Pekerjaan_Acian_Dinding`
-- `Arsitektur_Pekerjaan_Pasang_Keramik`
-- `Arsitektur_Pekerjaan_Pengecatan_Dinding`
+**K3 & Persiapan**
+- `K3_Safety_Induction`, `K3_Toolbox_Meeting`, `K3_Pemasangan_Safety_Net`
+- `Persiapan_Pemasangan_Bouwplank`, `Persiapan_Direksi_Keet`, `Persiapan_Mobilisasi_Alat_Berat`
 
-**MEP & Material**
-- `MEP_Pekerjaan_Instalasi_Pipa_Air`
-- `MEP_Pekerjaan_Instalasi_Kabel_Listrik`
-- `Material_On_Site_Besi_Beton`
-- `Material_On_Site_Beton_Ready_Mix`
+**Struktur Bawah (Substructure)**
+- `Struktur_Bawah_Tiang_Pancang_Pemancangan`
+- `Struktur_Bawah_Pile_Cap_Pembesian`, `Struktur_Bawah_Pile_Cap_Pengecoran`
+- **`Struktur_Bawah_Kolom_Pedestal_Bekisting`**
+- **`Struktur_Bawah_Kolom_Pedestal_Pembesian`**
+- **`Struktur_Bawah_Kolom_Pedestal_Pengecoran`**
+- `Struktur_Bawah_Tie_Beam_Pembesian`, `Struktur_Bawah_Tie_Beam_Pengecoran`
+
+**Struktur Atas (Superstructure)**
+- `Struktur_Atas_Kolom_Utama_Pembesian`, `Struktur_Atas_Kolom_Utama_Bekisting`, `Struktur_Atas_Kolom_Utama_Pengecoran`
+- `Struktur_Atas_Balok_Utama_Pembesian`, `Struktur_Atas_Balok_Utama_Bekisting`, `Struktur_Atas_Balok_Utama_Pengecoran`
+- `Struktur_Atas_Plat_Lantai_Pembesian`, `Struktur_Atas_Plat_Lantai_Bekisting`, `Struktur_Atas_Plat_Lantai_Pengecoran`
+- `Struktur_Atas_Bongkar_Bekisting_Balok`, `Struktur_Atas_Curing_Beton`
+
+**Arsitektur & MEP**
+- `Arsitektur_Dinding_Pasangan_Bata_Ringan`, `Arsitektur_Dinding_Plesteran`, `Arsitektur_Dinding_Acian`
+- `Arsitektur_Lantai_Pasang_Keramik`, `Arsitektur_Plafon_Pasang_Gypsum`
+- `MEP_Listrik_Instalasi_Titik_Lampu`, `MEP_Plumbing_Instalasi_Pipa_Air_Bersih`, `MEP_HVAC_Instalasi_Indoor_AC`
+
+**Material & Dokumentasi**
+- `Material_On_Site_Besi_Beton_Ulir`, `Material_On_Site_Semen_PC`, `Material_On_Site_Beton_Ready_Mix`
+- `Dokumentasi_Progress_Mingguan`, `Dokumentasi_Drone_View_Aerial`, `Dokumentasi_Joint_Inspection`
 
 ---
 *Status: Operasional & Tersinkronisasi ke GitHub*

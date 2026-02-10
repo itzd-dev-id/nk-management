@@ -41,82 +41,166 @@ export const WORK_HIERARCHY = [
     {
         category: 'K3 dan Keselamatan',
         tasks: [
-            'Safety_Induction',
-            'Toolbox_Meeting',
-            'Pemasangan_Safety_Net',
-            'Pemasangan_Railing_Pengaman',
-            'Audit_K3_Internal',
-            'Penggunaan_APD_Lengkap'
+            'K3_Safety_Induction',
+            'K3_Toolbox_Meeting',
+            'K3_Safety_Morning',
+            'K3_Audit_Internal',
+            'K3_Pemasangan_Safety_Sign',
+            'K3_Pemasangan_Safety_Net',
+            'K3_Pemasangan_Railing_Pengaman',
+            'K3_Inspeksi_Alat_Berat'
         ]
     },
     {
         category: 'Persiapan',
         tasks: [
-            'Persiapan_Pekerjaan_Pemasangan_Bouwplank',
-            'Persiapan_Pekerjaan_Pembersihan_Lahan',
-            'Persiapan_Pekerjaan_Direksi_Keet',
-            'Persiapan_Pekerjaan_Gudang_Material',
-            'Persiapan_Pekerjaan_Mobilisasi_Alat'
+            'Persiapan_Pembersihan_Lahan',
+            'Persiapan_Pagar_Proyek_Sementara',
+            'Persiapan_Pemasangan_Bouwplank',
+            'Persiapan_Direksi_Keet',
+            'Persiapan_Gudang_Material',
+            'Persiapan_Barak_Kerja',
+            'Persiapan_Mobilisasi_Alat_Berat',
+            'Persiapan_Penyediaan_Air_Kerja',
+            'Persiapan_Penyediaan_Listrik_Kerja'
         ]
     },
     {
-        category: 'Struktur',
+        category: 'Tanah',
         tasks: [
-            'Struktur_Pekerjaan_Lantai_Kerja',
-            'Struktur_Pekerjaan_Pemasangan_Bekisting',
-            'Struktur_Pekerjaan_Pembesian',
-            'Struktur_Pekerjaan_Pengecoran_Beton',
-            'Struktur_Pekerjaan_Bongkar_Bekisting',
-            'Struktur_Pekerjaan_Curing_Beton',
-            'Struktur_Pekerjaan_Galian_Tanah',
-            'Struktur_Pekerjaan_Urugan_Pasir',
-            'Struktur_Pekerjaan_Urugan_Tanah_Kembali'
+            'Tanah_Galian_Struktur',
+            'Tanah_Urugan_Kembali',
+            'Tanah_Urugan_Pasir_Bawah_Pondasi',
+            'Tanah_Pemadatan_Tanah',
+            'Tanah_Lantai_Kerja_Beton_Mutu_Rendah',
+            'Tanah_Galian_Septic_Tank',
+            'Tanah_Galian_Saluran_Drainase'
+        ]
+    },
+    {
+        category: 'Struktur Bawah',
+        tasks: [
+            'Struktur_Bawah_Tiang_Pancang_Pengadaan',
+            'Struktur_Bawah_Tiang_Pancang_Pemancangan',
+            'Struktur_Bawah_Tiang_Pancang_Pemotongan_Kepala',
+            'Struktur_Bawah_Bore_Pile_Pengeboran',
+            'Struktur_Bawah_Bore_Pile_Pembesian',
+            'Struktur_Bawah_Bore_Pile_Pengecoran',
+            'Struktur_Bawah_Pile_Cap_Bekisting',
+            'Struktur_Bawah_Pile_Cap_Pembesian',
+            'Struktur_Bawah_Pile_Cap_Pengecoran',
+            'Struktur_Bawah_Tie_Beam_Bekisting',
+            'Struktur_Bawah_Tie_Beam_Pembesian',
+            'Struktur_Bawah_Tie_Beam_Pengecoran',
+            'Struktur_Bawah_Kolom_Pedestal_Bekisting',
+            'Struktur_Bawah_Kolom_Pedestal_Pembesian',
+            'Struktur_Bawah_Kolom_Pedestal_Pengecoran'
+        ]
+    },
+    {
+        category: 'Struktur Atas',
+        tasks: [
+            'Struktur_Atas_Kolom_Utama_Bekisting',
+            'Struktur_Atas_Kolom_Utama_Pembesian',
+            'Struktur_Atas_Kolom_Utama_Pengecoran',
+            'Struktur_Atas_Kolom_Praktis_Bekisting',
+            'Struktur_Atas_Kolom_Praktis_Pembesian',
+            'Struktur_Atas_Kolom_Praktis_Pengecoran',
+            'Struktur_Atas_Balok_Utama_Bekisting',
+            'Struktur_Atas_Balok_Utama_Pembesian',
+            'Struktur_Atas_Balok_Utama_Pengecoran',
+            'Struktur_Atas_Balok_Anak_Bekisting',
+            'Struktur_Atas_Balok_Anak_Pembesian',
+            'Struktur_Atas_Balok_Anak_Pengecoran',
+            'Struktur_Atas_Plat_Lantai_Bekisting',
+            'Struktur_Atas_Plat_Lantai_Pembesian',
+            'Struktur_Atas_Plat_Lantai_Pengecoran',
+            'Struktur_Atas_Ring_Balok_Bekisting',
+            'Struktur_Atas_Ring_Balok_Pembesian',
+            'Struktur_Atas_Ring_Balok_Pengecoran',
+            'Struktur_Atas_Tangga_Bekisting',
+            'Struktur_Atas_Tangga_Pembesian',
+            'Struktur_Atas_Tangga_Pengecoran',
+            'Struktur_Atas_Bongkar_Bekisting_Kolom',
+            'Struktur_Atas_Bongkar_Bekisting_Balok',
+            'Struktur_Atas_Bongkar_Bekisting_Plat',
+            'Struktur_Atas_Curing_Beton'
         ]
     },
     {
         category: 'Arsitektur',
         tasks: [
-            'Arsitektur_Pekerjaan_Pasangan_Bata',
-            'Arsitektur_Pekerjaan_Plesteran_Dinding',
-            'Arsitektur_Pekerjaan_Acian_Dinding',
-            'Arsitektur_Pekerjaan_Pasang_Keramik_Lantai',
-            'Arsitektur_Pekerjaan_Pasang_Keramik_Dinding',
-            'Arsitektur_Pekerjaan_Pengecatan_Dinding',
-            'Arsitektur_Pekerjaan_Pasang_Plafon',
-            'Arsitektur_Pekerjaan_Pasang_Kusen_Pintu',
-            'Arsitektur_Pekerjaan_Pasang_Sanitair'
+            'Arsitektur_Dinding_Pasangan_Bata_Merah',
+            'Arsitektur_Dinding_Pasangan_Bata_Ringan',
+            'Arsitektur_Dinding_Plesteran',
+            'Arsitektur_Dinding_Acian',
+            'Arsitektur_Dinding_Pengecatan_Interior',
+            'Arsitektur_Dinding_Pengecatan_Eksterior',
+            'Arsitektur_Lantai_Pasang_Granit',
+            'Arsitektur_Lantai_Pasang_Keramik',
+            'Arsitektur_Lantai_Pasang_Plint',
+            'Arsitektur_Kusen_Pintu_Jendela_Aluminium',
+            'Arsitektur_Kusen_Pintu_Jendela_Kayu',
+            'Arsitektur_Daun_Pintu_Jendela_Pasang',
+            'Arsitektur_Plafon_Rangka_Hollow',
+            'Arsitektur_Plafon_Pasang_Gypsum',
+            'Arsitektur_Plafon_Pasang_PVC',
+            'Arsitektur_Plafon_Pengecatan',
+            'Arsitektur_Sanitary_Pasang_Kloset',
+            'Arsitektur_Sanitary_Pasang_Wastafel',
+            'Arsitektur_Sanitary_Pasang_Shower'
         ]
     },
     {
         category: 'MEP',
         tasks: [
-            'MEP_Pekerjaan_Instalasi_Pipa_Air',
-            'MEP_Pekerjaan_Instalasi_Kabel_Listrik',
-            'MEP_Pekerjaan_Pasang_Armature_Lampu',
-            'MEP_Pekerjaan_Pasang_Panel_Listrik',
-            'MEP_Pekerjaan_Instalasi_Fire_Alarm',
-            'MEP_Pekerjaan_Instalasi_Air_Conditioning'
+            'MEP_Listrik_Instalasi_Kabel_Daya',
+            'MEP_Listrik_Instalasi_Titik_Lampu',
+            'MEP_Listrik_Pasang_Armatur_Lampu',
+            'MEP_Listrik_Pasang_Saklar_Stop_Kontak',
+            'MEP_Listrik_Pasang_Panel_SDP',
+            'MEP_Plumbing_Instalasi_Pipa_Air_Bersih',
+            'MEP_Plumbing_Instalasi_Pipa_Air_Kotor',
+            'MEP_Plumbing_Instalasi_Pipa_Air_Hujan',
+            'MEP_Plumbing_Pasang_Pompa_Air',
+            'MEP_Plumbing_Pasang_Tandon_Air',
+            'MEP_HVAC_Instalasi_Indoor_AC',
+            'MEP_HVAC_Instalasi_Outdoor_AC',
+            'MEP_Fire_Instalasi_Fire_Alarm',
+            'MEP_Fire_Instalasi_Sprinkler_Hydrant',
+            'MEP_Elektronik_Instalasi_CCTV',
+            'MEP_Elektronik_Instalasi_Data_Wifi'
         ]
     },
     {
-        category: 'Material',
+        category: 'Material On Site',
         tasks: [
-            'Material_On_Site_Besi_Beton',
-            'Material_On_Site_Semen_Pasir',
+            'Material_On_Site_Pasir_Urug',
+            'Material_On_Site_Pasir_Pasang',
+            'Material_On_Site_Semen_PC',
+            'Material_On_Site_Batu_Kali',
+            'Material_On_Site_Batu_Pecah_Split',
+            'Material_On_Site_Besi_Beton_Polos',
+            'Material_On_Site_Besi_Beton_Ulir',
+            'Material_On_Site_Bata_Merah',
             'Material_On_Site_Bata_Ringan',
-            'Material_On_Site_Keramik',
-            'Material_On_Site_Pipa_MEP',
-            'Material_On_Site_Beton_Ready_Mix'
+            'Material_On_Site_Keramik_Lantai',
+            'Material_On_Site_Beton_Ready_Mix',
+            'Material_On_Site_Pipa_PVC',
+            'Material_On_Site_Kayu_Bekisting'
         ]
     },
     {
-        category: 'Lain-lain',
+        category: 'Dokumentasi & Monitoring',
         tasks: [
+            'Dokumentasi_Kondisi_Lahan_Existing',
+            'Dokumentasi_Progress_0_Persen',
             'Dokumentasi_Progress_Mingguan',
-            'Dokumentasi_Kondisi_Lapang',
-            'Dokumentasi_Drone_View',
+            'Dokumentasi_Progress_Bulanan',
+            'Dokumentasi_Drone_View_Aerial',
+            'Dokumentasi_Joint_Inspection',
             'Dokumentasi_Kunjungan_Direksi',
-            'Dokumentasi_Joint_Inspection'
+            'Dokumentasi_Tes_Laboratorium'
         ]
     }
 ];
