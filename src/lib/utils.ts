@@ -44,7 +44,16 @@ export function extractGDriveId(idOrUrl: string): string {
 
 export function detectBuildingFromKeyword(keyword: string, buildings: any[]): any | null {
     if (!keyword) return null;
-    const terms = keyword.toLowerCase().split(/[\s,;|]+/).filter(Boolean);
+
+    let buildingPart = keyword;
+    const separator = keyword.includes(',') ? ',' : (keyword.includes(';') ? ';' : null);
+
+    if (separator) {
+        buildingPart = keyword.split(separator)[0].trim();
+    }
+
+    const terms = buildingPart.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return null;
 
     for (const term of terms) {
         // Try exact code match
@@ -65,7 +74,18 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
 
 export function detectWorkFromKeyword(keyword: string, hierarchy: { category: string; tasks: string[] }[]): string {
     if (!keyword) return '';
-    const terms = keyword.toLowerCase().split(/[\s,;|]+/).filter(Boolean);
+
+    let workPart = keyword;
+    const separator = keyword.includes(',') ? ',' : (keyword.includes(';') ? ';' : null);
+
+    if (separator) {
+        const parts = keyword.split(separator);
+        if (parts.length < 2) return ''; // No second part for work
+        workPart = parts[1].trim();
+    }
+
+    const terms = workPart.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return '';
 
     for (const term of terms) {
         const normalizedTerm = term.replace(/_/g, ' ');

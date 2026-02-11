@@ -61,29 +61,27 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
                     <span className="text-[10px] font-black text-slate-900">{slot.id}</span>
                 </div>
 
-                {/* Smart Badges */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-20 w-full px-2">
+                {/* Smart Badges - Bottom Left */}
+                <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1 z-20 w-auto pointer-events-none">
                     <AnimatePresence mode="popLayout">
                         {slot.detectedBuilding && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8, y: -5 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, y: -5 }}
-                                className="px-2 py-0.5 bg-orange-500 text-white rounded-full flex items-center gap-1 shadow-sm"
+                                initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                                className="px-2 py-0.5 bg-orange-500 text-white rounded-lg flex items-center shadow-md border border-white/20"
                             >
-                                <span className="text-[7px] font-black uppercase tracking-tighter">Gedung:</span>
-                                <span className="text-[8px] font-bold truncate max-w-[60px]">{slot.detectedBuilding.name}</span>
+                                <span className="text-[9px] font-black tracking-tight">{slot.detectedBuilding.name}</span>
                             </motion.div>
                         )}
                         {slot.detectedTask && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8, y: -5 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, y: -5 }}
-                                className="px-2 py-0.5 bg-emerald-500 text-white rounded-full flex items-center gap-1 shadow-sm"
+                                initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                                animate={{ opacity: 1, scale: 1, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                                className="px-2 py-0.5 bg-emerald-500 text-white rounded-lg flex items-center shadow-md border border-white/20"
                             >
-                                <span className="text-[7px] font-black uppercase tracking-tighter">Pekerjaan:</span>
-                                <span className="text-[8px] font-bold truncate max-w-[60px]">{slot.detectedTask.replace(/_/g, ' ')}</span>
+                                <span className="text-[9px] font-black tracking-tight">{slot.detectedTask.replace(/_/g, ' ')}</span>
                             </motion.div>
                         )}
                     </AnimatePresence>
