@@ -54,12 +54,26 @@ export async function POST(req: NextRequest) {
         }
 
         const key = filename.split('.')[0];
+
+        // Generate timestamp in WIB (GMT+7)
+        const now = new Date();
+        const formatter = new Intl.DateTimeFormat('sv-SE', {
+            timeZone: 'Asia/Jakarta',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+        });
+        const wibTimestamp = formatter.format(now).replace(' ', 'T') + '+07:00';
+
         const { error } = await supabase
             .from('config')
             .upsert({
                 key,
                 value: data,
-                updated_at: new Date().toISOString()
+                updated_at: wibTimestamp
             }, { onConflict: 'key' });
 
         if (error) throw error;
