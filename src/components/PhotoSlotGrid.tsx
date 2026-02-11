@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,9 +18,10 @@ interface PhotoSlotGridProps {
     slots: SlotData[];
     onUpdateSlot: (id: number, data: Partial<SlotData>) => void;
     onRemoveFile: (id: number) => void;
+    allHierarchy: { category: string; tasks: string[] }[];
 }
 
-export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile }: PhotoSlotGridProps) {
+export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile, allHierarchy }: PhotoSlotGridProps) {
     return (
         <div className="grid grid-cols-2 gap-3 lg:gap-4">
             {slots.map((slot) => (
@@ -29,13 +30,21 @@ export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile }: PhotoSlotGr
                     slot={slot}
                     onUpdate={(data) => onUpdateSlot(slot.id, data)}
                     onRemove={() => onRemoveFile(slot.id)}
+                    allHierarchy={allHierarchy}
                 />
             ))}
         </div>
     );
 }
 
-function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void }) {
+function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void; allHierarchy: { category: string; tasks: string[] }[] }) {
+    const [inputValue, setInputValue] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop: (acceptedFiles) => {
             if (acceptedFiles.length > 0) {
@@ -47,6 +56,73 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
         },
         multiple: false
     });
+
+    // Update suggestions when input changes
+    useEffect(() => {
+        if (inputValue.trim().length > 0) {
+            const normalizedInput = inputValue.toLowerCase().replace(/_/g, ' ');
+            const matches: string[] = [];
+
+            // Search through all tasks
+            for (const group of allHierarchy) {
+                for (const task of group.tasks) {
+                    const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                    if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
+                        matches.push(task);
+                        if (matches.length >= 5) break;
+                    }
+                }
+                if (matches.length >= 5) break;
+            }
+
+            setSuggestions(matches);
+            setShowDropdown(matches.length > 0);
+            setSelectedIndex(0);
+        } else {
+            setSuggestions([]);
+            setShowDropdown(false);
+        }
+    }, [inputValue, allHierarchy, tags]);
+
+    // Update parent keyword when tags change
+    useEffect(() => {
+        onUpdate({ keyword: tags.join(', ') });
+    }, [tags]);
+
+    const addTag = (tag: string) => {
+        if (tag && !tags.includes(tag)) {
+            setTags([...tags, tag]);
+            setInputValue('');
+            setSuggestions([]);
+            setShowDropdown(false);
+            inputRef.current?.focus();
+        }
+    };
+
+    const removeTag = (index: number) => {
+        setTags(tags.filter((_, i) => i !== index));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (showDropdown && suggestions.length > 0) {
+                addTag(suggestions[selectedIndex]);
+            } else if (inputValue.trim()) {
+                addTag(inputValue.trim());
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedIndex((prev) => (prev + 1) % suggestions.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+        } else if (e.key === 'Escape') {
+            setShowDropdown(false);
+        } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {
+            removeTag(tags.length - 1);
+        }
+    };
 
     return (
         <div className="space-y-2">
@@ -112,18 +188,70 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
                 )}
             </div>
 
-            {/* Keyword Input */}
+            {/* Keyword Input with Tags */}
             <div className="relative">
-                <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <Search className={`w-3 h-3 ${slot.keyword ? 'text-orange-500' : 'text-slate-300'}`} />
+                <div className="min-h-[40px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex flex-wrap items-center gap-1.5">
+                    <Search className={`w-3 h-3 shrink-0 ${tags.length > 0 || inputValue ? 'text-orange-500' : 'text-slate-300'}`} />
+
+                    {/* Tags */}
+                    <AnimatePresence mode="popLayout">
+                        {tags.map((tag, index) => (
+                            <motion.div
+                                key={tag}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="inline-flex items-center gap-1 bg-orange-500 text-white rounded-lg px-2 py-0.5"
+                            >
+                                <span className="text-[9px] font-bold">{tag.replace(/_/g, ' ')}</span>
+                                <button
+                                    onClick={() => removeTag(index)}
+                                    className="hover:bg-white/20 rounded transition-colors"
+                                >
+                                    <X className="w-2.5 h-2.5" />
+                                </button>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+
+                    {/* Input */}
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onFocus={() => inputValue && setSuggestions.length > 0 && setShowDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                        placeholder={tags.length === 0 ? "Keyword (cth: direksi, beton)" : ""}
+                        className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-[10px] font-bold text-slate-700 placeholder:text-slate-300"
+                    />
                 </div>
-                <input
-                    type="text"
-                    value={slot.keyword}
-                    onChange={(e) => onUpdate({ keyword: e.target.value })}
-                    placeholder="Keyword (cth: masjid, beton)"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-[10px] font-bold text-slate-700 focus:outline-none focus:border-orange-500 transition-all placeholder:text-slate-300"
-                />
+
+                {/* Autocomplete Dropdown */}
+                <AnimatePresence>
+                    {showDropdown && suggestions.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50"
+                        >
+                            {suggestions.map((suggestion, index) => (
+                                <button
+                                    key={suggestion}
+                                    onClick={() => addTag(suggestion)}
+                                    className={`w-full px-3 py-2 text-left text-[10px] font-bold transition-colors ${index === selectedIndex
+                                            ? 'bg-orange-50 text-orange-600'
+                                            : 'text-slate-700 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    {suggestion.replace(/_/g, ' ')}
+                                </button>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Final Preview Info */}

@@ -442,8 +442,8 @@ export default function Home() {
   };
 
   const processFiles = async () => {
-    if (!selectedBuilding || !workName || !outputPath) {
-      alert('Select building, enter work name, and set output folder!');
+    if (!selectedBuilding || !workName) {
+      alert('Select building and enter work name!');
       return;
     }
 
@@ -625,6 +625,7 @@ export default function Home() {
                   slots={slots}
                   onUpdateSlot={handleUpdateSlot}
                   onRemoveFile={(id) => handleUpdateSlot(id, { file: null, keyword: '', detectedTask: '', previewName: '' })}
+                  allHierarchy={allHierarchy}
                 />
               </div>
 
