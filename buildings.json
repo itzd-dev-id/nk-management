@@ -36,147 +36,147 @@
     },
     {
         "code": "A",
-        "name": "Rusun Guru A",
+        "name": "Rusun Guru",
         "index": 0
     },
     {
         "code": "A.1",
-        "name": "Rusun Guru A.1",
+        "name": "Rusun Guru",
         "index": 1
     },
     {
         "code": "B",
-        "name": "Asrama Putra SD B",
+        "name": "Asrama Putra SD",
         "index": 2
     },
     {
         "code": "B.1",
-        "name": "Asrama Putra SD B.1",
+        "name": "Asrama Putra SD",
         "index": 3
     },
     {
         "code": "C",
-        "name": "Asrama Putri SD C",
+        "name": "Asrama Putri SD",
         "index": 4
     },
     {
         "code": "C.1",
-        "name": "Asrama Putri SD C.1",
+        "name": "Asrama Putri SD",
         "index": 5
     },
     {
         "code": "D",
-        "name": "Asrama Putri SMP D",
+        "name": "Asrama Putri SMP",
         "index": 6
     },
     {
         "code": "D.1",
-        "name": "Asrama Putra SMP D.1",
+        "name": "Asrama Putra SMP",
         "index": 7
     },
     {
         "code": "E",
-        "name": "Asrama Putra SMA E",
+        "name": "Asrama Putra SMA",
         "index": 8
     },
     {
         "code": "E.1",
-        "name": "Asrama Putri SMA E.1",
+        "name": "Asrama Putri SMA",
         "index": 9
     },
     {
         "code": "F",
-        "name": "Kantin SD F",
+        "name": "Kantin SD",
         "index": 10
     },
     {
         "code": "F.1",
-        "name": "Kantin SMP F.1",
+        "name": "Kantin SMP",
         "index": 11
     },
     {
         "code": "F.2",
-        "name": "Kantin SMA F.2",
+        "name": "Kantin SMA",
         "index": 12
     },
     {
         "code": "G",
-        "name": "Dapur Gudang G",
+        "name": "Dapur Gudang",
         "index": 13
     },
     {
         "code": "H",
-        "name": "Guest House H",
+        "name": "Guest House",
         "index": 14
     },
     {
         "code": "I",
-        "name": "Gedung SMA I",
+        "name": "Gedung SMA",
         "index": 15
     },
     {
         "code": "J",
-        "name": "Gedung SMP J",
+        "name": "Gedung SMP",
         "index": 16
     },
     {
         "code": "K",
-        "name": "Gedung SD K",
+        "name": "Gedung SD",
         "index": 17
     },
     {
         "code": "L",
-        "name": "Masjid L",
+        "name": "Masjid",
         "index": 18
     },
     {
         "code": "M",
-        "name": "Gedung Serbaguna M",
+        "name": "Gedung Serbaguna",
         "index": 19
     },
     {
         "code": "N",
-        "name": "Lapangan Upacara N",
+        "name": "Lapangan Upacara",
         "index": 20
     },
     {
         "code": "O",
-        "name": "Pos Keamanan O",
+        "name": "Pos Keamanan",
         "index": 21
     },
     {
         "code": "P",
-        "name": "Rumah Pompa P",
+        "name": "Rumah Pompa",
         "index": 22
     },
     {
         "code": "Q",
-        "name": "Power House Q",
+        "name": "Power House",
         "index": 23
     },
     {
         "code": "R",
-        "name": "TPS R",
+        "name": "TPS",
         "index": 24
     },
     {
         "code": "S",
-        "name": "Gedung Ibadah S",
+        "name": "Gedung Ibadah",
         "index": 25
     },
     {
         "code": "T",
-        "name": "Lapangan Basket T",
+        "name": "Lapangan Basket",
         "index": 26
     },
     {
         "code": "U",
-        "name": "Lapangan Sepak Bola U",
+        "name": "Lapangan Sepak Bola",
         "index": 27
     },
     {
         "code": "V",
-        "name": "Gudang Perawatan V",
+        "name": "Gudang Perawatan",
         "index": 28
     }
 ]

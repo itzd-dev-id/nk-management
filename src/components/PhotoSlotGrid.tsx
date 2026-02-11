@@ -68,8 +68,11 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
             // Search through building names first
             for (const building of allBuildings) {
                 const buildingNameNormalized = building.name.toLowerCase();
-                if (buildingNameNormalized.includes(normalizedInput) && !tags.includes(building.name)) {
-                    matches.push(building.name);
+                const buildingCodeNormalized = building.code.toLowerCase();
+                const displayString = `[${building.code}] ${building.name}`;
+
+                if ((buildingNameNormalized.includes(normalizedInput) || buildingCodeNormalized.includes(normalizedInput)) && !tags.includes(displayString)) {
+                    matches.push(displayString);
                     if (matches.length >= 10) break;
                 }
             }
@@ -98,18 +101,33 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
     // Initialize tags from slot.keyword on mount or when it changes externally
     useEffect(() => {
         if (slot.keyword && slot.keyword.trim()) {
-            const existingTags = slot.keyword.split(',').map(t => t.trim()).filter(Boolean);
-            // Only update if different to avoid infinite loops
-            if (JSON.stringify(existingTags) !== JSON.stringify(tags)) {
-                setTags(existingTags);
+            const rawTags = slot.keyword.split(',').map(t => t.trim()).filter(Boolean);
+
+            // Map raw tags to [Code] Name if they match a building
+            const mappedTags = rawTags.map(tag => {
+                // Check if it's already in [Code] Name format
+                if (tag.startsWith('[') && tag.includes(']')) return tag;
+
+                const b = allBuildings.find(b => b.code.toLowerCase() === tag.toLowerCase() || b.name.toLowerCase() === tag.toLowerCase());
+                if (b) return `[${b.code}] ${b.name}`;
+                return tag;
+            });
+
+            if (JSON.stringify(mappedTags) !== JSON.stringify(tags)) {
+                setTags(mappedTags);
             }
         } else if (!slot.keyword && tags.length > 0) {
             setTags([]);
         }
-    }, [slot.keyword]);
+    }, [slot.keyword, allBuildings]);
 
     // Update parent keyword when tags change
     useEffect(() => {
+        // Extract just the code or name for the backend keyword string
+        // Actually, we should probably send the full string or just the code?
+        // Let's send the full string but sanitize it if needed.
+        // Actually, the API route uses the keyword to detect buildings.
+        // If we send "[A] Rusun Guru", the detectBuildingFromKeyword might need adjustment.
         const newKeyword = tags.join(', ');
         if (newKeyword !== slot.keyword) {
             onUpdate({ keyword: newKeyword });
@@ -231,6 +249,9 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                     )
                                 );
 
+                                // Check if this tag is a building [Code] Name format
+                                const isBuilding = tag.startsWith('[') && tag.includes(']');
+
                                 return (
                                     <motion.div
                                         key={tag}
@@ -240,7 +261,14 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                         className={`inline-flex items-center gap-1 text-white rounded-lg px-2 py-0.5 whitespace-nowrap ${isWorkTask ? 'bg-emerald-500' : 'bg-orange-500'
                                             }`}
                                     >
-                                        <span className="text-[9px] font-bold">{tag.replace(/_/g, ' ')}</span>
+                                        {isBuilding ? (
+                                            <>
+                                                <span className="bg-white/20 px-1 rounded text-[8px] font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
+                                                <span className="text-[9px] font-bold">{tag.split(']')[1].trim()}</span>
+                                            </>
+                                        ) : (
+                                            <span className="text-[9px] font-bold">{tag.replace(/_/g, ' ')}</span>
+                                        )}
                                         <button
                                             onClick={() => removeTag(index)}
                                             className="hover:bg-white/20 rounded transition-colors"
@@ -274,20 +302,30 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50"
+                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50 max-h-[200px] overflow-y-auto"
                         >
-                            {suggestions.map((suggestion, index) => (
-                                <button
-                                    key={suggestion}
-                                    onClick={() => addTag(suggestion)}
-                                    className={`w-full px-3 py-2 text-left text-[10px] font-bold transition-colors ${index === selectedIndex
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-slate-700 hover:bg-slate-50'
-                                        }`}
-                                >
-                                    {suggestion.replace(/_/g, ' ')}
-                                </button>
-                            ))}
+                            {suggestions.map((suggestion, index) => {
+                                const isBuildingSug = suggestion.startsWith('[') && suggestion.includes(']');
+                                return (
+                                    <button
+                                        key={suggestion}
+                                        onClick={() => addTag(suggestion)}
+                                        className={`w-full px-3 py-2 text-left text-[10px] font-bold transition-colors flex items-center gap-2 ${index === selectedIndex
+                                            ? 'bg-orange-50 text-orange-600'
+                                            : 'text-slate-700 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        {isBuildingSug ? (
+                                            <>
+                                                <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[8px] font-black text-slate-500">{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
+                                                <span>{suggestion.split(']')[1].trim()}</span>
+                                            </>
+                                        ) : (
+                                            suggestion.replace(/_/g, ' ')
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </motion.div>
                     )}
                 </AnimatePresence>

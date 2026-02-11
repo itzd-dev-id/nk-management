@@ -17,14 +17,15 @@ export function generateNewName(
     // For file names, we still use underscores for separation as requested
     // And we replace slashes (subfolders) with dashes in the filename
     const fileWork = sanitizePath(workName).replace(/\s+/g, '_').replace(/\//g, '-');
+    const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');
 
-    // Format: 2026-02-01_Pekerjaan_C.1_10%_001.jpg
-    // Building code is unique and building name already contains the code, so we only use code
+    // Format: 2026-02-01_Pekerjaan_Building_A_10%_001.jpg
+    // Building name is now cleaned of redundant codes in buildings.json
     // If progress is empty, omit it
     const progressPart = progress ? `${progress}%_` : '';
-    return `${dateStr}_${fileWork}_${fileCode}_${progressPart}${seqStr}.${extension}`;
+    return `${dateStr}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
 }
 
 export function getFileExtension(filename: string): string {
@@ -52,6 +53,21 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
         buildingPart = keyword.split(separator)[0].trim();
     }
 
+    // NEW PASS: Handle [Code] Name format from UI tags
+    const badgeMatch = buildingPart.match(/^\[(.*?)\]\s*(.*)$/i);
+    if (badgeMatch) {
+        const codePart = badgeMatch[1].toLowerCase().trim();
+        const namePart = badgeMatch[2].toLowerCase().trim();
+
+        // Try code match first
+        const b = buildings.find(b => b.code.toLowerCase() === codePart);
+        if (b) return b;
+
+        // Then name match
+        const b2 = buildings.find(b => b.name.toLowerCase() === namePart);
+        if (b2) return b2;
+    }
+
     const normalizedInput = buildingPart.toLowerCase().trim();
     if (!normalizedInput) return null;
 
@@ -68,12 +84,11 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
     if (byPartialName) return byPartialName;
 
     // PASS 4: Fall back to individual word matching
-    const terms = normalizedInput.split(/\s+/).filter(Boolean);
+    const terms = normalizedInput.replace(/[\[\]]/g, ' ').split(/\s+/).filter(Boolean);
     if (terms.length === 0) return null;
 
     for (const term of terms) {
         // For very short terms (1-3 chars), ONLY use exact match to avoid false positives
-        // e.g., "A" should not match "Kursi Guru" just because "a" appears in "Guru"
         const isShortTerm = term.length <= 3;
 
         // Try exact code match
@@ -86,7 +101,6 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
 
         // For longer terms, try partial match with word boundary
         if (!isShortTerm) {
-            // Use word boundary regex to ensure we match whole words, not substrings
             const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
             const byPartial = buildings.find(b => wordBoundaryRegex.test(b.name));
             if (byPartial) return byPartial;
