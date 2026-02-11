@@ -88,35 +88,68 @@ export function detectWorkFromKeyword(
         workPart = parts[1].trim();
     }
 
-    const terms = workPart.toLowerCase().split(/\s+/).filter(Boolean);
-    if (terms.length === 0) return '';
+    const normalizedWorkPart = workPart.toLowerCase().replace(/_/g, ' ').trim();
+    if (!normalizedWorkPart) return '';
 
     // Filter hierarchy if filter provided
     const filteredHierarchy = categoryFilter
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    for (const term of terms) {
-        const normalizedTerm = term.replace(/_/g, ' ');
+    // PASS 1: Try exact match on full phrase
+    for (const group of filteredHierarchy) {
+        for (const task of group.tasks) {
+            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+            if (taskNormalized === normalizedWorkPart) {
+                return task;
+            }
+        }
+    }
 
-        // Try exact match in tasks
+    // PASS 2: Try partial match on full phrase (must contain the entire search phrase)
+    for (const group of filteredHierarchy) {
+        for (const task of group.tasks) {
+            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+            if (taskNormalized.includes(normalizedWorkPart)) {
+                return task;
+            }
+        }
+    }
+
+    // PASS 3: Check if search phrase matches category
+    for (const group of filteredHierarchy) {
+        if (group.category.toLowerCase().includes(normalizedWorkPart)) {
+            return group.tasks[0] || '';
+        }
+    }
+
+    // PASS 4: Fall back to individual word matching (for queries like "tanah" or "batu")
+    const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
+
+    for (const term of terms) {
+        // Try exact match on individual word
         for (const group of filteredHierarchy) {
             for (const task of group.tasks) {
-                if (task.toLowerCase() === normalizedTerm || task.toLowerCase().replace(/_/g, ' ') === normalizedTerm) return task;
+                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                if (taskNormalized === term) {
+                    return task;
+                }
             }
         }
 
-        // Try partial match in tasks
+        // Try partial match on individual word
         for (const group of filteredHierarchy) {
             for (const task of group.tasks) {
-                const taskLower = task.toLowerCase().replace(/_/g, ' ');
-                if (taskLower.includes(normalizedTerm)) return task;
+                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                if (taskNormalized.includes(term)) {
+                    return task;
+                }
             }
         }
 
         // Try match in categories
         for (const group of filteredHierarchy) {
-            if (group.category.toLowerCase().includes(normalizedTerm)) {
+            if (group.category.toLowerCase().includes(term)) {
                 return group.tasks[0] || '';
             }
         }
