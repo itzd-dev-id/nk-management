@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
 import { BottomNav, TabId } from '@/components/BottomNav';
-import { BUILDINGS, WORK_HIERARCHY } from '@/lib/constants';
 import { ProcessLog } from '@/components/ProcessLog';
 import { PhotoSlotGrid } from '@/components/PhotoSlotGrid';
 import { detectWorkFromKeyword } from '@/lib/utils';
@@ -84,9 +83,9 @@ export default function Home() {
     setProcessLogs(prev => [...prev, `[${time}] ${message}`]);
   }, []);
 
-  // Unified Data State (Dynamic Database)
-  const [allBuildings, setAllBuildings] = useState<Building[]>(BUILDINGS);
-  const [allHierarchy, setAllHierarchy] = useState<{ category: string; tasks: string[] }[]>(WORK_HIERARCHY);
+  // Unified Data State (Dynamic Database) - Load from Supabase only
+  const [allBuildings, setAllBuildings] = useState<Building[]>([]);
+  const [allHierarchy, setAllHierarchy] = useState<{ category: string; tasks: string[] }[]>([]);
 
   // Update preview name for a specific slot
   const updateSlotPreview = useCallback((slotId: number, slot: SlotData) => {
@@ -221,16 +220,15 @@ export default function Home() {
         })).sort((a, b) => (a.index || 0) - (b.index || 0));
         setAllBuildings(sortedB);
       } else {
-        setAllBuildings(BUILDINGS);
+        // Start with empty array if no data in Supabase
+        setAllBuildings([]);
       }
 
       if (wData) {
         setAllHierarchy(wData);
       } else {
-        const sortedDefault = WORK_HIERARCHY
-          .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
-          .sort((a, b) => a.category.localeCompare(b.category));
-        setAllHierarchy(sortedDefault);
+        // Start with empty array if no data in Supabase
+        setAllHierarchy([]);
       }
 
       showToast('Database sinkron dengan Cloud', 'info');
@@ -239,7 +237,7 @@ export default function Home() {
     } finally {
       setIsSyncing(false);
     }
-  }, [fetchConfig]);
+  }, [fetchConfig, showToast]);
 
   // Consolidated Cloud Save Effect
   useEffect(() => {
