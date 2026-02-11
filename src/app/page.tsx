@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -1157,6 +1157,34 @@ export default function Home() {
                     <div className="flex items-center gap-3">
                       <Play className="w-4 h-4 text-orange-500" />
                       <span className="text-xs font-bold text-slate-700">Sync Original Database</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300" />
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm('Apakah Anda yakin ingin melakukan migrasi dari file JSON lokal ke Supabase? Data di Supabase akan ditimpa.')) return;
+                      setIsSyncing(true);
+                      try {
+                        const res = await fetch('/api/migrate', { method: 'POST' });
+                        const data = await res.json();
+                        if (data.success) {
+                          showToast(data.message, 'success');
+                          loadAllConfigs(); // Reload to see new data
+                        } else {
+                          showToast(data.error, 'error');
+                        }
+                      } catch (e) {
+                        showToast('Gagal melakukan migrasi', 'error');
+                      } finally {
+                        setIsSyncing(false);
+                      }
+                    }}
+                    className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Database className="w-4 h-4 text-emerald-500" />
+                      <span className="text-xs font-bold text-slate-700">Migrate Local JSON to Supabase</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
