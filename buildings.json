@@ -1,0 +1,147 @@
+[
+    {
+        "code": "A",
+        "name": "Rusun Guru A",
+        "index": 0
+    },
+    {
+        "code": "A.1",
+        "name": "Rusun Guru A.1",
+        "index": 1
+    },
+    {
+        "code": "B",
+        "name": "Asrama Putra SD B",
+        "index": 2
+    },
+    {
+        "code": "B.1",
+        "name": "Asrama Putra SD B.1",
+        "index": 3
+    },
+    {
+        "code": "C",
+        "name": "Asrama Putri SD C",
+        "index": 4
+    },
+    {
+        "code": "C.1",
+        "name": "Asrama Putri SD C.1",
+        "index": 5
+    },
+    {
+        "code": "D",
+        "name": "Asrama Putri SMP D",
+        "index": 6
+    },
+    {
+        "code": "D.1",
+        "name": "Asrama Putra SMP D.1",
+        "index": 7
+    },
+    {
+        "code": "E",
+        "name": "Asrama Putra SMA E",
+        "index": 8
+    },
+    {
+        "code": "E.1",
+        "name": "Asrama Putri SMA E.1",
+        "index": 9
+    },
+    {
+        "code": "F",
+        "name": "Kantin SD F",
+        "index": 10
+    },
+    {
+        "code": "F.1",
+        "name": "Kantin SMP F.1",
+        "index": 11
+    },
+    {
+        "code": "F.2",
+        "name": "Kantin SMA F.2",
+        "index": 12
+    },
+    {
+        "code": "G",
+        "name": "Dapur Gudang G",
+        "index": 13
+    },
+    {
+        "code": "H",
+        "name": "Guest House H",
+        "index": 14
+    },
+    {
+        "code": "I",
+        "name": "Gedung SMA I",
+        "index": 15
+    },
+    {
+        "code": "J",
+        "name": "Gedung SMP J",
+        "index": 16
+    },
+    {
+        "code": "K",
+        "name": "Gedung SD K",
+        "index": 17
+    },
+    {
+        "code": "L",
+        "name": "Masjid L",
+        "index": 18
+    },
+    {
+        "code": "M",
+        "name": "Gedung Serbaguna M",
+        "index": 19
+    },
+    {
+        "code": "N",
+        "name": "Lapangan Upacara N",
+        "index": 20
+    },
+    {
+        "code": "O",
+        "name": "Pos Keamanan O",
+        "index": 21
+    },
+    {
+        "code": "P",
+        "name": "Rumah Pompa P",
+        "index": 22
+    },
+    {
+        "code": "Q",
+        "name": "Power House Q",
+        "index": 23
+    },
+    {
+        "code": "R",
+        "name": "TPS R",
+        "index": 24
+    },
+    {
+        "code": "S",
+        "name": "Gedung Ibadah S",
+        "index": 25
+    },
+    {
+        "code": "T",
+        "name": "Lapangan Basket T",
+        "index": 26
+    },
+    {
+        "code": "U",
+        "name": "Lapangan Sepak Bola U",
+        "index": 27
+    },
+    {
+        "code": "V",
+        "name": "Gudang Perawatan V",
+        "index": 28
+    }
+]

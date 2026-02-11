@@ -214,10 +214,18 @@ export default function Home() {
       const wData = await fetchConfig('works.json');
 
       if (bData) {
-        const sortedB = (bData as Building[]).map((b, idx) => ({
-          ...b,
-          index: b.index !== undefined ? b.index : idx
-        })).sort((a, b) => (a.index || 0) - (b.index || 0));
+        // Enforce Sorting: Global/Persiapan first, then alphabetical A-V
+        const sortedB = (bData as Building[]).sort((a, b) => {
+          const aCode = a.code.toLowerCase();
+          const bCode = b.code.toLowerCase();
+          const aName = a.name.toLowerCase();
+          const bName = b.name.toLowerCase();
+          const isGlobalA = aCode === 'gl' || aCode === 'glo' || aName.includes('global') || aName.includes('persiapan');
+          const isGlobalB = bCode === 'gl' || bCode === 'glo' || bName.includes('global') || bName.includes('persiapan');
+          if (isGlobalA && !isGlobalB) return -1;
+          if (!isGlobalA && isGlobalB) return 1;
+          return a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' });
+        });
         setAllBuildings(sortedB);
       } else {
         // Start with empty array if no data in Supabase
@@ -225,7 +233,15 @@ export default function Home() {
       }
 
       if (wData) {
-        setAllHierarchy(wData);
+        // Enforce Sorting: Persiapan first, then alphabetical
+        const sortedW = (wData as any[]).sort((a, b) => {
+          const aCat = a.category.toLowerCase();
+          const bCat = b.category.toLowerCase();
+          if (aCat === 'persiapan') return -1;
+          if (bCat === 'persiapan') return 1;
+          return a.category.localeCompare(b.category);
+        });
+        setAllHierarchy(sortedW);
       } else {
         // Start with empty array if no data in Supabase
         setAllHierarchy([]);
@@ -806,7 +822,17 @@ export default function Home() {
                             ? Math.max(...allBuildings.map(b => b.index || 0)) + 1
                             : 0;
                           const newBuilding = { code, name: nameInput.value, index: newIndex };
-                          const next = [...allBuildings, newBuilding].sort((a, b) => (a.index || 0) - (b.index || 0));
+                          const next = [...allBuildings, newBuilding].sort((a, b) => {
+                            const aCode = a.code.toLowerCase();
+                            const bCode = b.code.toLowerCase();
+                            const aName = a.name.toLowerCase();
+                            const bName = b.name.toLowerCase();
+                            const isGlobalA = aCode === 'gl' || aCode === 'glo' || aName.includes('global') || aName.includes('persiapan');
+                            const isGlobalB = bCode === 'gl' || bCode === 'glo' || bName.includes('global') || bName.includes('persiapan');
+                            if (isGlobalA && !isGlobalB) return -1;
+                            if (!isGlobalA && isGlobalB) return 1;
+                            return a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' });
+                          });
                           setAllBuildings(next);
                           setHasUnsavedChanges(true);
                           showToast(`Gedung ${code} ditambahkan`, 'success');
@@ -960,7 +986,13 @@ export default function Home() {
                             existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
                             next.push({ category: catName, tasks: [taskName] });
-                            next.sort((a, b) => a.category.localeCompare(b.category));
+                            next.sort((a, b) => {
+                              const aCat = a.category.toLowerCase();
+                              const bCat = b.category.toLowerCase();
+                              if (aCat === 'persiapan') return -1;
+                              if (bCat === 'persiapan') return 1;
+                              return a.category.localeCompare(b.category);
+                            });
                           }
                           setAllHierarchy(next);
                           setHasUnsavedChanges(true);
@@ -996,7 +1028,13 @@ export default function Home() {
                                       if (e.key === 'Enter') {
                                         const next = [...allHierarchy];
                                         next[i].category = editingCategory.name.trim();
-                                        next.sort((a, b) => a.category.localeCompare(b.category));
+                                        next.sort((a, b) => {
+                                          const aCat = a.category.toLowerCase();
+                                          const bCat = b.category.toLowerCase();
+                                          if (aCat === 'persiapan') return -1;
+                                          if (bCat === 'persiapan') return 1;
+                                          return a.category.localeCompare(b.category);
+                                        });
                                         setAllHierarchy(next);
                                         setHasUnsavedChanges(true);
                                         setEditingCategory(null);
@@ -1008,7 +1046,13 @@ export default function Home() {
                                     onClick={() => {
                                       const next = [...allHierarchy];
                                       next[i].category = editingCategory.name.trim();
-                                      next.sort((a, b) => a.category.localeCompare(b.category));
+                                      next.sort((a, b) => {
+                                        const aCat = a.category.toLowerCase();
+                                        const bCat = b.category.toLowerCase();
+                                        if (aCat === 'persiapan') return -1;
+                                        if (bCat === 'persiapan') return 1;
+                                        return a.category.localeCompare(b.category);
+                                      });
                                       setAllHierarchy(next);
                                       setHasUnsavedChanges(true);
                                       setEditingCategory(null);
