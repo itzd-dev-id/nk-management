@@ -165,31 +165,29 @@ export default function Home() {
     if (savedStorageType) setStorageType(savedStorageType);
   }, []);
 
-  // Sync Config from Drive
-  const fetchConfig = useCallback(async (path: string, filename: string) => {
-    if (!path || !session?.accessToken) return null;
+  // Sync Config from Vercel KV
+  const fetchConfig = useCallback(async (filename: string) => {
     try {
-      const res = await fetch(`/api/config?outputPath=${encodeURIComponent(path)}&filename=${filename}`);
+      const res = await fetch(`/api/config?filename=${filename}`);
       const { success, data } = await res.json();
       return success ? data : null;
     } catch (e) {
       console.error(`Failed to sync ${filename}`, e);
       return null;
     }
-  }, [session?.accessToken]);
+  }, []);
 
   const saveConfig = async (filename: string, data: any, message?: string) => {
-    if (!outputPath || !session?.accessToken) return;
     setIsSavingCloud(true);
     try {
       const res = await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outputPath, filename, data })
+        body: JSON.stringify({ filename, data })
       });
       const resData = await res.json();
-      if (resData.success) {
-        showToast(message || `Berhasil sinkronisasi ${filename}`, 'success');
+      if (resData.success && message) {
+        showToast(message, 'success');
       }
     } catch (e) {
       console.error(`Failed to save ${filename}`, e);
@@ -199,40 +197,24 @@ export default function Home() {
     }
   };
 
-  const loadAllConfigs = useCallback(async (path: string) => {
+  const loadAllConfigs = useCallback(async () => {
     setIsSyncing(true);
     try {
-      const bData = await fetchConfig(path, 'buildings.json');
-      const wData = await fetchConfig(path, 'works.json');
+      const bData = await fetchConfig('buildings.json');
+      const wData = await fetchConfig('works.json');
 
       if (bData) {
-        // Ensure indices exist and sort
         const sortedB = (bData as Building[]).map((b, idx) => ({
           ...b,
           index: b.index !== undefined ? b.index : idx
         })).sort((a, b) => (a.index || 0) - (b.index || 0));
         setAllBuildings(sortedB);
       } else {
-        const legacy = await fetchConfig(path, 'nk-management.json');
-        if (legacy?.buildings) {
-          const sortedLegacyB = (legacy.buildings as Building[]).map((b, idx) => ({
-            ...b,
-            index: idx
-          }));
-          setAllBuildings(sortedLegacyB);
-          saveConfig('buildings.json', sortedLegacyB, 'Database gedung dimigrasi dari file lama');
-        } else {
-          setAllBuildings(BUILDINGS);
-        }
+        setAllBuildings(BUILDINGS);
       }
 
-      const legacy = await fetchConfig(path, 'nk-management.json');
-      if (legacy?.works) {
-        const sortedLegacyW = (legacy.works as { category: string; tasks: string[] }[])
-          .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
-          .sort((a, b) => a.category.localeCompare(b.category));
-        setAllHierarchy(sortedLegacyW);
-        saveConfig('works.json', sortedLegacyW, 'Database pekerjaan dimigrasi dari file lama');
+      if (wData) {
+        setAllHierarchy(wData);
       } else {
         const sortedDefault = WORK_HIERARCHY
           .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
@@ -247,39 +229,36 @@ export default function Home() {
     } finally {
       setIsSyncing(false);
     }
-  }, [fetchConfig, session?.accessToken, selectedBuilding, workName, progress]);
+  }, [fetchConfig]);
 
   // Separate saves for buildings and hierarchy
   useEffect(() => {
-    if (outputPath && session?.accessToken) {
-      if (skipNextSave.current) {
-        // Handled by the next effect for reset
-      } else {
-        saveConfig('buildings.json', allBuildings);
-      }
+    if (skipNextSave.current) {
+      // Handled by the next effect for reset
+    } else {
+      saveConfig('buildings.json', allBuildings);
     }
-  }, [allBuildings, outputPath, session?.accessToken]);
+  }, [allBuildings]);
 
   useEffect(() => {
-    if (outputPath && session?.accessToken) {
-      if (skipNextSave.current) {
-        skipNextSave.current = false;
-      } else {
-        saveConfig('works.json', allHierarchy);
-      }
+    if (skipNextSave.current) {
+      skipNextSave.current = false;
+    } else {
+      saveConfig('works.json', allHierarchy);
     }
-  }, [allHierarchy, outputPath, session?.accessToken]);
+  }, [allHierarchy]);
 
+  // Initial load
   useEffect(() => {
-    if (outputPath) loadAllConfigs(outputPath);
-  }, [outputPath, loadAllConfigs]);
+    loadAllConfigs();
+  }, [loadAllConfigs]);
 
   // Re-sync when switching to settings tab
   useEffect(() => {
-    if (activeTab === 'settings' && outputPath) {
-      loadAllConfigs(outputPath);
+    if (activeTab === 'settings') {
+      loadAllConfigs();
     }
-  }, [activeTab, outputPath, loadAllConfigs]);
+  }, [activeTab, loadAllConfigs]);
 
   // UI helpers and other persistence
   useEffect(() => {
@@ -1171,8 +1150,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <button
                     onClick={() => {
-                      if (outputPath) loadAllConfigs(outputPath);
-                      else showToast("Masukkan Folder ID terlebih dahulu", "error");
+                      loadAllConfigs();
                     }}
                     className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-colors"
                   >
