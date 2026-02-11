@@ -4,7 +4,7 @@ const path = require('path');
 const buildings = JSON.parse(fs.readFileSync('./buildings.json', 'utf8'));
 const works = JSON.parse(fs.readFileSync('./works.json', 'utf8'));
 
-const baseDir = path.join(__dirname, '../termiin');
+const baseDir = path.join(__dirname, '../Termin');
 
 if (!fs.existsSync(baseDir)) {
     fs.mkdirSync(baseDir, { recursive: true });
