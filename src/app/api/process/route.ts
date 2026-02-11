@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
             buildingName,
             buildingIndex,
             progress,
-            outputPath
+            outputPath,
+            showBuildingIndex = true
         } = metadata;
 
         if (!outputPath) {
@@ -44,7 +45,9 @@ export async function POST(req: NextRequest) {
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
         const formattedIndex = (buildingIndex !== undefined) ? String(buildingIndex).padStart(2, '0') : '00';
-        const buildingFolder = `${formattedIndex}. ${sanitizedBuildingName} (${sanitizedBuildingCode})`;
+        const buildingFolder = showBuildingIndex
+            ? `${formattedIndex}. ${sanitizedBuildingName} (${sanitizedBuildingCode})`
+            : `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
 
         const extension = file.name.split('.').pop() || '';
 

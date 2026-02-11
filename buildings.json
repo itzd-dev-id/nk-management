@@ -1,36 +1,36 @@
 [
     {
-        "code": "TEMP-BP",
+        "code": "T-BP",
         "name": "Barak Pekerja",
         "index": 100
     },
     {
-        "code": "TEMP-DK",
+        "code": "T-DK",
         "name": "Direksi Keet",
         "index": 101
     },
     {
-        "code": "TEMP-GM",
+        "code": "T-GM",
         "name": "Gudang Material",
         "index": 102
     },
     {
-        "code": "TEMP-GS",
+        "code": "T-GS",
         "name": "Gudang Sementara",
         "index": 103
     },
     {
-        "code": "TEMP-KP",
+        "code": "T-KP",
         "name": "Kantin Pekerja",
         "index": 104
     },
     {
-        "code": "TEMP-MP",
+        "code": "T-MP",
         "name": "Mushola Pekerja",
         "index": 105
     },
     {
-        "code": "TEMP-TP",
+        "code": "T-TP",
         "name": "Toilet Pekerja",
         "index": 106
     },

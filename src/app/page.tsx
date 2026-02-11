@@ -60,6 +60,7 @@ export default function Home() {
   const [buildingSearch, setBuildingSearch] = useState('');
   const [taskSearch, setTaskSearch] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
+  const [showBuildingIndex, setShowBuildingIndex] = useState(true);
 
   // Toast Helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -178,9 +179,11 @@ export default function Home() {
   useEffect(() => {
     const savedPath = localStorage.getItem('nk_output_path');
     const savedStorageType = localStorage.getItem('nk_storage_type') as 'local' | 'gdrive';
+    const savedShowIndex = localStorage.getItem('nk_show_building_index');
 
     if (savedPath) setOutputPath(savedPath);
     if (savedStorageType) setStorageType(savedStorageType);
+    if (savedShowIndex !== null) setShowBuildingIndex(savedShowIndex === 'true');
   }, []);
 
   // Sync Config from Vercel KV
@@ -349,6 +352,10 @@ export default function Home() {
   }, [storageType]);
 
   useEffect(() => {
+    localStorage.setItem('nk_show_building_index', String(showBuildingIndex));
+  }, [showBuildingIndex]);
+
+  useEffect(() => {
     if (selectedBuilding) {
       if (activeStep === 'building') setActiveStep('work');
     }
@@ -510,6 +517,7 @@ export default function Home() {
         buildingIndex: selectedBuilding.index,
         progress: parseInt(progress) || 0,
         outputPath: outputPath,
+        showBuildingIndex: showBuildingIndex,
       }));
 
       try {
@@ -1286,6 +1294,32 @@ export default function Home() {
                       )}
                     </div>
                     <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data database (Gedung & Pekerjaan) akan otomatis tersimpan dalam folder Cloud ini.</p>
+                  </div>
+                </div>
+
+                {/* Naming Options */}
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center block">Folder Naming Options</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5">
+                    <button
+                      onClick={() => setShowBuildingIndex(!showBuildingIndex)}
+                      className="w-full flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${showBuildingIndex ? 'bg-orange-500 border-orange-500' : 'bg-white border-slate-300'}`}>
+                          {showBuildingIndex && <Check className="w-4 h-4 text-white" />}
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className="text-sm font-black text-slate-900 leading-tight">Show Building Index</span>
+                          <span className="text-[10px] font-medium text-slate-400 leading-tight mt-0.5">
+                            {showBuildingIndex ? '101. Direksi Keet (T-DK)' : 'Direksi Keet (T-DK)'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors ${showBuildingIndex ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>
+                        {showBuildingIndex ? 'ON' : 'OFF'}
+                      </div>
+                    </button>
                   </div>
                 </div>
 

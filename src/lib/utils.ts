@@ -72,6 +72,10 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
     if (terms.length === 0) return null;
 
     for (const term of terms) {
+        // For very short terms (1-3 chars), ONLY use exact match to avoid false positives
+        // e.g., "A" should not match "Kursi Guru" just because "a" appears in "Guru"
+        const isShortTerm = term.length <= 3;
+
         // Try exact code match
         const byCode = buildings.find(b => b.code.toLowerCase() === term);
         if (byCode) return byCode;
@@ -80,9 +84,13 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
         const byName = buildings.find(b => b.name.toLowerCase() === term);
         if (byName) return byName;
 
-        // Try partial name match
-        const byPartial = buildings.find(b => b.name.toLowerCase().includes(term));
-        if (byPartial) return byPartial;
+        // For longer terms, try partial match with word boundary
+        if (!isShortTerm) {
+            // Use word boundary regex to ensure we match whole words, not substrings
+            const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+            const byPartial = buildings.find(b => wordBoundaryRegex.test(b.name));
+            if (byPartial) return byPartial;
+        }
     }
 
     return null;
@@ -143,6 +151,9 @@ export function detectWorkFromKeyword(
     const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
 
     for (const term of terms) {
+        // For very short terms (1-3 chars), ONLY use exact match to avoid false positives
+        const isShortTerm = term.length <= 3;
+
         // Try exact match on individual word
         for (const group of filteredHierarchy) {
             for (const task of group.tasks) {
@@ -153,20 +164,25 @@ export function detectWorkFromKeyword(
             }
         }
 
-        // Try partial match on individual word
-        for (const group of filteredHierarchy) {
-            for (const task of group.tasks) {
-                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                if (taskNormalized.includes(term)) {
-                    return task;
+        // For longer terms, try partial match with word boundary
+        if (!isShortTerm) {
+            for (const group of filteredHierarchy) {
+                for (const task of group.tasks) {
+                    const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                    // Use word boundary regex to match whole words only
+                    const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+                    if (wordBoundaryRegex.test(taskNormalized)) {
+                        return task;
+                    }
                 }
             }
-        }
 
-        // Try match in categories
-        for (const group of filteredHierarchy) {
-            if (group.category.toLowerCase().includes(term)) {
-                return group.tasks[0] || '';
+            // Try match in categories
+            for (const group of filteredHierarchy) {
+                const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+                if (wordBoundaryRegex.test(group.category.toLowerCase())) {
+                    return group.tasks[0] || '';
+                }
             }
         }
     }
