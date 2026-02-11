@@ -95,9 +95,25 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
         }
     }, [inputValue, allHierarchy, allBuildings, tags]);
 
+    // Initialize tags from slot.keyword on mount or when it changes externally
+    useEffect(() => {
+        if (slot.keyword && slot.keyword.trim()) {
+            const existingTags = slot.keyword.split(',').map(t => t.trim()).filter(Boolean);
+            // Only update if different to avoid infinite loops
+            if (JSON.stringify(existingTags) !== JSON.stringify(tags)) {
+                setTags(existingTags);
+            }
+        } else if (!slot.keyword && tags.length > 0) {
+            setTags([]);
+        }
+    }, [slot.keyword]);
+
     // Update parent keyword when tags change
     useEffect(() => {
-        onUpdate({ keyword: tags.join(', ') });
+        const newKeyword = tags.join(', ');
+        if (newKeyword !== slot.keyword) {
+            onUpdate({ keyword: newKeyword });
+        }
     }, [tags]);
 
     const addTag = (tag: string) => {
