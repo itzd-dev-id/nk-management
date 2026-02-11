@@ -115,22 +115,29 @@ export default function Home() {
 
       // If file or keyword changed, detect task AND building
       if (data.file || data.keyword !== undefined) {
-        const searchTerms = [
-          updated.keyword,
-          updated.file?.name.split('.')[0] || ''
-        ].filter(Boolean).join(' ');
+        // Split keyword into individual tags for detection
+        const keywordTags = updated.keyword ? updated.keyword.split(',').map(t => t.trim()).filter(Boolean) : [];
+        const fileName = updated.file?.name.split('.')[0] || '';
 
-        // Smart Building Detection (first pass to get detectedB for task logic)
-        const detectedB_temp = detectBuildingFromKeyword(searchTerms, allBuildings);
+        // Try to detect building from each tag or filename
+        let detectedB_new = null;
+        for (const tag of [...keywordTags, fileName].filter(Boolean)) {
+          detectedB_new = detectBuildingFromKeyword(tag, allBuildings);
+          if (detectedB_new) break; // Stop at first successful detection
+        }
 
-        updated.detectedTask = detectWorkFromKeyword(
-          searchTerms,
-          allHierarchy,
-          (detectedB_temp?.code === 'GL' || (!detectedB_temp && selectedBuilding?.code === 'GL')) ? 'Material On Site' : undefined
-        );
+        // Try to detect work task from each tag or filename
+        let detectedTask = '';
+        for (const tag of [...keywordTags, fileName].filter(Boolean)) {
+          detectedTask = detectWorkFromKeyword(
+            tag,
+            allHierarchy,
+            (detectedB_new?.code === 'GL' || (!detectedB_new && selectedBuilding?.code === 'GL')) ? 'Material On Site' : undefined
+          );
+          if (detectedTask) break; // Stop at first successful detection
+        }
 
-        // Smart Building Detection (final assignment)
-        const detectedB_new = detectBuildingFromKeyword(searchTerms, allBuildings);
+        updated.detectedTask = detectedTask;
         updated.detectedBuilding = detectedB_new;
 
         // Auto-select building if detected and none selected (or first slot)
