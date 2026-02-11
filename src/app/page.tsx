@@ -123,14 +123,25 @@ export default function Home() {
 
         // Try to detect building from each tag or filename
         let detectedB_new = null;
+        let buildingMatchedTag = null; // Track which tag matched the building
         for (const tag of [...keywordTags, fileName].filter(Boolean)) {
           detectedB_new = detectBuildingFromKeyword(tag, allBuildings);
-          if (detectedB_new) break; // Stop at first successful detection
+          if (detectedB_new) {
+            buildingMatchedTag = tag; // Remember this tag matched a building
+            break; // Stop at first successful detection
+          }
         }
 
         // Try to detect work task from each tag or filename
+        // BUT exclude the tag that matched a building to avoid false positives
         let detectedTask = '';
-        for (const tag of [...keywordTags, fileName].filter(Boolean)) {
+        const tagsForWorkDetection = [...keywordTags, fileName].filter(Boolean);
+        for (const tag of tagsForWorkDetection) {
+          // Skip the tag that already matched a building
+          if (buildingMatchedTag && tag.toLowerCase() === buildingMatchedTag.toLowerCase()) {
+            continue;
+          }
+
           detectedTask = detectWorkFromKeyword(
             tag,
             allHierarchy,
