@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Only initialize if we're not in a build environment or if the variables are present
+const supabase = (supabaseUrl && supabaseServiceKey)
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null;
 
 export async function GET(req: NextRequest) {
     try {
@@ -10,11 +18,22 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Missing filename' }, { status: 400 });
         }
 
-        // KV key format: config:buildings or config:works
-        const key = `config:${filename.split('.')[0]}`;
-        const data = await kv.get(key);
+        if (!supabase) {
+            return NextResponse.json({ success: false, error: 'Supabase not initialized' }, { status: 500 });
+        }
 
-        return NextResponse.json({ success: true, data });
+        const key = filename.split('.')[0];
+        const { data, error } = await supabase
+            .from('config')
+            .select('value')
+            .eq('key', key)
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        return NextResponse.json({ success: true, data: data?.value || null });
 
     } catch (error: any) {
         console.error('Config GET error:', error);
@@ -30,8 +49,16 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: 'Missing filename or data' }, { status: 400 });
         }
 
-        const key = `config:${filename.split('.')[0]}`;
-        await kv.set(key, data);
+        if (!supabase) {
+            return NextResponse.json({ success: false, error: 'Supabase not initialized' }, { status: 500 });
+        }
+
+        const key = filename.split('.')[0];
+        const { error } = await supabase
+            .from('config')
+            .upsert({ key, value: data }, { onConflict: 'key' });
+
+        if (error) throw error;
 
         return NextResponse.json({ success: true });
 
