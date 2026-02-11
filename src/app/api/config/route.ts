@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
         const key = filename.split('.')[0];
         const { error } = await supabase
             .from('config')
-            .upsert({ key, value: data }, { onConflict: 'key' });
+            .upsert({
+                key,
+                value: data,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' });
 
         if (error) throw error;
 

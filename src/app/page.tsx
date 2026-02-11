@@ -51,7 +51,7 @@ export default function Home() {
   const [isSyncing, setIsSyncing] = useState(false);
 
   const [isSavingCloud, setIsSavingCloud] = useState(false);
-  const skipNextSave = React.useRef(false);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [editingBuilding, setEditingBuilding] = useState<{ index: number; name: string } | null>(null);
   const [editingTask, setEditingTask] = useState<{ catIndex: number; taskIndex: number; name: string } | null>(null);
@@ -232,7 +232,6 @@ export default function Home() {
         setAllHierarchy(sortedDefault);
       }
 
-      skipNextSave.current = true;
       showToast('Database sinkron dengan Cloud', 'info');
     } catch (e) {
       console.error('Failed to load all configs', e);
@@ -241,22 +240,41 @@ export default function Home() {
     }
   }, [fetchConfig]);
 
-  // Separate saves for buildings and hierarchy
+  // Consolidated Cloud Save Effect
   useEffect(() => {
-    if (skipNextSave.current) {
-      // Handled by the next effect for reset
-    } else {
-      saveConfig('buildings.json', allBuildings);
-    }
-  }, [allBuildings]);
+    // Only save if we are NOT currently syncing/loading from cloud
+    if (isSyncing) return;
 
-  useEffect(() => {
-    if (skipNextSave.current) {
-      skipNextSave.current = false;
-    } else {
-      saveConfig('works.json', allHierarchy);
-    }
-  }, [allHierarchy]);
+    const timer = setTimeout(() => {
+      const saveAll = async () => {
+        setIsSavingCloud(true);
+        try {
+          // Save both in parallel
+          await Promise.all([
+            fetch('/api/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: 'buildings.json', data: allBuildings })
+            }),
+            fetch('/api/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: 'works.json', data: allHierarchy })
+            })
+          ]);
+          setLastSynced(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+        } catch (e) {
+          console.error('Auto-save failed', e);
+        } finally {
+          setIsSavingCloud(false);
+        }
+      };
+
+      saveAll();
+    }, 1000); // 1s debounce
+
+    return () => clearTimeout(timer);
+  }, [allBuildings, allHierarchy, isSyncing]);
 
   // Initial load
   useEffect(() => {
@@ -1168,8 +1186,19 @@ export default function Home() {
                       <div className="flex flex-col items-start translate-y-[1px]">
                         <span className="text-xs font-bold text-slate-700 leading-none">Sync Supabase Database</span>
                         <div className="flex items-center gap-1.5 mt-1">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600/70">Connected</span>
+                          {isSavingCloud || isSyncing ? (
+                            <>
+                              <Loader2 className="w-1.5 h-1.5 animate-spin text-orange-500" />
+                              <span className="text-[8px] font-black uppercase tracking-widest text-orange-500/70">Syncing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600/70">
+                                {lastSynced ? `Synced ${lastSynced}` : 'Connected'}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
