@@ -1161,33 +1161,6 @@ export default function Home() {
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
 
-                  <button
-                    onClick={async () => {
-                      if (!window.confirm('Apakah Anda yakin ingin melakukan migrasi dari file JSON lokal ke Supabase? Data di Supabase akan ditimpa.')) return;
-                      setIsSyncing(true);
-                      try {
-                        const res = await fetch('/api/migrate', { method: 'POST' });
-                        const data = await res.json();
-                        if (data.success) {
-                          showToast(data.message, 'success');
-                          loadAllConfigs(); // Reload to see new data
-                        } else {
-                          showToast(data.error, 'error');
-                        }
-                      } catch (e) {
-                        showToast('Gagal melakukan migrasi', 'error');
-                      } finally {
-                        setIsSyncing(false);
-                      }
-                    }}
-                    className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Database className="w-4 h-4 text-emerald-500" />
-                      <span className="text-xs font-bold text-slate-700">Migrate Local JSON to Supabase</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300" />
-                  </button>
                   <button className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl opacity-50 cursor-not-allowed">
                     <div className="flex items-center gap-3">
                       <Info className="w-4 h-4 text-slate-400" />
