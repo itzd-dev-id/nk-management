@@ -41,7 +41,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>('archive');
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [workName, setWorkName] = useState('');
-  const [progress, setProgress] = useState('0');
+  const [progress, setProgress] = useState('');
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -552,13 +552,14 @@ export default function Home() {
                         {progress || '0'}
                       </span>
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         value={progress}
                         onChange={(e) => {
-                          const val = e.target.value;
+                          const val = e.target.value.replace(/\D/g, '');
                           if (val.length <= 3) setProgress(val);
                         }}
-                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
                         style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
                         placeholder="0"
                       />
