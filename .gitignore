@@ -42,3 +42,6 @@ next-env.d.ts
 
 # credentials
 client_secret_*.json
+
+# save data local
+/save/
