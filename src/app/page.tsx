@@ -1155,8 +1155,14 @@ export default function Home() {
                     className="w-full flex items-center justify-between px-6 py-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <Play className="w-4 h-4 text-orange-500" />
-                      <span className="text-xs font-bold text-slate-700">Sync Original Database</span>
+                      <Database className="w-4 h-4 text-emerald-500" />
+                      <div className="flex flex-col items-start translate-y-[1px]">
+                        <span className="text-xs font-bold text-slate-700 leading-none">Sync Supabase Database</span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[8px] font-black uppercase tracking-widest text-emerald-600/70">Connected</span>
+                        </div>
+                      </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-300" />
                   </button>
