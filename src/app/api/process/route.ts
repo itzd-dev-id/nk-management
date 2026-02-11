@@ -71,11 +71,14 @@ export async function POST(req: NextRequest) {
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        // Hierarchy: [Category (optional)] -> [Building Folder] -> [Task Name]
+        // Hierarchy: [Category (optional)] -> [Building Folder] -> [Task Name - Building Name]
         const folderParts = [];
         if (categoryPart) folderParts.push(categoryPart.trim());
         folderParts.push(buildingFolder);
-        folderParts.push(taskPart.trim());
+
+        // Final folder: Task Name - Building Name
+        const finalTaskFolder = `${taskPart.trim()} - ${sanitizedBuildingName}`;
+        folderParts.push(finalTaskFolder);
 
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
