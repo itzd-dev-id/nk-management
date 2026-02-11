@@ -217,8 +217,16 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
 
             {/* Keyword Input with Tags */}
             <div className="relative">
-                <div className="min-h-[40px] bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex flex-wrap items-center gap-1.5">
-                    <Search className={`w-3 h-3 shrink-0 ${tags.length > 0 || inputValue ? 'text-orange-500' : 'text-slate-300'}`} />
+                <div className={`min-h-[40px] border rounded-xl px-3 py-2 flex flex-wrap items-center gap-1.5 transition-all ${slot.detectedTask
+                        ? 'bg-emerald-50 border-emerald-500'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}>
+                    <Search className={`w-3 h-3 shrink-0 ${slot.detectedTask
+                            ? 'text-emerald-500'
+                            : tags.length > 0 || inputValue
+                                ? 'text-orange-500'
+                                : 'text-slate-300'
+                        }`} />
 
                     {/* Tags */}
                     <AnimatePresence mode="popLayout">
