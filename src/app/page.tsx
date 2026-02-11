@@ -15,6 +15,23 @@ import imageCompression from 'browser-image-compression';
 import { BottomNav, TabId } from '@/components/BottomNav';
 import { BUILDINGS, WORK_HIERARCHY } from '@/lib/constants';
 import { ProcessLog } from '@/components/ProcessLog';
+import { PhotoSlotGrid } from '@/components/PhotoSlotGrid';
+import { detectWorkFromKeyword } from '@/lib/utils';
+
+export interface SlotData {
+  id: number;
+  file: File | null;
+  keyword: string;
+  detectedTask: string;
+  previewName: string;
+}
+
+const INITIAL_SLOTS: SlotData[] = [
+  { id: 1, file: null, keyword: '', detectedTask: '', previewName: '' },
+  { id: 2, file: null, keyword: '', detectedTask: '', previewName: '' },
+  { id: 3, file: null, keyword: '', detectedTask: '', previewName: '' },
+  { id: 4, file: null, keyword: '', detectedTask: '', previewName: '' },
+];
 
 export default function Home() {
   const { data: session } = useSession() as any;
@@ -28,8 +45,10 @@ export default function Home() {
   const [outputPath, setOutputPath] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
+  const [slots, setSlots] = useState<SlotData[]>(INITIAL_SLOTS);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
   const [isSavingCloud, setIsSavingCloud] = useState(false);
   const skipNextSave = React.useRef(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
@@ -66,6 +85,57 @@ export default function Home() {
   // Unified Data State (Dynamic Database)
   const [allBuildings, setAllBuildings] = useState<Building[]>(BUILDINGS);
   const [allHierarchy, setAllHierarchy] = useState<{ category: string; tasks: string[] }[]>(WORK_HIERARCHY);
+
+  // Update preview name for a specific slot
+  const updateSlotPreview = useCallback((slotId: number, slot: SlotData) => {
+    if (!slot.file || !selectedBuilding) return '';
+
+    const ext = getFileExtension(slot.file.name);
+    const dateStr = getDefaultDate();
+    const task = slot.detectedTask || workName || 'Draft';
+
+    return generateNewName(
+      dateStr,
+      task,
+      selectedBuilding.name,
+      selectedBuilding.code,
+      progress,
+      slot.id, // Use slot ID as sequence for now
+      ext
+    );
+  }, [selectedBuilding, workName, progress]);
+
+  // Handle slot updates
+  const handleUpdateSlot = useCallback((id: number, data: Partial<SlotData>) => {
+    setSlots(current => current.map(slot => {
+      if (slot.id !== id) return slot;
+
+      const updated = { ...slot, ...data };
+
+      // If file or keyword changed, detect task
+      if (data.file || data.keyword !== undefined) {
+        const searchTerms = [
+          updated.keyword,
+          updated.file?.name.split('.')[0] || ''
+        ].filter(Boolean).join(' ');
+
+        updated.detectedTask = detectWorkFromKeyword(searchTerms, allHierarchy);
+      }
+
+      // Update preview name
+      updated.previewName = updateSlotPreview(id, updated);
+
+      return updated;
+    }));
+  }, [allHierarchy, updateSlotPreview]);
+
+  // Update all previews when global state changes
+  useEffect(() => {
+    setSlots(current => current.map(slot => ({
+      ...slot,
+      previewName: updateSlotPreview(slot.id, slot)
+    })));
+  }, [selectedBuilding, workName, progress, updateSlotPreview]);
 
   // Persistence
   useEffect(() => {
@@ -139,33 +209,28 @@ export default function Home() {
         }
       }
 
-      if (wData) {
-        // Sort categories and tasks
-        const sortedW = (wData as { category: string; tasks: string[] }[])
+      const legacy = await fetchConfig(path, 'nk-management.json');
+      if (legacy?.works) {
+        const sortedLegacyW = (legacy.works as { category: string; tasks: string[] }[])
           .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
           .sort((a, b) => a.category.localeCompare(b.category));
-        setAllHierarchy(sortedW);
+        setAllHierarchy(sortedLegacyW);
+        saveConfig('works.json', sortedLegacyW, 'Database pekerjaan dimigrasi dari file lama');
       } else {
-        const legacy = await fetchConfig(path, 'nk-management.json');
-        if (legacy?.works) {
-          const sortedLegacyW = (legacy.works as { category: string; tasks: string[] }[])
-            .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
-            .sort((a, b) => a.category.localeCompare(b.category));
-          setAllHierarchy(sortedLegacyW);
-          saveConfig('works.json', sortedLegacyW, 'Database pekerjaan dimigrasi dari file lama');
-        } else {
-          const sortedDefault = WORK_HIERARCHY
-            .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
-            .sort((a, b) => a.category.localeCompare(b.category));
-          setAllHierarchy(sortedDefault);
-        }
+        const sortedDefault = WORK_HIERARCHY
+          .map(cat => ({ ...cat, tasks: [...cat.tasks].sort((a, b) => a.localeCompare(b)) }))
+          .sort((a, b) => a.category.localeCompare(b.category));
+        setAllHierarchy(sortedDefault);
       }
+
       skipNextSave.current = true;
       showToast('Database sinkron dengan Cloud', 'info');
+    } catch (e) {
+      console.error('Failed to load all configs', e);
     } finally {
       setIsSyncing(false);
     }
-  }, [fetchConfig, session?.accessToken]);
+  }, [fetchConfig, session?.accessToken, selectedBuilding, workName, progress]);
 
   // Separate saves for buildings and hierarchy
   useEffect(() => {
@@ -411,6 +476,7 @@ export default function Home() {
     }
 
     setIsProcessing(false);
+    setSlots(INITIAL_SLOTS);
     addLog(`[SUCCESS] Seluruh proses selesai!`);
     showToast('Seluruh file berhasil diproses dan diarsipkan!', 'success');
   };
@@ -501,17 +567,62 @@ export default function Home() {
                   </div>
                 </div>
 
-                <DropZone onFilesAdded={handleFilesAdded} fileCount={files.length} />
+                <PhotoSlotGrid
+                  slots={slots}
+                  onUpdateSlot={handleUpdateSlot}
+                  onRemoveFile={(id) => handleUpdateSlot(id, { file: null, keyword: '', detectedTask: '', previewName: '' })}
+                />
               </div>
 
-              {files.length > 0 && (
+              {slots.some(s => s.file) && (
                 <button
-                  onClick={processFiles}
-                  disabled={isProcessing}
+                  onClick={async () => {
+                    if (!selectedBuilding || !outputPath) {
+                      showToast("Select building and set folder ID first", "error");
+                      return;
+                    }
+
+                    // Convert occupied slots to FileMetadata
+                    const newFilesToProcess: FileMetadata[] = await Promise.all(
+                      slots
+                        .filter(s => s.file)
+                        .map(async (s) => {
+                          let detectedDate = getDefaultDate();
+                          if (s.file!.type.startsWith('image/')) {
+                            try {
+                              const exif = await exifr.parse(s.file!);
+                              if (exif?.DateTimeOriginal) {
+                                detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
+                              }
+                            } catch (e) {
+                              console.warn('Metadata skip', e);
+                            }
+                          }
+
+                          return {
+                            id: Math.random().toString(36).substring(7),
+                            file: s.file!,
+                            originalName: s.file!.name,
+                            newName: s.previewName,
+                            detectedDate,
+                            status: 'pending' as const,
+                            building: selectedBuilding,
+                            workName: s.detectedTask || workName || 'Documentation',
+                            progress: progress,
+                            sequence: s.id
+                          };
+                        })
+                    );
+
+                    setFiles(newFilesToProcess);
+                    // Defer execution slightly to ensure state is updated
+                    setTimeout(() => processFiles(), 100);
+                  }}
+                  disabled={isProcessing || !selectedBuilding}
                   className="w-full bg-orange-500 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all uppercase tracking-widest text-sm"
                 >
                   {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                  {isProcessing ? 'Processing...' : 'Start Archiving'}
+                  {isProcessing ? 'Processing Slots...' : 'Process All Slots'}
                 </button>
               )}
 

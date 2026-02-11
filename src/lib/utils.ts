@@ -41,3 +41,33 @@ export function extractGDriveId(idOrUrl: string): string {
     const match = idOrUrl.match(/[-\w]{25,}/);
     return match ? match[0] : idOrUrl;
 }
+
+export function detectWorkFromKeyword(keyword: string, hierarchy: { category: string; tasks: string[] }[]): string {
+    if (!keyword) return '';
+    const normalizedK = keyword.toLowerCase().trim().replace(/\s+/g, '_');
+
+    // Try exact match in tasks
+    for (const group of hierarchy) {
+        for (const task of group.tasks) {
+            if (task.toLowerCase() === normalizedK) return task;
+        }
+    }
+
+    // Try partial match in tasks
+    for (const group of hierarchy) {
+        for (const task of group.tasks) {
+            if (task.toLowerCase().includes(normalizedK) || normalizedK.includes(task.toLowerCase())) {
+                return task;
+            }
+        }
+    }
+
+    // Try match in categories
+    for (const group of hierarchy) {
+        if (group.category.toLowerCase().includes(normalizedK)) {
+            return group.tasks[0] || ''; // Return first task of category as default
+        }
+    }
+
+    return '';
+}
