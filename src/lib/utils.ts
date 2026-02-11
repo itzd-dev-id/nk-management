@@ -17,14 +17,14 @@ export function generateNewName(
     // For file names, we still use underscores for separation as requested
     // And we replace slashes (subfolders) with dashes in the filename
     const fileWork = sanitizePath(workName).replace(/\s+/g, '_').replace(/\//g, '-');
-    const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');
 
-    // Format: 2026-02-01_Pekerjaan_Pemancangan_Rusun_Guru_A_10%_001.jpg
+    // Format: 2026-02-01_Pekerjaan_C.1_10%_001.jpg
+    // Building code is unique and building name already contains the code, so we only use code
     // If progress is empty, omit it
     const progressPart = progress ? `${progress}%_` : '';
-    return `${dateStr}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
+    return `${dateStr}_${fileWork}_${fileCode}_${progressPart}${seqStr}.${extension}`;
 }
 
 export function getFileExtension(filename: string): string {
