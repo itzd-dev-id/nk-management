@@ -454,22 +454,28 @@ export default function Home() {
       return;
     }
 
+    // Filter slots that have files
+    const slotsWithFiles = slots.filter(slot => slot.file !== null);
+
+    if (slotsWithFiles.length === 0) {
+      alert('No files to process!');
+      return;
+    }
+
     setIsProcessing(true);
     setProcessLogs([]);
-    addLog(`[INFO] Memulai proses pengarsipan untuk ${files.length} file...`);
+    addLog(`[INFO] Memulai proses pengarsipan untuk ${slotsWithFiles.length} file...`);
 
-    const updatedFiles = [...files];
+    for (let i = 0; i < slotsWithFiles.length; i++) {
+      const slot = slotsWithFiles[i];
+      const file = slot.file!; // We know it's not null from filter
 
-    for (let i = 0; i < updatedFiles.length; i++) {
-      const fileMeta = updatedFiles[i];
-      if (fileMeta.status === 'success') continue;
+      addLog(`[INFO] Memproses: ${file.name}`);
 
-      let fileToUpload = fileMeta.file;
-      addLog(`[INFO] Memproses: ${fileMeta.originalName}`);
+      let fileToUpload = file;
 
       // 1. Automatic Compression for Images
-      if (fileMeta.file.type.startsWith('image/')) {
-        setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'compressing' } : f));
+      if (file.type.startsWith('image/')) {
         addLog(`[INFO] Mengompresi foto...`);
 
         try {
@@ -480,29 +486,28 @@ export default function Home() {
             fileType: 'image/jpeg',
             preserveExif: true
           };
-          const compressedBlob = await imageCompression(fileMeta.file, options);
-          fileToUpload = new File([compressedBlob], fileMeta.originalName.replace(/\.[^/.]+$/, "") + ".jpg", {
+          const compressedBlob = await imageCompression(file, options);
+          fileToUpload = new File([compressedBlob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
             type: 'image/jpeg',
-            lastModified: fileMeta.file.lastModified
+            lastModified: file.lastModified
           });
-          addLog(`[INFO] Kompresi selesai (${(fileMeta.file.size / 1024 / 1024).toFixed(2)}MB -> ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`);
+          addLog(`[INFO] Kompresi selesai (${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`);
         } catch (error) {
-          addLog(`[ERROR] Gagal kompresi: ${fileMeta.originalName}`);
+          addLog(`[ERROR] Gagal kompresi: ${file.name}`);
         }
       }
 
-      setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'processing' } : f));
       addLog(`[INFO] Mengunggah ke Google Drive...`);
 
       const formData = new FormData();
       formData.append('file', fileToUpload);
       formData.append('metadata', JSON.stringify({
-        detectedDate: fileMeta.detectedDate,
-        workName: fileMeta.workName,
-        buildingCode: fileMeta.building.code,
-        buildingName: fileMeta.building.name,
-        buildingIndex: fileMeta.building.index,
-        progress: fileMeta.progress,
+        detectedDate: slot.detectedDate || getDefaultDate(),
+        workName: workName,
+        buildingCode: selectedBuilding.code,
+        buildingName: selectedBuilding.name,
+        buildingIndex: selectedBuilding.index,
+        progress: progressPercentage || 0,
         outputPath: outputPath,
       }));
 
@@ -515,22 +520,15 @@ export default function Home() {
         const result = await response.json();
 
         if (result.success) {
-          setFiles(prev => prev.map(f => f.id === fileMeta.id ? {
-            ...f,
-            status: 'success',
-            newName: result.finalName || f.newName
-          } : f));
           addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
         } else {
           let errorMsg = result.error;
           if (result.details?.error?.message) {
             errorMsg = `${result.error}: ${result.details.error.message}`;
           }
-          setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: errorMsg } : f));
           addLog(`[ERROR] Gagal: ${errorMsg}`);
         }
       } catch (e: any) {
-        setFiles(prev => prev.map(f => f.id === fileMeta.id ? { ...f, status: 'error', error: 'Upload failed: ' + e.message } : f));
         addLog(`[ERROR] Gagal sistem: ${e.message}`);
       }
     }
