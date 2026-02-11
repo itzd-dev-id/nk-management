@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,14 +23,15 @@ export interface SlotData {
   file: File | null;
   keyword: string;
   detectedTask: string;
+  detectedBuilding: Building | null;
   previewName: string;
 }
 
 const INITIAL_SLOTS: SlotData[] = [
-  { id: 1, file: null, keyword: '', detectedTask: '', previewName: '' },
-  { id: 2, file: null, keyword: '', detectedTask: '', previewName: '' },
-  { id: 3, file: null, keyword: '', detectedTask: '', previewName: '' },
-  { id: 4, file: null, keyword: '', detectedTask: '', previewName: '' },
+  { id: 1, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
+  { id: 2, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
+  { id: 3, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
+  { id: 4, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
 ];
 
 export default function Home() {
@@ -112,7 +113,7 @@ export default function Home() {
 
       const updated = { ...slot, ...data };
 
-      // If file or keyword changed, detect task
+      // If file or keyword changed, detect task AND building
       if (data.file || data.keyword !== undefined) {
         const searchTerms = [
           updated.keyword,
@@ -120,6 +121,15 @@ export default function Home() {
         ].filter(Boolean).join(' ');
 
         updated.detectedTask = detectWorkFromKeyword(searchTerms, allHierarchy);
+
+        // Smart Building Detection
+        const detectedB = detectBuildingFromKeyword(searchTerms, allBuildings);
+        updated.detectedBuilding = detectedB;
+
+        // Auto-select building if detected and none selected (or first slot)
+        if (detectedB && (!selectedBuilding || id === 1)) {
+          setSelectedBuilding(detectedB);
+        }
       }
 
       // Update preview name
@@ -127,7 +137,7 @@ export default function Home() {
 
       return updated;
     }));
-  }, [allHierarchy, updateSlotPreview]);
+  }, [allHierarchy, allBuildings, selectedBuilding, updateSlotPreview]);
 
   // Update all previews when global state changes
   useEffect(() => {

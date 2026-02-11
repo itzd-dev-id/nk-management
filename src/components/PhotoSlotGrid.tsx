@@ -10,6 +10,7 @@ interface SlotData {
     file: File | null;
     keyword: string;
     detectedTask: string;
+    detectedBuilding: { code: string; name: string } | null;
     previewName: string;
 }
 
@@ -21,7 +22,7 @@ interface PhotoSlotGridProps {
 
 export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile }: PhotoSlotGridProps) {
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 lg:gap-4">
             {slots.map((slot) => (
                 <PhotoSlot
                     key={slot.id}
@@ -56,8 +57,36 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
                 <input {...getInputProps()} />
 
                 {/* Slot Number Indicator */}
-                <div className="absolute top-3 left-3 w-6 h-6 bg-slate-900/10 backdrop-blur-md rounded-lg flex items-center justify-center z-10">
+                <div className="absolute top-3 left-3 w-6 h-6 bg-slate-900/10 backdrop-blur-md rounded-lg flex items-center justify-center z-20">
                     <span className="text-[10px] font-black text-slate-900">{slot.id}</span>
+                </div>
+
+                {/* Smart Badges */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 z-20 w-full px-2">
+                    <AnimatePresence mode="popLayout">
+                        {slot.detectedBuilding && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8, y: -5 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, y: -5 }}
+                                className="px-2 py-0.5 bg-orange-500 text-white rounded-full flex items-center gap-1 shadow-sm"
+                            >
+                                <span className="text-[7px] font-black uppercase tracking-tighter">Gedung:</span>
+                                <span className="text-[8px] font-bold truncate max-w-[60px]">{slot.detectedBuilding.name}</span>
+                            </motion.div>
+                        )}
+                        {slot.detectedTask && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8, y: -5 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, y: -5 }}
+                                className="px-2 py-0.5 bg-emerald-500 text-white rounded-full flex items-center gap-1 shadow-sm"
+                            >
+                                <span className="text-[7px] font-black uppercase tracking-tighter">Pekerjaan:</span>
+                                <span className="text-[8px] font-bold truncate max-w-[60px]">{slot.detectedTask.replace(/_/g, ' ')}</span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {slot.file ? (
@@ -72,7 +101,7 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
                                 e.stopPropagation();
                                 onRemove();
                             }}
-                            className="absolute top-3 right-3 p-1.5 bg-white/90 backdrop-blur-md rounded-xl text-red-500 shadow-sm active:scale-90 transition-transform z-10"
+                            className="absolute bottom-3 right-3 p-1.5 bg-white/90 backdrop-blur-md rounded-xl text-red-500 shadow-sm active:scale-90 transition-transform z-10"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -94,39 +123,23 @@ function PhotoSlot({ slot, onUpdate, onRemove }: { slot: SlotData; onUpdate: (da
                     type="text"
                     value={slot.keyword}
                     onChange={(e) => onUpdate({ keyword: e.target.value })}
-                    placeholder="Keyword / Detect..."
+                    placeholder="Keyword (cth: masjid, beton)"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-2 text-[10px] font-bold text-slate-700 focus:outline-none focus:border-orange-500 transition-all placeholder:text-slate-300"
                 />
             </div>
 
-            {/* Final Preview & Detected Task */}
-            <div className="min-h-[24px] px-1">
+            {/* Final Preview Info */}
+            <div className="min-h-[16px] px-1">
                 <AnimatePresence mode="wait">
-                    {slot.detectedTask ? (
-                        <motion.div
-                            key="detected"
-                            initial={{ opacity: 0, y: 2 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="space-y-0.5"
-                        >
-                            <div className="flex items-center gap-1">
-                                <span className="text-[8px] font-black text-emerald-500 uppercase">Match:</span>
-                                <span className="text-[9px] font-bold text-slate-600 truncate">{slot.detectedTask.replace(/_/g, ' ')}</span>
-                            </div>
-                            <p className="text-[7px] font-medium text-slate-400 truncate tracking-tight break-all">
-                                {slot.previewName}
-                            </p>
-                        </motion.div>
-                    ) : slot.keyword ? (
+                    {slot.previewName && (
                         <motion.p
-                            key="no-match"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="text-[8px] font-black text-slate-300 uppercase italic"
+                            className="text-[7px] font-medium text-slate-400 truncate tracking-tight break-all"
                         >
-                            No match found...
+                            {slot.previewName}
                         </motion.p>
-                    ) : null}
+                    )}
                 </AnimatePresence>
             </div>
         </div>

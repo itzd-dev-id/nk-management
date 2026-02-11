@@ -42,30 +42,54 @@ export function extractGDriveId(idOrUrl: string): string {
     return match ? match[0] : idOrUrl;
 }
 
+export function detectBuildingFromKeyword(keyword: string, buildings: any[]): any | null {
+    if (!keyword) return null;
+    const terms = keyword.toLowerCase().split(/[\s,;|]+/).filter(Boolean);
+
+    for (const term of terms) {
+        // Try exact code match
+        const byCode = buildings.find(b => b.code.toLowerCase() === term);
+        if (byCode) return byCode;
+
+        // Try exact name match
+        const byName = buildings.find(b => b.name.toLowerCase() === term);
+        if (byName) return byName;
+
+        // Try partial name match
+        const byPartial = buildings.find(b => b.name.toLowerCase().includes(term));
+        if (byPartial) return byPartial;
+    }
+
+    return null;
+}
+
 export function detectWorkFromKeyword(keyword: string, hierarchy: { category: string; tasks: string[] }[]): string {
     if (!keyword) return '';
-    const normalizedK = keyword.toLowerCase().trim().replace(/\s+/g, '_');
+    const terms = keyword.toLowerCase().split(/[\s,;|]+/).filter(Boolean);
 
-    // Try exact match in tasks
-    for (const group of hierarchy) {
-        for (const task of group.tasks) {
-            if (task.toLowerCase() === normalizedK) return task;
-        }
-    }
+    for (const term of terms) {
+        const normalizedTerm = term.replace(/_/g, ' ');
 
-    // Try partial match in tasks
-    for (const group of hierarchy) {
-        for (const task of group.tasks) {
-            if (task.toLowerCase().includes(normalizedK) || normalizedK.includes(task.toLowerCase())) {
-                return task;
+        // Try exact match in tasks
+        for (const group of hierarchy) {
+            for (const task of group.tasks) {
+                if (task.toLowerCase() === normalizedTerm || task.toLowerCase().replace(/_/g, ' ') === normalizedTerm) return task;
             }
         }
-    }
 
-    // Try match in categories
-    for (const group of hierarchy) {
-        if (group.category.toLowerCase().includes(normalizedK)) {
-            return group.tasks[0] || ''; // Return first task of category as default
+        // Try partial match in tasks
+        for (const group of hierarchy) {
+            for (const task of group.tasks) {
+                const taskLower = task.toLowerCase().replace(/_/g, ' ');
+                if (taskLower.includes(normalizedTerm)) return task;
+            }
+        }
+
+        // Try match in categories
+        for (const group of hierarchy) {
+            if (group.category.toLowerCase().includes(normalizedTerm)) {
+                return group.tasks[0] || '';
+            }
         }
     }
 
