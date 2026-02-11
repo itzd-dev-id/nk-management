@@ -508,7 +508,7 @@ export default function Home() {
         buildingCode: selectedBuilding.code,
         buildingName: selectedBuilding.name,
         buildingIndex: selectedBuilding.index,
-        progress: progressPercentage || 0,
+        progress: parseInt(progress) || 0,
         outputPath: outputPath,
       }));
 
