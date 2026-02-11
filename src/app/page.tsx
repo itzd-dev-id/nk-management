@@ -120,15 +120,22 @@ export default function Home() {
           updated.file?.name.split('.')[0] || ''
         ].filter(Boolean).join(' ');
 
-        updated.detectedTask = detectWorkFromKeyword(searchTerms, allHierarchy);
+        // Smart Building Detection (first pass to get detectedB for task logic)
+        const detectedB_temp = detectBuildingFromKeyword(searchTerms, allBuildings);
 
-        // Smart Building Detection
-        const detectedB = detectBuildingFromKeyword(searchTerms, allBuildings);
-        updated.detectedBuilding = detectedB;
+        updated.detectedTask = detectWorkFromKeyword(
+          searchTerms,
+          allHierarchy,
+          (detectedB_temp?.code === 'GL' || (!detectedB_temp && selectedBuilding?.code === 'GL')) ? 'Material On Site' : undefined
+        );
+
+        // Smart Building Detection (final assignment)
+        const detectedB_new = detectBuildingFromKeyword(searchTerms, allBuildings);
+        updated.detectedBuilding = detectedB_new;
 
         // Auto-select building if detected and none selected (or first slot)
-        if (detectedB && (!selectedBuilding || id === 1)) {
-          setSelectedBuilding(detectedB);
+        if (detectedB_new && (!selectedBuilding || id === 1)) {
+          setSelectedBuilding(detectedB_new);
         }
       }
 
@@ -567,12 +574,12 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col justify-end gap-1.5 pb-1">
+                  <div className="flex flex-col items-center justify-center gap-1.5 pb-1">
                     <div className="flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Live Data</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 text-center">Live Data</span>
                     </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight text-center">
                       Actual Field<br />Progress Percentage
                     </p>
                   </div>

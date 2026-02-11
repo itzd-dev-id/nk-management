@@ -72,7 +72,11 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
     return null;
 }
 
-export function detectWorkFromKeyword(keyword: string, hierarchy: { category: string; tasks: string[] }[]): string {
+export function detectWorkFromKeyword(
+    keyword: string,
+    hierarchy: { category: string; tasks: string[] }[],
+    categoryFilter?: string
+): string {
     if (!keyword) return '';
 
     let workPart = keyword;
@@ -87,18 +91,23 @@ export function detectWorkFromKeyword(keyword: string, hierarchy: { category: st
     const terms = workPart.toLowerCase().split(/\s+/).filter(Boolean);
     if (terms.length === 0) return '';
 
+    // Filter hierarchy if filter provided
+    const filteredHierarchy = categoryFilter
+        ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
+        : hierarchy;
+
     for (const term of terms) {
         const normalizedTerm = term.replace(/_/g, ' ');
 
         // Try exact match in tasks
-        for (const group of hierarchy) {
+        for (const group of filteredHierarchy) {
             for (const task of group.tasks) {
                 if (task.toLowerCase() === normalizedTerm || task.toLowerCase().replace(/_/g, ' ') === normalizedTerm) return task;
             }
         }
 
         // Try partial match in tasks
-        for (const group of hierarchy) {
+        for (const group of filteredHierarchy) {
             for (const task of group.tasks) {
                 const taskLower = task.toLowerCase().replace(/_/g, ' ');
                 if (taskLower.includes(normalizedTerm)) return task;
@@ -106,7 +115,7 @@ export function detectWorkFromKeyword(keyword: string, hierarchy: { category: st
         }
 
         // Try match in categories
-        for (const group of hierarchy) {
+        for (const group of filteredHierarchy) {
             if (group.category.toLowerCase().includes(normalizedTerm)) {
                 return group.tasks[0] || '';
             }
