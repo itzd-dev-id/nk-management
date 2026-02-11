@@ -52,6 +52,7 @@ export default function Home() {
 
   const [isSavingCloud, setIsSavingCloud] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [editingBuilding, setEditingBuilding] = useState<{ index: number; name: string } | null>(null);
   const [editingTask, setEditingTask] = useState<{ catIndex: number; taskIndex: number; name: string } | null>(null);
@@ -242,15 +243,17 @@ export default function Home() {
 
   // Consolidated Cloud Save Effect
   useEffect(() => {
-    // Only save if we are NOT currently syncing/loading from cloud
+    // Don't auto-save during initial sync
     if (isSyncing) return;
+    // Don't auto-save if there are no changes
+    if (!hasUnsavedChanges) return;
 
     const timer = setTimeout(() => {
       const saveAll = async () => {
         setIsSavingCloud(true);
         try {
           // Save both in parallel
-          await Promise.all([
+          const results = await Promise.all([
             fetch('/api/config', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -262,31 +265,44 @@ export default function Home() {
               body: JSON.stringify({ filename: 'works.json', data: allHierarchy })
             })
           ]);
-          setLastSynced(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
-        } catch (e) {
+
+          // Check if both succeeded
+          const [buildingsRes, worksRes] = results;
+          const buildingsData = await buildingsRes.json();
+          const worksData = await worksRes.json();
+
+          if (buildingsData.success && worksData.success) {
+            setLastSynced(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+            setHasUnsavedChanges(false);
+            showToast('Data tersimpan ke Cloud', 'success');
+          } else {
+            throw new Error(buildingsData.error || worksData.error || 'Failed to save');
+          }
+        } catch (e: any) {
           console.error('Auto-save failed', e);
+          showToast(`Gagal menyimpan: ${e.message}`, 'error');
         } finally {
           setIsSavingCloud(false);
         }
       };
 
       saveAll();
-    }, 1000); // 1s debounce
+    }, 1500); // 1.5s debounce
 
     return () => clearTimeout(timer);
-  }, [allBuildings, allHierarchy, isSyncing]);
+  }, [allBuildings, allHierarchy, isSyncing, hasUnsavedChanges, showToast]);
 
   // Initial load
   useEffect(() => {
     loadAllConfigs();
   }, [loadAllConfigs]);
 
-  // Re-sync when switching to settings tab
+  // Re-sync when switching to settings tab (only if no unsaved changes)
   useEffect(() => {
-    if (activeTab === 'settings') {
+    if (activeTab === 'settings' && !hasUnsavedChanges) {
       loadAllConfigs();
     }
-  }, [activeTab, loadAllConfigs]);
+  }, [activeTab, loadAllConfigs, hasUnsavedChanges]);
 
   // UI helpers and other persistence
   useEffect(() => {
@@ -794,6 +810,7 @@ export default function Home() {
                           const newBuilding = { code, name: nameInput.value, index: newIndex };
                           const next = [...allBuildings, newBuilding].sort((a, b) => (a.index || 0) - (b.index || 0));
                           setAllBuildings(next);
+                          setHasUnsavedChanges(true);
                           showToast(`Gedung ${code} ditambahkan`, 'success');
                           const match = code.match(/([A-Z]+)(\d*)/);
                           if (match) {
@@ -840,6 +857,7 @@ export default function Home() {
                                       const next = [...allBuildings];
                                       next[i].name = editingBuilding.name;
                                       setAllBuildings(next);
+                                      setHasUnsavedChanges(true);
                                       setEditingBuilding(null);
                                       showToast(`Nama gedung ${b.code} diperbarui`, 'success');
                                     }
@@ -857,6 +875,7 @@ export default function Home() {
                                       const next = [...allBuildings];
                                       next[i].name = editingBuilding.name;
                                       setAllBuildings(next);
+                                      setHasUnsavedChanges(true);
                                       setEditingBuilding(null);
                                       showToast(`Nama gedung ${b.code} diperbarui`, 'success');
                                     }}
@@ -877,6 +896,7 @@ export default function Home() {
                                     onClick={() => {
                                       if (window.confirm(`Apakah Anda yakin ingin menghapus gedung "${b.name}"?`)) {
                                         setAllBuildings(allBuildings.filter((_, idx) => idx !== i));
+                                        setHasUnsavedChanges(true);
                                         showToast(`Gedung ${b.name} dihapus`, 'info');
                                       }
                                     }}
@@ -945,6 +965,7 @@ export default function Home() {
                             next.sort((a, b) => a.category.localeCompare(b.category));
                           }
                           setAllHierarchy(next);
+                          setHasUnsavedChanges(true);
                           showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName}`, 'success');
                           catInput.value = '';
                           taskInput.value = '';
@@ -979,6 +1000,7 @@ export default function Home() {
                                         next[i].category = editingCategory.name.trim();
                                         next.sort((a, b) => a.category.localeCompare(b.category));
                                         setAllHierarchy(next);
+                                        setHasUnsavedChanges(true);
                                         setEditingCategory(null);
                                         showToast(`Kategori diperbarui`, 'success');
                                       }
@@ -990,6 +1012,7 @@ export default function Home() {
                                       next[i].category = editingCategory.name.trim();
                                       next.sort((a, b) => a.category.localeCompare(b.category));
                                       setAllHierarchy(next);
+                                      setHasUnsavedChanges(true);
                                       setEditingCategory(null);
                                       showToast(`Kategori diperbarui`, 'success');
                                     }}
@@ -1026,6 +1049,7 @@ export default function Home() {
                                             const next = [...allHierarchy];
                                             next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
                                             setAllHierarchy(next);
+                                            setHasUnsavedChanges(true);
                                             setEditingTask(null);
                                             showToast(`Pekerjaan diperbarui`, 'success');
                                           }
@@ -1043,6 +1067,7 @@ export default function Home() {
                                             const next = [...allHierarchy];
                                             next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
                                             setAllHierarchy(next);
+                                            setHasUnsavedChanges(true);
                                             setEditingTask(null);
                                             showToast(`Pekerjaan diperbarui`, 'success');
                                           }}
@@ -1069,6 +1094,7 @@ export default function Home() {
                                               } else {
                                                 setAllHierarchy(next);
                                               }
+                                              setHasUnsavedChanges(true);
                                               showToast(`Tugas ${t} dihapus`, 'info');
                                             }
                                           }}
@@ -1088,6 +1114,57 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* Manual Save Button */}
+              {hasUnsavedChanges && (
+                <div className="bg-orange-50 border border-orange-200 rounded-3xl p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Info className="w-4 h-4 text-orange-500" />
+                    <span className="text-xs font-bold text-orange-700">Perubahan belum tersimpan</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      setIsSavingCloud(true);
+                      try {
+                        const results = await Promise.all([
+                          fetch('/api/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename: 'buildings.json', data: allBuildings })
+                          }),
+                          fetch('/api/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ filename: 'works.json', data: allHierarchy })
+                          })
+                        ]);
+
+                        const [buildingsRes, worksRes] = results;
+                        const buildingsData = await buildingsRes.json();
+                        const worksData = await worksRes.json();
+
+                        if (buildingsData.success && worksData.success) {
+                          setLastSynced(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+                          setHasUnsavedChanges(false);
+                          showToast('Data berhasil disimpan ke Cloud!', 'success');
+                        } else {
+                          throw new Error(buildingsData.error || worksData.error || 'Failed to save');
+                        }
+                      } catch (e: any) {
+                        console.error('Manual save failed', e);
+                        showToast(`Gagal menyimpan: ${e.message}`, 'error');
+                      } finally {
+                        setIsSavingCloud(false);
+                      }
+                    }}
+                    disabled={isSavingCloud}
+                    className="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isSavingCloud ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+                    {isSavingCloud ? 'Menyimpan...' : 'Simpan ke Cloud'}
+                  </button>
+                </div>
+              )}
 
             </motion.div>
           )}
@@ -1259,7 +1336,7 @@ export default function Home() {
           ))}
         </AnimatePresence>
       </div>
-    </main>
+    </main >
   );
 }
 
