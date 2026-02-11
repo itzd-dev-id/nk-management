@@ -95,11 +95,16 @@ export default function Home() {
 
     const ext = getFileExtension(slot.file.name);
     const dateStr = getDefaultDate();
-    const task = slot.detectedTask || workName || 'Draft';
+
+    // Determine task name without category for filename
+    let taskName = slot.detectedTask || workName || 'Draft';
+    if (taskName.includes(' / ')) {
+      taskName = taskName.split(' / ').pop() || taskName;
+    }
 
     return generateNewName(
       dateStr,
-      task,
+      taskName,
       selectedBuilding.name,
       selectedBuilding.code,
       progress,

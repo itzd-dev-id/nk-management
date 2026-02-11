@@ -40,7 +40,11 @@ export async function POST(req: NextRequest) {
         }
 
         const sanitizedWork = sanitizePath(workName);
-        const combinedWorkFolder = sanitizedWork.replace(/_/g, ' ');
+
+        // Split workName into category and task
+        const workParts = workName.split(' / ');
+        const categoryPart = workParts.length > 1 ? workParts[0] : null;
+        const taskPart = workParts[workParts.length - 1];
 
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
@@ -52,7 +56,8 @@ export async function POST(req: NextRequest) {
         const extension = file.name.split('.').pop() || '';
 
         // Filename parts - KEEP underscores for filenames
-        const fileWork = sanitizedWork.replace(/\s+/g, '_').replace(/\//g, '-');
+        // We only use the task name part for the filename to match the preview
+        const fileWork = sanitizePath(taskPart).replace(/\s+/g, '_').replace(/\//g, '-');
         const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
         const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
 
@@ -66,8 +71,12 @@ export async function POST(req: NextRequest) {
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        // Flatter hierarchy: [Building] -> [Category / Task Name]
-        const folderParts = [buildingFolder, combinedWorkFolder];
+        // Hierarchy: [Category (optional)] -> [Building Folder] -> [Task Name]
+        const folderParts = [];
+        if (categoryPart) folderParts.push(categoryPart.trim());
+        folderParts.push(buildingFolder);
+        folderParts.push(taskPart.trim());
+
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 
