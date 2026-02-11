@@ -24,6 +24,7 @@ export interface SlotData {
   detectedTask: string;
   detectedBuilding: Building | null;
   previewName: string;
+  detectedDate?: string;
 }
 
 const INITIAL_SLOTS: SlotData[] = [
