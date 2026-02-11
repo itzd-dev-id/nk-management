@@ -169,11 +169,9 @@ export default function Home() {
   // Persistence
   useEffect(() => {
     const savedPath = localStorage.getItem('nk_output_path');
-    const savedBuilding = localStorage.getItem('nk_selected_building');
     const savedStorageType = localStorage.getItem('nk_storage_type') as 'local' | 'gdrive';
 
     if (savedPath) setOutputPath(savedPath);
-    if (savedBuilding) setSelectedBuilding(JSON.parse(savedBuilding));
     if (savedStorageType) setStorageType(savedStorageType);
   }, []);
 
@@ -296,7 +294,6 @@ export default function Home() {
 
   useEffect(() => {
     if (selectedBuilding) {
-      localStorage.setItem('nk_selected_building', JSON.stringify(selectedBuilding));
       if (activeStep === 'building') setActiveStep('work');
     }
   }, [selectedBuilding]);
