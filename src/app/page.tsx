@@ -137,6 +137,18 @@ export default function Home() {
         if (detectedB_new && (!selectedBuilding || id === 1)) {
           setSelectedBuilding(detectedB_new);
         }
+
+        // Auto-select global Work Name if detected
+        if (updated.detectedTask) {
+          const category = allHierarchy.find(h => h.tasks.includes(updated.detectedTask))?.category;
+          if (category) {
+            const fullWorkName = `${category} / ${updated.detectedTask}`;
+            // If global work is empty or we are on the first slot, update the global state
+            if (!workName || id === 1 || workName === 'Work Name') {
+              setWorkName(fullWorkName);
+            }
+          }
+        }
       }
 
       // Update preview name
