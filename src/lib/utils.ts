@@ -52,7 +52,23 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
         buildingPart = keyword.split(separator)[0].trim();
     }
 
-    const terms = buildingPart.toLowerCase().split(/\s+/).filter(Boolean);
+    const normalizedInput = buildingPart.toLowerCase().trim();
+    if (!normalizedInput) return null;
+
+    // PASS 1: Try exact code match on full phrase
+    const byExactCode = buildings.find(b => b.code.toLowerCase() === normalizedInput);
+    if (byExactCode) return byExactCode;
+
+    // PASS 2: Try exact name match on full phrase
+    const byExactName = buildings.find(b => b.name.toLowerCase() === normalizedInput);
+    if (byExactName) return byExactName;
+
+    // PASS 3: Try partial name match on full phrase
+    const byPartialName = buildings.find(b => b.name.toLowerCase().includes(normalizedInput));
+    if (byPartialName) return byPartialName;
+
+    // PASS 4: Fall back to individual word matching
+    const terms = normalizedInput.split(/\s+/).filter(Boolean);
     if (terms.length === 0) return null;
 
     for (const term of terms) {
