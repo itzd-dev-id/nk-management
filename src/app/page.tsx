@@ -626,6 +626,7 @@ export default function Home() {
                   onUpdateSlot={handleUpdateSlot}
                   onRemoveFile={(id) => handleUpdateSlot(id, { file: null, keyword: '', detectedTask: '', previewName: '' })}
                   allHierarchy={allHierarchy}
+                  allBuildings={allBuildings}
                 />
               </div>
 

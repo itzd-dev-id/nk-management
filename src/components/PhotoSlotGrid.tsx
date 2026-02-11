@@ -19,9 +19,10 @@ interface PhotoSlotGridProps {
     onUpdateSlot: (id: number, data: Partial<SlotData>) => void;
     onRemoveFile: (id: number) => void;
     allHierarchy: { category: string; tasks: string[] }[];
+    allBuildings: { code: string; name: string; index?: number }[];
 }
 
-export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile, allHierarchy }: PhotoSlotGridProps) {
+export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile, allHierarchy, allBuildings }: PhotoSlotGridProps) {
     return (
         <div className="grid grid-cols-2 gap-3 lg:gap-4">
             {slots.map((slot) => (
@@ -31,13 +32,14 @@ export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile, allHierarchy 
                     onUpdate={(data) => onUpdateSlot(slot.id, data)}
                     onRemove={() => onRemoveFile(slot.id)}
                     allHierarchy={allHierarchy}
+                    allBuildings={allBuildings}
                 />
             ))}
         </div>
     );
 }
 
-function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void; allHierarchy: { category: string; tasks: string[] }[] }) {
+function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void; allHierarchy: { category: string; tasks: string[] }[]; allBuildings: { code: string; name: string; index?: number }[] }) {
     const [inputValue, setInputValue] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -63,16 +65,25 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy }: { slot: SlotData;
             const normalizedInput = inputValue.toLowerCase().replace(/_/g, ' ');
             const matches: string[] = [];
 
-            // Search through all tasks
+            // Search through building names first
+            for (const building of allBuildings) {
+                const buildingNameNormalized = building.name.toLowerCase();
+                if (buildingNameNormalized.includes(normalizedInput) && !tags.includes(building.name)) {
+                    matches.push(building.name);
+                    if (matches.length >= 10) break;
+                }
+            }
+
+            // Then search through all tasks
             for (const group of allHierarchy) {
                 for (const task of group.tasks) {
                     const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
                     if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
                         matches.push(task);
-                        if (matches.length >= 5) break;
+                        if (matches.length >= 10) break;
                     }
                 }
-                if (matches.length >= 5) break;
+                if (matches.length >= 10) break;
             }
 
             setSuggestions(matches);
@@ -82,7 +93,7 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy }: { slot: SlotData;
             setSuggestions([]);
             setShowDropdown(false);
         }
-    }, [inputValue, allHierarchy, tags]);
+    }, [inputValue, allHierarchy, allBuildings, tags]);
 
     // Update parent keyword when tags change
     useEffect(() => {
@@ -242,8 +253,8 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy }: { slot: SlotData;
                                     key={suggestion}
                                     onClick={() => addTag(suggestion)}
                                     className={`w-full px-3 py-2 text-left text-[10px] font-bold transition-colors ${index === selectedIndex
-                                            ? 'bg-orange-50 text-orange-600'
-                                            : 'text-slate-700 hover:bg-slate-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-slate-700 hover:bg-slate-50'
                                         }`}
                                 >
                                     {suggestion.replace(/_/g, ' ')}
