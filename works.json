@@ -3,20 +3,13 @@
         "category": "Persiapan",
         "_description": "Pekerjaan Persiapan Lahan dan Fasilitas Proyek",
         "tasks": [
-            "Barak Pekerja",
             "Bouwplank",
-            "Direksi Keet",
-            "Gudang Material",
-            "Gudang Sementara",
-            "Kantin Pekerja",
             "Mobilisasi Alat",
-            "Mushola Pekerja",
             "Pagar Proyek",
             "Pagar Sementara",
             "Papan Nama Proyek",
             "Pematangan Lahan",
-            "Pembersihan Lahan",
-            "Toilet Pekerja"
+            "Pembersihan Lahan"
         ]
     },
     {

@@ -1,5 +1,40 @@
 [
     {
+        "code": "TEMP-BP",
+        "name": "Barak Pekerja",
+        "index": 100
+    },
+    {
+        "code": "TEMP-DK",
+        "name": "Direksi Keet",
+        "index": 101
+    },
+    {
+        "code": "TEMP-GM",
+        "name": "Gudang Material",
+        "index": 102
+    },
+    {
+        "code": "TEMP-GS",
+        "name": "Gudang Sementara",
+        "index": 103
+    },
+    {
+        "code": "TEMP-KP",
+        "name": "Kantin Pekerja",
+        "index": 104
+    },
+    {
+        "code": "TEMP-MP",
+        "name": "Mushola Pekerja",
+        "index": 105
+    },
+    {
+        "code": "TEMP-TP",
+        "name": "Toilet Pekerja",
+        "index": 106
+    },
+    {
         "code": "A",
         "name": "Rusun Guru A",
         "index": 0
