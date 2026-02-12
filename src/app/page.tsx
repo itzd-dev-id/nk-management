@@ -14,25 +14,8 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
 import { BottomNav, TabId } from '@/components/BottomNav';
 import { ProcessLog } from '@/components/ProcessLog';
-import { PhotoSlotGrid } from '@/components/PhotoSlotGrid';
 import { detectWorkFromKeyword } from '@/lib/utils';
 
-export interface SlotData {
-  id: number;
-  file: File | null;
-  keyword: string;
-  detectedTask: string;
-  detectedBuilding: Building | null;
-  previewName: string;
-  detectedDate?: string;
-}
-
-const INITIAL_SLOTS: SlotData[] = [
-  { id: 1, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
-  { id: 2, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
-  { id: 3, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
-  { id: 4, file: null, keyword: '', detectedTask: '', detectedBuilding: null, previewName: '' },
-];
 
 export default function Home() {
   const { data: session } = useSession() as any;
@@ -48,7 +31,6 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
-  const [slots, setSlots] = useState<SlotData[]>(INITIAL_SLOTS);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -56,9 +38,9 @@ export default function Home() {
   const [lastSynced, setLastSynced] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
-  const [editingBuilding, setEditingBuilding] = useState<{ index: number; name: string } | null>(null);
-  const [editingTask, setEditingTask] = useState<{ catIndex: number; taskIndex: number; name: string } | null>(null);
-  const [editingCategory, setEditingCategory] = useState<{ index: number; name: string } | null>(null);
+  const [editingBuilding, setEditingBuilding] = useState<{ index?: number, name: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<{ catIndex?: number, taskIndex?: number, name: string } | null>(null);
+  const [editingCategory, setEditingCategory] = useState<{ index?: number, name: string } | null>(null);
   const [buildingSearch, setBuildingSearch] = useState('');
   const [taskSearch, setTaskSearch] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
@@ -90,108 +72,6 @@ export default function Home() {
   // Unified Data State (Dynamic Database) - Load from Supabase only
   const [allBuildings, setAllBuildings] = useState<Building[]>([]);
   const [allHierarchy, setAllHierarchy] = useState<{ category: string; tasks: string[] }[]>([]);
-
-  // Update preview name for a specific slot
-  const updateSlotPreview = useCallback((slotId: number, slot: SlotData) => {
-    if (!slot.file || !selectedBuilding) return '';
-
-    const ext = getFileExtension(slot.file.name);
-    const dateStr = getDefaultDate();
-
-    // Determine task name without category for filename
-    let taskName = slot.detectedTask || workName || 'Draft';
-    if (taskName.includes(' / ')) {
-      taskName = taskName.split(' / ').pop() || taskName;
-    }
-
-    return generateNewName(
-      dateStr,
-      taskName,
-      selectedBuilding.name,
-      selectedBuilding.code,
-      progress,
-      slot.id, // Use slot ID as sequence for now
-      ext
-    );
-  }, [selectedBuilding, workName, progress]);
-
-  // Handle slot updates
-  const handleUpdateSlot = useCallback((id: number, data: Partial<SlotData>) => {
-    setSlots(current => current.map(slot => {
-      if (slot.id !== id) return slot;
-
-      const updated = { ...slot, ...data };
-
-      // If file or keyword changed, detect task AND building
-      if (data.file || data.keyword !== undefined) {
-        // Split keyword into individual tags for detection
-        const keywordTags = updated.keyword ? updated.keyword.split(',').map(t => t.trim()).filter(Boolean) : [];
-        const fileName = updated.file?.name.split('.')[0] || '';
-
-        // Try to detect building from each tag or filename
-        let detectedB_new = null;
-        let buildingMatchedTag = null; // Track which tag matched the building
-        for (const tag of [...keywordTags, fileName].filter(Boolean)) {
-          detectedB_new = detectBuildingFromKeyword(tag, allBuildings);
-          if (detectedB_new) {
-            buildingMatchedTag = tag; // Remember this tag matched a building
-            break; // Stop at first successful detection
-          }
-        }
-
-        // Try to detect work task from each tag or filename
-        // BUT exclude the tag that matched a building to avoid false positives
-        let detectedTask = '';
-        const tagsForWorkDetection = [...keywordTags, fileName].filter(Boolean);
-        for (const tag of tagsForWorkDetection) {
-          // Skip the tag that already matched a building
-          if (buildingMatchedTag && tag.toLowerCase() === buildingMatchedTag.toLowerCase()) {
-            continue;
-          }
-
-          detectedTask = detectWorkFromKeyword(
-            tag,
-            allHierarchy,
-            (detectedB_new?.code === 'GL' || (!detectedB_new && selectedBuilding?.code === 'GL')) ? '10. Logistik & Material' : undefined
-          );
-          if (detectedTask) break; // Stop at first successful detection
-        }
-
-        updated.detectedTask = detectedTask;
-        updated.detectedBuilding = detectedB_new;
-
-        // Auto-select building if detected and none selected (or first slot)
-        if (detectedB_new && (!selectedBuilding || id === 1)) {
-          setSelectedBuilding(detectedB_new);
-        }
-
-        // Auto-select global Work Name if detected
-        if (updated.detectedTask) {
-          const category = allHierarchy.find(h => h.tasks.includes(updated.detectedTask))?.category;
-          if (category) {
-            const fullWorkName = `${category} / ${updated.detectedTask}`;
-            // If global work is empty or we are on the first slot, update the global state
-            if (!workName || id === 1 || workName === 'Work Name') {
-              setWorkName(fullWorkName);
-            }
-          }
-        }
-      }
-
-      // Update preview name
-      updated.previewName = updateSlotPreview(id, updated);
-
-      return updated;
-    }));
-  }, [allHierarchy, allBuildings, selectedBuilding, updateSlotPreview]);
-
-  // Update all previews when global state changes
-  useEffect(() => {
-    setSlots(current => current.map(slot => ({
-      ...slot,
-      previewName: updateSlotPreview(slot.id, slot)
-    })));
-  }, [selectedBuilding, workName, progress, updateSlotPreview]);
 
   // Persistence
   useEffect(() => {
@@ -489,97 +369,7 @@ export default function Home() {
     setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
-  const processFiles = async () => {
-    if (!selectedBuilding || !workName) {
-      alert('Select building and enter work name!');
-      return;
-    }
 
-    // Filter slots that have files
-    const slotsWithFiles = slots.filter(slot => slot.file !== null);
-
-    if (slotsWithFiles.length === 0) {
-      alert('No files to process!');
-      return;
-    }
-
-    setIsProcessing(true);
-    setProcessLogs([]);
-    addLog(`[INFO] Memulai proses pengarsipan untuk ${slotsWithFiles.length} file...`);
-
-    for (let i = 0; i < slotsWithFiles.length; i++) {
-      const slot = slotsWithFiles[i];
-      const file = slot.file!; // We know it's not null from filter
-
-      addLog(`[INFO] Memproses: ${file.name}`);
-
-      let fileToUpload = file;
-
-      // 1. Automatic Compression for Images
-      if (file.type.startsWith('image/')) {
-        addLog(`[INFO] Mengompresi foto...`);
-
-        try {
-          const options = {
-            maxSizeMB: 1.2,
-            maxWidthOrHeight: 1920,
-            useWebWorker: false,
-            fileType: 'image/jpeg',
-            preserveExif: true
-          };
-          const compressedBlob = await imageCompression(file, options);
-          fileToUpload = new File([compressedBlob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-            type: 'image/jpeg',
-            lastModified: file.lastModified
-          });
-          addLog(`[INFO] Kompresi selesai (${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB)`);
-        } catch (error) {
-          addLog(`[ERROR] Gagal kompresi: ${file.name}`);
-        }
-      }
-
-      addLog(`[INFO] Mengunggah ke Google Drive...`);
-
-      const formData = new FormData();
-      formData.append('file', fileToUpload);
-      formData.append('metadata', JSON.stringify({
-        detectedDate: slot.detectedDate || getDefaultDate(),
-        workName: workName,
-        buildingCode: selectedBuilding.code,
-        buildingName: selectedBuilding.name,
-        buildingIndex: selectedBuilding.index,
-        progress: parseInt(progress) || 0,
-        outputPath: outputPath,
-        showBuildingIndex: showBuildingIndex,
-      }));
-
-      try {
-        const response = await fetch('/api/process', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
-        } else {
-          let errorMsg = result.error;
-          if (result.details?.error?.message) {
-            errorMsg = `${result.error}: ${result.details.error.message}`;
-          }
-          addLog(`[ERROR] Gagal: ${errorMsg}`);
-        }
-      } catch (e: any) {
-        addLog(`[ERROR] Gagal sistem: ${e.message}`);
-      }
-    }
-
-    setIsProcessing(false);
-    setSlots(INITIAL_SLOTS);
-    addLog(`[SUCCESS] Seluruh proses selesai!`);
-    showToast('Seluruh file berhasil diproses dan diarsipkan!', 'success');
-  };
 
   return (
     <main className="min-h-dvh bg-[#F2F2F7] pb-24 relative overflow-x-hidden">
@@ -668,66 +458,85 @@ export default function Home() {
                   </div>
                 </div>
 
-                <PhotoSlotGrid
-                  slots={slots}
-                  onUpdateSlot={handleUpdateSlot}
-                  onRemoveFile={(id) => handleUpdateSlot(id, { file: null, keyword: '', detectedTask: '', previewName: '' })}
-                  allHierarchy={allHierarchy}
-                  allBuildings={allBuildings}
-                />
-              </div>
+                {/* New Single Drop Zone for Post */}
+                <div className="relative group">
+                  <input
+                    type="file"
+                    multiple
+                    className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                    onChange={async (e) => {
+                      const fileList = e.target.files;
+                      if (!fileList || fileList.length === 0) return;
+                      if (!selectedBuilding || !outputPath) {
+                        showToast("Select building and set Folder ID first", "error");
+                        return;
+                      }
 
-              {slots.some(s => s.file) && (
-                <button
-                  onClick={async () => {
-                    if (!selectedBuilding || !outputPath) {
-                      showToast("Select building and set folder ID first", "error");
-                      return;
-                    }
+                      setIsProcessing(true);
+                      setProcessLogs([]);
+                      addLog(`[INFO] [POST] Memproses ${fileList.length} file...`);
 
-                    // Convert occupied slots to FileMetadata
-                    const newFilesToProcess: FileMetadata[] = await Promise.all(
-                      slots
-                        .filter(s => s.file)
-                        .map(async (s) => {
-                          let detectedDate = getDefaultDate();
-                          if (s.file!.type.startsWith('image/')) {
-                            try {
-                              const exif = await exifr.parse(s.file!);
-                              if (exif?.DateTimeOriginal) {
-                                detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
-                              }
-                            } catch (e) {
-                              console.warn('Metadata skip', e);
+                      for (let i = 0; i < fileList.length; i++) {
+                        const file = fileList[i];
+                        addLog(`[INFO] Mengunggah: ${file.name}`);
+
+                        // EXIF Date Detection
+                        let detectedDate = getDefaultDate();
+                        if (file.type.startsWith('image/')) {
+                          try {
+                            const exif = await exifr.parse(file);
+                            if (exif?.DateTimeOriginal) {
+                              detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
                             }
+                          } catch (e) {
+                            console.warn('Metadata skip', e);
                           }
+                        }
 
-                          return {
-                            id: Math.random().toString(36).substring(7),
-                            file: s.file!,
-                            originalName: s.file!.name,
-                            newName: s.previewName,
-                            detectedDate,
-                            status: 'pending' as const,
-                            building: selectedBuilding,
-                            workName: s.detectedTask || workName || 'Documentation',
-                            progress: progress,
-                            sequence: s.id
-                          };
-                        })
-                    );
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('metadata', JSON.stringify({
+                          detectedDate,
+                          workName: workName || 'Documentation',
+                          buildingCode: selectedBuilding.code,
+                          buildingName: selectedBuilding.name,
+                          buildingIndex: selectedBuilding.index,
+                          progress: progress || '0',
+                          outputPath: outputPath,
+                          showBuildingIndex: showBuildingIndex,
+                        }));
 
-                    setFiles(newFilesToProcess);
-                    // Defer execution slightly to ensure state is updated
-                    setTimeout(() => processFiles(), 100);
-                  }}
-                  disabled={isProcessing || !selectedBuilding}
-                  className="w-full bg-orange-500 text-white py-5 rounded-[2rem] font-black shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 active:scale-95 transition-all uppercase tracking-widest text-sm"
-                >
-                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                  {isProcessing ? 'Processing Slots...' : 'Process All Slots'}
-                </button>
-              )}
+                        try {
+                          const res = await fetch('/api/process', { method: 'POST', body: formData });
+                          const result = await res.json();
+                          if (result.success) {
+                            addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
+                          } else {
+                            addLog(`[ERROR] Gagal: ${result.error}`);
+                          }
+                        } catch (err: any) {
+                          addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                        }
+                      }
+                      setIsProcessing(false);
+                      showToast(`Berhasil memproses ${fileList.length} file!`, 'success');
+                    }}
+                  />
+                  <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-12 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
+                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      {isProcessing ? (
+                        <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+                      ) : (
+                        <PlusCircle className="w-6 h-6 text-orange-500" />
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <span className="text-sm font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Drop Daily Photos'}</span>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1">Select multiple files for {selectedBuilding?.code || 'NK'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               {/* Naming Preview & Logs Section */}
               {(files.length > 0 || isProcessing || processLogs.length > 0) && (
@@ -1142,7 +951,7 @@ export default function Home() {
                                     onKeyDown={(e) => {
                                       if (e.key === 'Enter') {
                                         const next = [...allHierarchy];
-                                        next[i].category = editingCategory.name.trim();
+                                        next[i].category = (editingCategory?.name || '').trim();
                                         next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                                         setAllHierarchy(next);
                                         setHasUnsavedChanges(true);
