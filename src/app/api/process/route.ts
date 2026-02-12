@@ -46,6 +46,9 @@ export async function POST(req: NextRequest) {
         const categoryPart = workParts.length > 1 ? workParts[0] : null;
         const taskPart = workParts[workParts.length - 1];
 
+        // Clean up category: Remove leading numbers and dots (e.g., "01. Persiapan" -> "Persiapan")
+        let cleanCategory = categoryPart ? categoryPart.replace(/^\d+\.\s*/, '').trim() : null;
+
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
 
@@ -70,13 +73,13 @@ export async function POST(req: NextRequest) {
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        // New Hierarchy (Location-centric): [Building Folder] -> [Category (optional)] -> [Task Name - Building Name]
+        // New Hierarchy (Location-centric): [Building Folder] -> [Category (clean)] -> [Task Name]
         const folderParts = [];
         folderParts.push(buildingFolder);
-        if (categoryPart) folderParts.push(categoryPart.trim());
+        if (cleanCategory) folderParts.push(cleanCategory);
 
-        // Final folder: Task Name - Building Name
-        const finalTaskFolder = `${taskPart.trim()} - ${sanitizedBuildingName}`;
+        // Final folder: Task Name
+        const finalTaskFolder = taskPart.trim();
         folderParts.push(finalTaskFolder);
 
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
