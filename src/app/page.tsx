@@ -690,10 +690,10 @@ export default function Home() {
                   <AnimatePresence>
                     {showDropdown && suggestions.length > 0 && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden z-[100] max-h-[250px] overflow-y-auto"
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden z-[100] max-h-[250px] overflow-y-auto"
                       >
                         <div className="p-2 space-y-1">
                           {suggestions.map((suggestion, index) => {
