@@ -45,14 +45,24 @@ export const WORK_HIERARCHY = [
             'Papan Nama Proyek',
             'Pematangan Lahan',
             'Pembersihan Lahan',
+            'Pengiriman Material',
+            'Gudang Material'
+        ]
+    },
+    {
+        category: 'SMKK',
+        tasks: [
+            'Induction',
+            'Jaring Pengaman',
             'Rambu Safety',
             'Safety Sign',
             'Toolbox Meeting'
         ]
     },
     {
-        category: '02. Pekerjaan Tanah',
+        category: 'Struktur',
         tasks: [
+            // Pekerjaan Tanah
             'Buis Beton 30cm',
             'Galian',
             'Galian Biasa',
@@ -60,12 +70,8 @@ export const WORK_HIERARCHY = [
             'Pemadatan Tanah',
             'Urugan Pasir',
             'Urugan Split',
-            'Urugan Tanah'
-        ]
-    },
-    {
-        category: '03. Struktur Bawah',
-        tasks: [
+            'Urugan Tanah',
+            // Struktur Bawah
             'Bekisting Pondasi',
             'Lantai Kerja',
             'Pancang',
@@ -75,16 +81,13 @@ export const WORK_HIERARCHY = [
             'Penetrasi Tiang Pancang',
             'Pengecoran Pondasi',
             'Pengadaan Tiang Pancang',
+            'Pengiriman Pancang', // Requested
             'Pile Cap',
             'Pondasi Batu Belah',
             'Sambungan Pancang',
             'Sloof',
-            'Tie Beam'
-        ]
-    },
-    {
-        category: '04. Struktur Atas',
-        tasks: [
+            'Tie Beam',
+            // Struktur Atas
             'Balok',
             'Balok Praktis',
             'Bekisting',
@@ -96,11 +99,17 @@ export const WORK_HIERARCHY = [
             'Plat Lantai',
             'Ramp',
             'Tangga',
-            'Wiremesh'
+            'Wiremesh',
+            // Logistik Struktur
+            'Pengiriman Besi',
+            'Pengiriman Beton',
+            'Pengiriman Pasir',
+            'Pengiriman Semen',
+            'Pengiriman Tanah'
         ]
     },
     {
-        category: '05. Arsitektur & Atap',
+        category: 'Arsitektur',
         tasks: [
             'Acian',
             'Bata Ringan',
@@ -129,11 +138,14 @@ export const WORK_HIERARCHY = [
             'Railing Tangga',
             'Rangka Metalfuring',
             'Sanitary',
-            'Wastafel'
+            'Wastafel',
+            // Logistik Arsitektur
+            'Pengiriman Bata',
+            'Pengiriman Keramik'
         ]
     },
     {
-        category: '06. MEP',
+        category: 'MEP',
         tasks: [
             'CCTV',
             'Cubicle 20KV',
@@ -156,7 +168,7 @@ export const WORK_HIERARCHY = [
         ]
     },
     {
-        category: '07. Lansekap & Lapangan',
+        category: 'Pekerjaan Lapangan',
         tasks: [
             'Grass Block',
             'Grow In',
@@ -175,7 +187,7 @@ export const WORK_HIERARCHY = [
         ]
     },
     {
-        category: '08. Furniture',
+        category: 'Furniture',
         tasks: [
             'Almari',
             'Bed UKS',
@@ -205,7 +217,7 @@ export const WORK_HIERARCHY = [
         ]
     },
     {
-        category: '10. Logistik & Material',
+        category: '10. Logistik & Material', // Or "Gudang Material On Site" if user insists
         tasks: [
             'Pengiriman Bata',
             'Pengiriman Batu',
@@ -213,6 +225,7 @@ export const WORK_HIERARCHY = [
             'Pengiriman Beton',
             'Pengiriman Keramik',
             'Pengiriman Material',
+            'Pengiriman Pancang', // Added
             'Pengiriman Pasir',
             'Pengiriman Semen',
             'Pengiriman Tanah'
