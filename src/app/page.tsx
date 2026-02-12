@@ -531,7 +531,7 @@ export default function Home() {
               </div>
 
               {/* Step 1: Location & Work */}
-              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden p-6 space-y-6">
+              <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-6">
                 <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
                 <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
 
@@ -826,6 +826,9 @@ export default function Home() {
                   </AnimatePresence>
                 </div>
               )}
+
+              {/* Spacer to allow scrolling when autocomplete is active */}
+              <div className="h-64" />
             </motion.div>
           )}
 
