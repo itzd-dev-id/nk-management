@@ -35,19 +35,15 @@ export const BUILDINGS: Building[] = [
 
 export const WORK_HIERARCHY = [
     {
-        category: '01. Persiapan & SMKK',
+        category: 'Persiapan',
         tasks: [
             'Barak Tenaga dan Barang',
             'Bouwplank',
-            'Induction',
-            'Jaring Pengaman',
             'Mobilisasi Alat',
             'Pagar Sementara',
             'Papan Nama Proyek',
             'Pematangan Lahan',
-            'Pembersihan Lahan',
-            'Pengiriman Material',
-            'Gudang Material'
+            'Pembersihan Lahan'
         ]
     },
     {
@@ -82,7 +78,6 @@ export const WORK_HIERARCHY = [
             'Penetrasi Tiang Pancang',
             'Pengecoran Pondasi',
             'Pengadaan Tiang Pancang',
-            'Pengiriman Pancang', // Requested
             'Pile Cap',
             'Pondasi Batu Belah',
             'Sambungan Pancang',
@@ -100,13 +95,7 @@ export const WORK_HIERARCHY = [
             'Plat Lantai',
             'Ramp',
             'Tangga',
-            'Wiremesh',
-            // Logistik Struktur
-            'Pengiriman Besi',
-            'Pengiriman Beton',
-            'Pengiriman Pasir',
-            'Pengiriman Semen',
-            'Pengiriman Tanah'
+            'Wiremesh'
         ]
     },
     {
@@ -139,10 +128,7 @@ export const WORK_HIERARCHY = [
             'Railing Tangga',
             'Rangka Metalfuring',
             'Sanitary',
-            'Wastafel',
-            // Logistik Arsitektur
-            'Pengiriman Bata',
-            'Pengiriman Keramik'
+            'Wastafel'
         ]
     },
     {
@@ -206,7 +192,7 @@ export const WORK_HIERARCHY = [
         ]
     },
     {
-        category: '09. Dokumentasi',
+        category: 'Dokumentasi',
         tasks: [
             'As Built Drawing',
             'Dokumentasi Material',
@@ -218,7 +204,7 @@ export const WORK_HIERARCHY = [
         ]
     },
     {
-        category: '10. Logistik & Material', // Or "Gudang Material On Site" if user insists
+        category: 'Logistik & Material',
         tasks: [
             'Pengiriman Bata',
             'Pengiriman Batu',
@@ -226,7 +212,7 @@ export const WORK_HIERARCHY = [
             'Pengiriman Beton',
             'Pengiriman Keramik',
             'Pengiriman Material',
-            'Pengiriman Pancang', // Added
+            'Pengiriman Pancang',
             'Pengiriman Pasir',
             'Pengiriman Semen',
             'Pengiriman Tanah'

@@ -1,25 +1,31 @@
 [
     {
-        "category": "01. Persiapan & SMKK",
+        "category": "Persiapan",
         "_description": "Pekerjaan Persiapan Lahan, Fasilitas Proyek, dan Keselamatan Konstruksi",
         "tasks": [
             "Barak Tenaga dan Barang",
             "Bouwplank",
-            "Induction",
-            "Jaring Pengaman",
             "Mobilisasi Alat",
             "Pagar Sementara",
             "Papan Nama Proyek",
             "Pematangan Lahan",
-            "Pembersihan Lahan",
+            "Pembersihan Lahan"
+        ]
+    },
+    {
+        "category": "SMKK",
+        "_description": "Sistem Manajemen Keselamatan Konstruksi",
+        "tasks": [
+            "Induction",
+            "Jaring Pengaman",
             "Rambu Safety",
             "Safety Sign",
             "Toolbox Meeting"
         ]
     },
     {
-        "category": "02. Pekerjaan Tanah",
-        "_description": "Pekerjaan Galian, Urugan, dan Pemadatan Tanah",
+        "category": "Struktur",
+        "_description": "Pekerjaan Tanah, Struktur Bawah dan Struktur Atas",
         "tasks": [
             "Buis Beton 30cm",
             "Galian",
@@ -28,13 +34,7 @@
             "Pemadatan Tanah",
             "Urugan Pasir",
             "Urugan Split",
-            "Urugan Tanah"
-        ]
-    },
-    {
-        "category": "03. Struktur Bawah",
-        "_description": "Pekerjaan Pondasi, Pile Cap, dan Struktur Bawah Tanah",
-        "tasks": [
+            "Urugan Tanah",
             "Bekisting Pondasi",
             "Lantai Kerja",
             "Pancang",
@@ -48,13 +48,7 @@
             "Pondasi Batu Belah",
             "Sambungan Pancang",
             "Sloof",
-            "Tie Beam"
-        ]
-    },
-    {
-        "category": "04. Struktur Atas",
-        "_description": "Pekerjaan Rangka Bangunan, Kolom, Balok, dan Plat Lantai",
-        "tasks": [
+            "Tie Beam",
             "Balok",
             "Balok Praktis",
             "Bekisting",
@@ -70,8 +64,8 @@
         ]
     },
     {
-        "category": "05. Arsitektur & Atap",
-        "_description": "Pekerjaan Finishing Dinding, Lantai, Kusen, dan Penutup Atap",
+        "category": "Arsitektur",
+        "_description": "Pekerjaan Arsitektur Dinding, Lantai, Plafon, Pintu, Jendela dan Sanitasi",
         "tasks": [
             "Acian",
             "Bata Ringan",
@@ -104,8 +98,8 @@
         ]
     },
     {
-        "category": "06. MEP",
-        "_description": "Pekerjaan Mekanikal, Elektrikal, dan Plumbing (Listrik/Air)",
+        "category": "MEP",
+        "_description": "Mechanical, Electrical, and Plumbing",
         "tasks": [
             "CCTV",
             "Cubicle 20KV",
@@ -128,8 +122,8 @@
         ]
     },
     {
-        "category": "07. Lansekap & Lapangan",
-        "_description": "Pekerjaan Luar Bangunan, Lapangan Olahraga, dan Taman",
+        "category": "Pekerjaan Lapangan",
+        "_description": "Pekerjaan Lansekap, Saluran, dan Fasilitas Luar",
         "tasks": [
             "Grass Block",
             "Grow In",
@@ -148,8 +142,8 @@
         ]
     },
     {
-        "category": "08. Furniture",
-        "_description": "Pekerjaan Pengadaan Mebel dan Interior",
+        "category": "Furniture",
+        "_description": "Pengadaan dan Instalasi Furniture",
         "tasks": [
             "Almari",
             "Bed UKS",
@@ -167,8 +161,8 @@
         ]
     },
     {
-        "category": "09. Dokumentasi",
-        "_description": "Pekerjaan Pelaporan dan Dokumentasi Visual Proyek",
+        "category": "Dokumentasi",
+        "_description": "Laporan dan Dokumentasi Visual Proyek",
         "tasks": [
             "As Built Drawing",
             "Dokumentasi Material",
@@ -180,7 +174,7 @@
         ]
     },
     {
-        "category": "10. Logistik & Material",
+        "category": "Logistik & Material",
         "_description": "Logistik dan Kedatangan Material di Proyek",
         "tasks": [
             "Pengiriman Bata",
