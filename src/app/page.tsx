@@ -723,8 +723,26 @@ export default function Home() {
                     addLog(`[INFO] Submitting documentation...`);
 
                     const file = pendingPostFile;
+                    let uploadFile: File | Blob = file;
 
-                    // Final Metadata Prep
+                    // 1. Image Compression
+                    if (file.type.startsWith('image/')) {
+                      try {
+                        addLog(`[INFO] Compressing image...`);
+                        const options = {
+                          maxSizeMB: 1,
+                          maxWidthOrHeight: 1920,
+                          useWebWorker: true
+                        };
+                        uploadFile = await imageCompression(file, options);
+                        addLog(`[INFO] Compression done: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`);
+                      } catch (err) {
+                        console.error('Compression error:', err);
+                        addLog(`[WARN] Compression failed, using original.`);
+                      }
+                    }
+
+                    // 2. Final Metadata Prep
                     let detectedDate = getDefaultDate();
                     if (file.type.startsWith('image/')) {
                       try {
@@ -738,7 +756,7 @@ export default function Home() {
                     }
 
                     const formData = new FormData();
-                    formData.append('file', file);
+                    formData.append('file', uploadFile, file.name);
                     formData.append('metadata', JSON.stringify({
                       detectedDate,
                       workName: workName || 'Documentation',
