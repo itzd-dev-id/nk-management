@@ -12,7 +12,7 @@ Berikut adalah daftar pekerjaan yang disusun berdasarkan urutan pelaksanaan di l
    - Sewa Gudang
    - Sewa Pagar Sementara Proyek (Seng Gelombang t=2m)
    - Papan Nama Proyek
-   - Brak Tenaga dan Barang
+   - Barak Tenaga dan Barang
 
 ---
 
@@ -30,11 +30,13 @@ Berikut adalah daftar pekerjaan yang disusun berdasarkan urutan pelaksanaan di l
 
 ## 3. Pekerjaan Struktur (Structural)
 1. **Struktur Bawah (Sub-structure)**
-   - Pekerjaan Galian Pondasi (PC-2 s.d PC-15A)
-   - Urugan Pasir tebal 10 cm & Lantai Kerja
+   - Galian Pondasi PC-2 s.d PC-15A
+   - Urugan Pasir tebal 10 cm
+2. **Pekerjaan Pondasi & Beton Bawah**
+   - Lantai Kerja (Lean Concrete)
    - Pembuatan Pile Cap (Beton fc 25 MPa, Besi Tulangan, Bekisting)
    - Pekerjaan Tie Beam (TB-1, TB-2)
-2. **Struktur Atas (Super-structure)**
+3. **Struktur Atas (Super-structure)**
    - Pekerjaan Kolom (K-1 s.d K-6)
    - Pekerjaan Balok (B-1, B-2)
    - Pekerjaan Plat Lantai (t = 120 mm, t = 150 mm)
