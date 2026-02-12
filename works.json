@@ -3,6 +3,7 @@
         "category": "Persiapan",
         "_description": "Pekerjaan Persiapan Lahan dan Fasilitas Proyek",
         "tasks": [
+            "Barak Tenaga dan Barang",
             "Bouwplank",
             "Mobilisasi Alat",
             "Pagar Proyek",
@@ -259,6 +260,7 @@
             "Bekisting",
             "Bekisting Pondasi",
             "Besi Tulangan Ulir",
+            "Lantai Kerja",
             "Pancang",
             "Pedestal",
             "Pembesian",
@@ -281,7 +283,6 @@
             "Buis Beton 30cm",
             "Galian",
             "Galian Biasa",
-            "Lantai Kerja",
             "Mengangkut Tanah",
             "Pemadatan",
             "Pemadatan Tanah",
