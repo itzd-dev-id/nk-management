@@ -37,6 +37,7 @@ export default function Home() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const keywordInputRef = React.useRef<HTMLInputElement>(null);
+  const [pendingPostFile, setPendingPostFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -167,6 +168,34 @@ export default function Home() {
       removeTag(postTags.length - 1);
     }
   };
+
+  // Deferred Detection Effect: Run when tags or pending file changes
+  useEffect(() => {
+    if (!pendingPostFile) return;
+
+    const fileName = pendingPostFile.name.split('.')[0];
+    const fullKeyword = [...postTags, fileName].join(', ');
+
+    // Detect Building
+    const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
+    if (detectedB) {
+      setSelectedBuilding(detectedB);
+    }
+
+    // Detect Task
+    const detectedT = detectWorkFromKeyword(
+      fullKeyword,
+      allHierarchy,
+      (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
+    );
+
+    if (detectedT) {
+      const category = allHierarchy.find(h => h.tasks.includes(detectedT))?.category;
+      if (category) {
+        setWorkName(`${category} / ${detectedT}`);
+      }
+    }
+  }, [postTags, pendingPostFile, allBuildings, allHierarchy]);
 
   // Sync Config from Vercel KV
   const fetchConfig = useCallback(async (filename: string) => {
@@ -537,105 +566,62 @@ export default function Home() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-
-                      if (!selectedBuilding || !outputPath) {
-                        showToast("Select building and set Folder ID first", "error");
-                        return;
-                      }
-
-                      setIsProcessing(true);
-                      setProcessLogs([]);
-                      addLog(`[INFO] [SMART] Memproses file: ${file.name}...`);
-
-                      // 1. Keyword & Building Detection (from Filename + Input)
-                      const fileName = file.name.split('.')[0];
-                      const fullKeyword = [...postTags, fileName].join(', ');
-
-                      // Detect Building
-                      const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                      let finalBuilding = selectedBuilding;
-                      if (detectedB) {
-                        finalBuilding = detectedB;
-                        setSelectedBuilding(detectedB);
-                        addLog(`[DETECT] Gedung: ${detectedB.name}`);
-                      }
-
-                      // Detect Task
-                      const detectedT = detectWorkFromKeyword(
-                        fullKeyword,
-                        allHierarchy,
-                        (finalBuilding?.code === 'GL' || finalBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
-                      );
-
-                      let finalWorkName = workName || 'Documentation';
-                      if (detectedT) {
-                        const category = allHierarchy.find(h => h.tasks.includes(detectedT))?.category;
-                        if (category) {
-                          finalWorkName = `${category} / ${detectedT}`;
-                          setWorkName(finalWorkName);
-                          addLog(`[DETECT] Pekerjaan: ${detectedT}`);
-                        }
-                      }
-
-                      // 2. EXIF Date Detection
-                      let detectedDate = getDefaultDate();
-                      if (file.type.startsWith('image/')) {
-                        try {
-                          const exif = await exifr.parse(file);
-                          if (exif?.DateTimeOriginal) {
-                            detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
-                          }
-                        } catch (e) {
-                          console.warn('Metadata skip', e);
-                        }
-                      }
-
-                      // 3. Process Upload
-                      const formData = new FormData();
-                      formData.append('file', file);
-                      formData.append('metadata', JSON.stringify({
-                        detectedDate,
-                        workName: finalWorkName,
-                        buildingCode: finalBuilding.code,
-                        buildingName: finalBuilding.name,
-                        buildingIndex: finalBuilding.index,
-                        progress: progress || '0',
-                        outputPath: outputPath,
-                        showBuildingIndex: showBuildingIndex,
-                      }));
-
-                      try {
-                        const res = await fetch('/api/process', { method: 'POST', body: formData });
-                        const result = await res.json();
-                        if (result.success) {
-                          addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
-                          setPostTags([]); // Reset tags after success
-                          setPostKeyword('');
-                        } else {
-                          addLog(`[ERROR] Gagal: ${result.error}`);
-                        }
-                      } catch (err: any) {
-                        addLog(`[ERROR] Gagal sistem: ${err.message}`);
-                      }
-
-                      setIsProcessing(false);
+                      setPendingPostFile(file);
+                      addLog(`[FILE] File terpilih: ${file.name}`);
                     }}
                   />
-                  <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-16 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
-                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                      {isProcessing ? (
-                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-                      ) : (
-                        <PlusCircle className="w-8 h-8 text-orange-500" />
-                      )}
+                  {pendingPostFile ? (
+                    <div className="bg-orange-50/50 border-2 border-orange-200 rounded-[2rem] p-4 flex items-center gap-4 relative overflow-hidden group">
+                      <div className="absolute top-2 right-2 z-20">
+                        <button
+                          onClick={() => {
+                            setPendingPostFile(null);
+                            setPostTags([]);
+                          }}
+                          className="bg-white/80 backdrop-blur shadow-sm text-slate-400 hover:text-red-500 rounded-full p-1.5 transition-colors"
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white border border-orange-100 shrink-0 shadow-sm">
+                        {pendingPostFile.type.startsWith('image/') ? (
+                          <img
+                            src={URL.createObjectURL(pendingPostFile)}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <FileIcon className="w-8 h-8 text-orange-200" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0 pr-8">
+                        <p className="text-xs font-black text-slate-900 truncate uppercase mt-1">{pendingPostFile.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-bold text-orange-500/60 uppercase tracking-tight">READY TO PROCESS</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <span className="text-base font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Capture / Upload'}</span>
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-1">
-                        {selectedBuilding ? `Ready for ${selectedBuilding.code}` : 'Take Photo or Select File'}
-                      </p>
+                  ) : (
+                    <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-16 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
+                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        {isProcessing ? (
+                          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                        ) : (
+                          <PlusCircle className="w-8 h-8 text-orange-500" />
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <span className="text-base font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Capture / Upload'}</span>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-1">
+                          {selectedBuilding ? `Ready for ${selectedBuilding.code}` : 'Take Photo or Select File'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="relative space-y-2">
@@ -721,6 +707,85 @@ export default function Home() {
                   </AnimatePresence>
                 </div>
               </div>
+              {/* Submit Button */}
+              {pendingPostFile && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onClick={async () => {
+                    if (!selectedBuilding || !outputPath) {
+                      showToast("Pilih Gedung dan Isi Folder ID di Settings dulu!", "error");
+                      return;
+                    }
+
+                    setIsProcessing(true);
+                    setProcessLogs([]);
+                    addLog(`[INFO] Submitting documentation...`);
+
+                    const file = pendingPostFile;
+
+                    // Final Metadata Prep
+                    let detectedDate = getDefaultDate();
+                    if (file.type.startsWith('image/')) {
+                      try {
+                        const exif = await exifr.parse(file);
+                        if (exif?.DateTimeOriginal) {
+                          detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
+                        }
+                      } catch (e) {
+                        console.warn('Metadata skip', e);
+                      }
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('metadata', JSON.stringify({
+                      detectedDate,
+                      workName: workName || 'Documentation',
+                      buildingCode: selectedBuilding.code,
+                      buildingName: selectedBuilding.name,
+                      buildingIndex: selectedBuilding.index,
+                      progress: progress || '0',
+                      outputPath: outputPath,
+                      showBuildingIndex: showBuildingIndex,
+                    }));
+
+                    try {
+                      const res = await fetch('/api/process', { method: 'POST', body: formData });
+                      const result = await res.json();
+                      if (result.success) {
+                        addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
+                        setPendingPostFile(null);
+                        setPostTags([]);
+                        setPostKeyword('');
+                        showToast("Documentation uploaded successfully!", "success");
+                      } else {
+                        addLog(`[ERROR] Gagal: ${result.error}`);
+                        showToast(result.error, "error");
+                      }
+                    } catch (err: any) {
+                      addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                      showToast(err.message, "error");
+                    }
+
+                    setIsProcessing(false);
+                  }}
+                  disabled={isProcessing}
+                  className="w-full bg-slate-900 text-white rounded-[2rem] py-4 text-sm font-black uppercase tracking-widest shadow-xl shadow-slate-200 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-5 h-5" />
+                      <span>Submit Documentation</span>
+                    </>
+                  )}
+                </motion.button>
+              )}
 
               {/* Naming Preview & Logs Section */}
               {(files.length > 0 || isProcessing || processLogs.length > 0) && (
