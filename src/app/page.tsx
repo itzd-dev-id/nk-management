@@ -152,7 +152,7 @@ export default function Home() {
           detectedTask = detectWorkFromKeyword(
             tag,
             allHierarchy,
-            (detectedB_new?.code === 'GL' || (!detectedB_new && selectedBuilding?.code === 'GL')) ? 'Material On Site' : undefined
+            (detectedB_new?.code === 'GL' || (!detectedB_new && selectedBuilding?.code === 'GL')) ? '10. Logistik & Material' : undefined
           );
           if (detectedTask) break; // Stop at first successful detection
         }
@@ -266,11 +266,7 @@ export default function Home() {
       if (wData) {
         // Enforce Sorting: Persiapan first, then alphabetical
         const sortedW = (wData as any[]).sort((a, b) => {
-          const aCat = a.category.toLowerCase();
-          const bCat = b.category.toLowerCase();
-          if (aCat === 'persiapan') return -1;
-          if (bCat === 'persiapan') return 1;
-          return a.category.localeCompare(b.category);
+          return a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' });
         });
         setAllHierarchy(sortedW);
       } else {
@@ -1111,13 +1107,7 @@ export default function Home() {
                             existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
                             next.push({ category: catName, tasks: [taskName] });
-                            next.sort((a, b) => {
-                              const aCat = a.category.toLowerCase();
-                              const bCat = b.category.toLowerCase();
-                              if (aCat === 'persiapan') return -1;
-                              if (bCat === 'persiapan') return 1;
-                              return a.category.localeCompare(b.category);
-                            });
+                            next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                           }
                           setAllHierarchy(next);
                           setHasUnsavedChanges(true);
@@ -1153,13 +1143,7 @@ export default function Home() {
                                       if (e.key === 'Enter') {
                                         const next = [...allHierarchy];
                                         next[i].category = editingCategory.name.trim();
-                                        next.sort((a, b) => {
-                                          const aCat = a.category.toLowerCase();
-                                          const bCat = b.category.toLowerCase();
-                                          if (aCat === 'persiapan') return -1;
-                                          if (bCat === 'persiapan') return 1;
-                                          return a.category.localeCompare(b.category);
-                                        });
+                                        next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                                         setAllHierarchy(next);
                                         setHasUnsavedChanges(true);
                                         setEditingCategory(null);
@@ -1171,13 +1155,7 @@ export default function Home() {
                                     onClick={() => {
                                       const next = [...allHierarchy];
                                       next[i].category = editingCategory.name.trim();
-                                      next.sort((a, b) => {
-                                        const aCat = a.category.toLowerCase();
-                                        const bCat = b.category.toLowerCase();
-                                        if (aCat === 'persiapan') return -1;
-                                        if (bCat === 'persiapan') return 1;
-                                        return a.category.localeCompare(b.category);
-                                      });
+                                      next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                                       setAllHierarchy(next);
                                       setHasUnsavedChanges(true);
                                       setEditingCategory(null);
