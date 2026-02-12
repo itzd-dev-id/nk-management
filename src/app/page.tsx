@@ -31,6 +31,7 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
+  const [postKeyword, setPostKeyword] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -426,11 +427,24 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Quick Detect Keyword</label>
+                    <div className="relative group">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                        <Info className="w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
+                      </div>
+                      <input
+                        type="text"
+                        value={postKeyword}
+                        onChange={(e) => setPostKeyword(e.target.value)}
+                        placeholder="Ex: Pancang"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Work Progress (%)</label>
                     <div className="bg-slate-50 border border-slate-200 rounded-2xl py-4 flex items-center justify-center gap-1 group relative">
-                      <span className="invisible absolute whitespace-pre text-2xl font-black px-1 min-w-[2ch]">
-                        {progress || '0'}
-                      </span>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -446,27 +460,17 @@ export default function Home() {
                       <span className="text-lg font-black text-slate-400 mt-1">%</span>
                     </div>
                   </div>
-
-                  <div className="flex flex-col items-center justify-center gap-1.5 pb-1">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 text-center">Live Data</span>
-                    </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-tight text-center">
-                      Actual Field<br />Progress Percentage
-                    </p>
-                  </div>
                 </div>
 
                 {/* New Single Drop Zone for Post */}
                 <div className="relative group">
                   <input
                     type="file"
-                    multiple
                     className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
                     onChange={async (e) => {
-                      const fileList = e.target.files;
-                      if (!fileList || fileList.length === 0) return;
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
                       if (!selectedBuilding || !outputPath) {
                         showToast("Select building and set Folder ID first", "error");
                         return;
@@ -474,65 +478,94 @@ export default function Home() {
 
                       setIsProcessing(true);
                       setProcessLogs([]);
-                      addLog(`[INFO] [POST] Memproses ${fileList.length} file...`);
+                      addLog(`[INFO] [SMART] Memproses file: ${file.name}...`);
 
-                      for (let i = 0; i < fileList.length; i++) {
-                        const file = fileList[i];
-                        addLog(`[INFO] Mengunggah: ${file.name}`);
+                      // 1. Keyword & Building Detection (from Filename + Input)
+                      const fileName = file.name.split('.')[0];
+                      const fullKeyword = `${postKeyword}, ${fileName}`;
 
-                        // EXIF Date Detection
-                        let detectedDate = getDefaultDate();
-                        if (file.type.startsWith('image/')) {
-                          try {
-                            const exif = await exifr.parse(file);
-                            if (exif?.DateTimeOriginal) {
-                              detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
-                            }
-                          } catch (e) {
-                            console.warn('Metadata skip', e);
-                          }
-                        }
+                      // Detect Building
+                      const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                      let finalBuilding = selectedBuilding;
+                      if (detectedB) {
+                        finalBuilding = detectedB;
+                        setSelectedBuilding(detectedB);
+                        addLog(`[DETECT] Gedung: ${detectedB.name}`);
+                      }
 
-                        const formData = new FormData();
-                        formData.append('file', file);
-                        formData.append('metadata', JSON.stringify({
-                          detectedDate,
-                          workName: workName || 'Documentation',
-                          buildingCode: selectedBuilding.code,
-                          buildingName: selectedBuilding.name,
-                          buildingIndex: selectedBuilding.index,
-                          progress: progress || '0',
-                          outputPath: outputPath,
-                          showBuildingIndex: showBuildingIndex,
-                        }));
+                      // Detect Task
+                      const detectedT = detectWorkFromKeyword(
+                        fullKeyword,
+                        allHierarchy,
+                        (finalBuilding?.code === 'GL' || finalBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
+                      );
 
-                        try {
-                          const res = await fetch('/api/process', { method: 'POST', body: formData });
-                          const result = await res.json();
-                          if (result.success) {
-                            addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
-                          } else {
-                            addLog(`[ERROR] Gagal: ${result.error}`);
-                          }
-                        } catch (err: any) {
-                          addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                      let finalWorkName = workName || 'Documentation';
+                      if (detectedT) {
+                        const category = allHierarchy.find(h => h.tasks.includes(detectedT))?.category;
+                        if (category) {
+                          finalWorkName = `${category} / ${detectedT}`;
+                          setWorkName(finalWorkName);
+                          addLog(`[DETECT] Pekerjaan: ${detectedT}`);
                         }
                       }
+
+                      // 2. EXIF Date Detection
+                      let detectedDate = getDefaultDate();
+                      if (file.type.startsWith('image/')) {
+                        try {
+                          const exif = await exifr.parse(file);
+                          if (exif?.DateTimeOriginal) {
+                            detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
+                          }
+                        } catch (e) {
+                          console.warn('Metadata skip', e);
+                        }
+                      }
+
+                      // 3. Process Upload
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      formData.append('metadata', JSON.stringify({
+                        detectedDate,
+                        workName: finalWorkName,
+                        buildingCode: finalBuilding.code,
+                        buildingName: finalBuilding.name,
+                        buildingIndex: finalBuilding.index,
+                        progress: progress || '0',
+                        outputPath: outputPath,
+                        showBuildingIndex: showBuildingIndex,
+                      }));
+
+                      try {
+                        const res = await fetch('/api/process', { method: 'POST', body: formData });
+                        const result = await res.json();
+                        if (result.success) {
+                          addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
+                          setPostKeyword(''); // Reset keyword after success
+                        } else {
+                          addLog(`[ERROR] Gagal: ${result.error}`);
+                        }
+                      } catch (err: any) {
+                        addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                      }
+
                       setIsProcessing(false);
-                      showToast(`Berhasil memproses ${fileList.length} file!`, 'success');
                     }}
                   />
-                  <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-12 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
-                    <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                  <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-16 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
+                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                       {isProcessing ? (
-                        <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
                       ) : (
-                        <PlusCircle className="w-6 h-6 text-orange-500" />
+                        <PlusCircle className="w-8 h-8 text-orange-500" />
                       )}
                     </div>
                     <div className="text-center">
-                      <span className="text-sm font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Drop Daily Photos'}</span>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1">Select multiple files for {selectedBuilding?.code || 'NK'}</p>
+                      <span className="text-base font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Capture / Upload'}</span>
+                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-1">
+                        {selectedBuilding ? `Ready for ${selectedBuilding.code}` : 'Take Photo or Select File'}
+                      </p>
                     </div>
                   </div>
                 </div>
