@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -1156,12 +1156,21 @@ export default function Home() {
 
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
                     <div className="space-y-2">
-                      <input
-                        id="new-work-cat"
-                        type="text"
-                        placeholder="Category (ex: Arsitektur)"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
-                      />
+                      <div className="relative">
+                        <select
+                          id="new-work-cat"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-orange-500 appearance-none"
+                          defaultValue=""
+                        >
+                          <option value="" disabled>Select Category...</option>
+                          {allHierarchy.map((h, i) => (
+                            <option key={i} value={h.category}>{h.category}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
+                      </div>
                       <input
                         id="new-work-task"
                         type="text"
@@ -1172,7 +1181,7 @@ export default function Home() {
                     <button
                       disabled={isSavingCloud}
                       onClick={() => {
-                        const catInput = document.getElementById('new-work-cat') as HTMLInputElement;
+                        const catInput = document.getElementById('new-work-cat') as HTMLSelectElement;
                         const taskInput = document.getElementById('new-work-task') as HTMLInputElement;
                         if (catInput.value && taskInput.value) {
                           const next = [...allHierarchy];
@@ -1186,6 +1195,7 @@ export default function Home() {
                             }
                             existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
+                            // Should not happen with dropdown, but safe to keep
                             next.push({ category: catName, tasks: [taskName] });
                             next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                           }
@@ -1194,6 +1204,8 @@ export default function Home() {
                           showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName}`, 'success');
                           catInput.value = '';
                           taskInput.value = '';
+                        } else {
+                          showToast('Mohon pilih kategori dan isi nama tugas', 'error');
                         }
                       }}
                       className="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
