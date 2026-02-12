@@ -732,7 +732,8 @@ export default function Home() {
                         const options = {
                           maxSizeMB: 1,
                           maxWidthOrHeight: 1920,
-                          useWebWorker: true
+                          useWebWorker: true,
+                          preserveExif: true
                         };
                         uploadFile = await imageCompression(file, options);
                         addLog(`[INFO] Compression done: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`);
