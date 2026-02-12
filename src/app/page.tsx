@@ -425,40 +425,22 @@ export default function Home() {
                 <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
                 <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Quick Detect Keyword</label>
-                    <div className="relative group">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                        <Info className="w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
-                      </div>
-                      <input
-                        type="text"
-                        value={postKeyword}
-                        onChange={(e) => setPostKeyword(e.target.value)}
-                        placeholder="Ex: Pancang"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Work Progress (%)</label>
-                    <div className="bg-slate-50 border border-slate-200 rounded-2xl py-4 flex items-center justify-center gap-1 group relative">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={progress}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          if (val.length <= 3) setProgress(val);
-                        }}
-                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
-                        style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
-                        placeholder="0"
-                      />
-                      <span className="text-lg font-black text-slate-400 mt-1">%</span>
-                    </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl py-4 flex items-center justify-center gap-1 group relative">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={progress}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        if (val.length <= 3) setProgress(val);
+                      }}
+                      className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
+                      style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
+                      placeholder="0"
+                    />
+                    <span className="text-lg font-black text-slate-400 mt-1">%</span>
                   </div>
                 </div>
 
@@ -567,6 +549,22 @@ export default function Home() {
                         {selectedBuilding ? `Ready for ${selectedBuilding.code}` : 'Take Photo or Select File'}
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Quick Detect Keyword / Hints</label>
+                  <div className="relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                      <Zap className="w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
+                    </div>
+                    <input
+                      type="text"
+                      value={postKeyword}
+                      onChange={(e) => setPostKeyword(e.target.value)}
+                      placeholder="Type building codes or work keywords..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                    />
                   </div>
                 </div>
               </div>
