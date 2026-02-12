@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
