@@ -44,7 +44,9 @@ export default function Home() {
   const [progress, setProgress] = useState('');
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
+  const [terminPath, setTerminPath] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [slots, setSlots] = useState<SlotData[]>(INITIAL_SLOTS);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -194,10 +196,12 @@ export default function Home() {
   // Persistence
   useEffect(() => {
     const savedPath = localStorage.getItem('nk_output_path');
+    const savedTerminPath = localStorage.getItem('nk_termin_path');
     const savedStorageType = localStorage.getItem('nk_storage_type') as 'local' | 'gdrive';
     const savedShowIndex = localStorage.getItem('nk_show_building_index');
 
     if (savedPath) setOutputPath(savedPath);
+    if (savedTerminPath) setTerminPath(savedTerminPath);
     if (savedStorageType) setStorageType(savedStorageType);
     if (savedShowIndex !== null) setShowBuildingIndex(savedShowIndex === 'true');
   }, []);
@@ -362,6 +366,23 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, [outputPath]);
+
+  useEffect(() => {
+    if (!terminPath) {
+      setTerminSaveStatus('idle');
+      return;
+    }
+
+    setTerminSaveStatus('saving');
+    const timer = setTimeout(() => {
+      localStorage.setItem('nk_termin_path', terminPath);
+      setTerminSaveStatus('saved');
+      const hideTimer = setTimeout(() => setTerminSaveStatus('idle'), 2000);
+      return () => clearTimeout(hideTimer);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, [terminPath]);
 
   useEffect(() => {
     if (storageType) localStorage.setItem('nk_storage_type', storageType);
@@ -754,23 +775,95 @@ export default function Home() {
             </motion.div>
           )}
 
-          {activeTab === 'queue' && (
+          {activeTab === 'termin' && (
             <motion.div
-              key="queue"
+              key="termin"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               className="space-y-6"
             >
               <div className="space-y-2 text-center pb-2">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Status</h2>
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{files.length} Items in Queue</p>
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight">Termin</h2>
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Stage Payment Documentation</p>
               </div>
-              <FileList
-                files={files}
-                onRemove={removeFile}
-                onUpdateDate={handleUpdateDate}
-              />
+
+              {allHierarchy.map((cat, idx) => (
+                <div key={idx} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-6 space-y-4">
+                  <div className="flex items-center justify-between px-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{cat.category}</span>
+                    <span className="text-[10px] font-bold text-orange-500 uppercase">{cat.tasks.length} Tasks</span>
+                  </div>
+
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      multiple
+                      className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                      onChange={async (e) => {
+                        const fileList = e.target.files;
+                        if (!fileList || fileList.length === 0) return;
+                        if (!selectedBuilding || !terminPath) {
+                          showToast("Select building and set Termin Folder ID first", "error");
+                          return;
+                        }
+
+                        setIsProcessing(true);
+                        setProcessLogs([]);
+                        addLog(`[INFO] [TERMIN] Memproses ${fileList.length} file untuk kategori ${cat.category}...`);
+
+                        for (let i = 0; i < fileList.length; i++) {
+                          const file = fileList[i];
+                          addLog(`[INFO] Mengunggah: ${file.name}`);
+
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          formData.append('metadata', JSON.stringify({
+                            detectedDate: getDefaultDate(),
+                            workName: `${cat.category} / Documentation`,
+                            buildingCode: selectedBuilding.code,
+                            buildingName: selectedBuilding.name,
+                            buildingIndex: selectedBuilding.index,
+                            progress: 100, // Termin usually 100% per milestone
+                            outputPath: terminPath, // Use termin folder
+                            showBuildingIndex: showBuildingIndex,
+                          }));
+
+                          try {
+                            const res = await fetch('/api/process', { method: 'POST', body: formData });
+                            const result = await res.json();
+                            if (result.success) {
+                              addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
+                            } else {
+                              addLog(`[ERROR] Gagal: ${result.error}`);
+                            }
+                          } catch (err: any) {
+                            addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                          }
+                        }
+                        setIsProcessing(false);
+                        showToast(`File Termin ${cat.category} berhasil diproses!`, 'success');
+                      }}
+                    />
+                    <div className="border-2 border-dashed border-slate-200 rounded-2xl py-8 flex flex-col items-center justify-center gap-2 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all">
+                      <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-orange-100 mb-1 transition-colors">
+                        <PlusCircle className="w-5 h-5 text-slate-400 group-hover:text-orange-500" />
+                      </div>
+                      <span className="text-xs font-black text-slate-400 group-hover:text-orange-600 uppercase tracking-widest">Drop Termin Files</span>
+                      <p className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">PDF or Images for {cat.category.split('. ')[1] || cat.category}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Common Logs for Termin */}
+              {(isProcessing || processLogs.length > 0) && (
+                <ProcessLog
+                  logs={processLogs}
+                  isProcessing={isProcessing}
+                  onClose={() => setProcessLogs([])}
+                />
+              )}
             </motion.div>
           )}
 
@@ -1310,6 +1403,29 @@ export default function Home() {
                       )}
                     </div>
                     <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Data database (Gedung & Pekerjaan) akan otomatis tersimpan dalam folder Cloud ini.</p>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
+                    <div className="flex items-center gap-3 text-slate-400">
+                      <ClipboardList className="w-5 h-5 text-orange-500" />
+                      <span className="text-xs font-black uppercase tracking-tight text-slate-900">Google Drive Termin Folder ID</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={terminPath}
+                        onChange={(e) => setTerminPath(e.target.value)}
+                        placeholder="Enter Folder ID for Termin..."
+                        className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-300"
+                      />
+                      {terminSaveStatus === 'saved' && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-green-500 bg-white pl-2">
+                          <Check className="w-4 h-4" />
+                          <span className="text-[9px] font-black uppercase">Saved</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Dokumen pembiayaan termin akan otomatis tersimpan dalam folder Cloud khusus ini.</p>
                   </div>
                 </div>
 

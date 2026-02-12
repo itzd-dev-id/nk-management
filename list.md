@@ -1,195 +1,170 @@
-# Daftar Pekerjaan Proyek (Termin)
+# Daftar Pekerjaan Proyek (Sesuai Fase Termin)
 
-## 1. Persiapan
+Berikut adalah daftar lengkap pekerjaan yang terorganisir berdasarkan 10 Fase Kontruksi untuk pelacakan termin.
+
+## 01. Persiapan & SMKK
+- Barak Tenaga dan Barang
 - Bouwplank
+- Induction
+- Jaring Pengaman
 - Mobilisasi Alat
-- Pagar Proyek
 - Pagar Sementara
 - Papan Nama Proyek
 - Pematangan Lahan
 - Pembersihan Lahan
+- Rambu Safety
+- Safety Sign
+- Toolbox Meeting
 
 ---
 
-## 2. Arsitektur
+## 02. Pekerjaan Tanah
+- Buis Beton 30cm
+- Galian
+- Galian Biasa
+- Mengangkut Tanah
+- Pemadatan Tanah
+- Urugan Pasir
+- Urugan Split
+- Urugan Tanah
+
+---
+
+## 03. Struktur Bawah
+- Bekisting Pondasi
+- Lantai Kerja
+- Pancang
+- Pedestal
+- Pembesian Pondasi
+- Pemotongan Kepala Pancang
+- Penetrasi Tiang Pancang
+- Pengecoran Pondasi
+- Pengadaan Tiang Pancang
+- Pile Cap
+- Pondasi Batu Belah
+- Sambungan Pancang
+- Sloof
+- Tie Beam
+
+---
+
+## 04. Struktur Atas
+- Balok
+- Balok Praktis
+- Bekisting
+- Finish Trowel
+- Kolom
+- Kolom Praktis
+- Pembesian
+- Pengecoran
+- Plat Lantai
+- Ramp
+- Tangga
+- Wiremesh
+
+---
+
+## 05. Arsitektur & Atap
 - Acian
 - Bata Ringan
-- Bordes Tangga
 - Cat Eksterior
-- Cat Epoxy
 - Cat Interior
 - Closet
 - Daun Jendela
 - Daun Pintu
 - Dinding Rooster
-- Finish Trowel
 - Finishing Beton Expose
 - Floor Drain
-- Granit Lantai
-- Handrail
-- Handrail Tangga
+- Guiding Block
 - Homogeneous Tile Polish
 - Homogeneous Tile Unpolished
 - Kanopi
-- Keramik
-- Keramik Dinding
 - Keramik Lantai
 - Kusen
-- Kusen Jendela
-- Kusen Pintu
-- List Plafond
+- Lisplang
+- Nok Atap
 - Pasangan Bata
-- Pasangan Batako
-- Pengecatan
-- Plafon
+- Penutup Atap
 - Plafon Gypsum
 - Plafon Kalsiboard
 - Plafond UPVC
 - Plesteran
-- Plesteran Dalam
-- Plesteran Luar
-- Plesteran Mortar Siap Pakai
-- Railing Balkon
+- Railing Tangga
 - Rangka Metalfuring
 - Sanitary
-- Shower
 - Wastafel
 
 ---
 
-## 3. Atap
-- Lisplang
-- Nok Atap
-- Penutup Atap
-- Penutup Genteng
-- Penutup Spandek
-- Rangka Atap
-- Rangka Baja
-- Rangka Kayu
-- Talang
+## 06. MEP
+- CCTV
+- Cubicle 20KV
+- Fire Alarm
+- Genset
+- Genset 300KVA Silent
+- Grounding
+- Instalasi AC
+- Instalasi Listrik
+- Instalasi Pipa Air
+- Instalasi Pipa Limbah
+- Panel Listrik
+- Pompa Air
+- Smoke Detector
+- Split AC
+- Stop Kontak
+- Tandon Air
+- Titik Lampu
+- VRV AC
 
 ---
 
-## 4. Dokumentasi
+## 07. Lansekap & Lapangan
+- Grass Block
+- Grow In
+- Jaring Pengaman Lapangan
+- Land Clearing
+- Marka Lapangan
+- Media Tanam
+- Net Voli
+- Paving Block
+- Penanaman Pohon
+- Penanaman Rumput
+- Ring Basket
+- Rumput
+- Saluran Drainase
+- Taman
+
+---
+
+## 08. Furniture
+- Almari
+- Bed UKS
+- Kitchen Set
+- Kursi Guru
+- Kursi Kelas
+- Kursi Rapat
+- Lemari
+- Meja Guru
+- Meja Kelas
+- Meja Rapat
+- Papan Tulis
+- Signage
+- Sofa
+
+---
+
+## 09. Dokumentasi
 - As Built Drawing
 - Dokumentasi Material
 - Drone View
-- Foto Udara
 - Inspeksi Bersama
-- Joint Inspection
 - Progress Bulanan
 - Progress Harian
 - Progress Mingguan
 
 ---
 
-## 5. Furniture
-- Almari
-- Bed UKS
-- Cleaning
-- Kitchen Set
-- Kursi Guru
-- Kursi Kelas
-- Kursi Lab
-- Kursi Nakes
-- Kursi Pasien
-- Kursi Rapat
-- Lemari
-- Marking Parkir
-- Meja Guru
-- Meja Kelas
-- Meja Lab
-- Meja Rapat
-- Meja Sofa
-- Nakas
-- Papan Nama
-- Papan Tulis
-- Pembersihan Akhir
-- Signage
-- Sofa
-
----
-
-## 6. K3 dan Keselamatan
-- Audit K3
-- Audit Mingguan
-- Barricade
-- Helmet Area
-- Induction
-- Jaring Pengaman
-- Pagar Pengaman
-- Perancah
-- Rambu Safety
-- Safety Net
-- Safety Sign
-- Scaffolding
-- Toolbox Meeting
-
----
-
-## 7. Lansekap dan Lapangan
-- Geotextil
-- Grass Block
-- Grow In
-- Jaring Pengaman Lapangan
-- Land Clearing
-- Leveling Subgrade
-- Marka Lapangan
-- Media Tanam
-- Net Voli
-- Pasca Grow In
-- Paving Block
-- Paving Jalan
-- Paving Trotoar
-- Penanaman Pohon
-- Penanaman Rumput
-- Pratanam
-- Ring Basket
-- Rumput
-- Saluran
-- Saluran Drainase
-- Taman
-- Weed Killer
-
----
-
-## 8. MEP
-- Battery Charger
-- CCTV
-- Circuit Breaker
-- Cubicle 20KV
-- Flow Meter
-- Genset
-- Genset 300KVA Silent
-- Grounding
-- Instalasi AC
-- Instalasi Fire Alarm
-- Instalasi Hydrant
-- Instalasi Kabel
-- Instalasi Listrik
-- Instalasi Pipa Air
-- Instalasi Pipa Limbah
-- Instalasi Rechem
-- Knalpot Silencer
-- Load Break Switch
-- Panel Genset AMF
-- Panel Listrik
-- Panel Tegangan Menengah
-- Pompa Air
-- Pompa Alkon
-- Smoke Detector
-- Split AC
-- Stop Kontak
-- Tandon Air
-- Tangki Air
-- Tanki Genset
-- Titik Lampu
-- Trafo Oil Ester
-- VRV AC
-
----
-
-## 9. Material On Site
+## 10. Logistik & Material
 - Pengiriman Bata
 - Pengiriman Batu
 - Pengiriman Besi
@@ -199,70 +174,3 @@
 - Pengiriman Pasir
 - Pengiriman Semen
 - Pengiriman Tanah
-- Pengiriman Tiang Pancang
-
----
-
-## 10. Struktur Atas
-- Balok
-- Balok Praktis
-- Bekisting
-- Bekisting Balok
-- Bekisting Kolom
-- Bekisting Plat
-- Bekisting Tangga
-- Finish Trowel
-- Kolom
-- Kolom Praktis
-- Lift Shaft
-- Pembesian
-- Pembesian Balok
-- Pembesian Kolom
-- Pembesian Plat
-- Pembesian Tangga
-- Pengecoran
-- Pengecoran Balok
-- Pengecoran Kolom
-- Pengecoran Plat
-- Pengecoran Tangga
-- Plat Lantai
-- Plat t=120
-- Ramp
-- Tangga
-- Wiremesh
-
----
-
-## 11. Struktur Bawah
-- Bekisting
-- Bekisting Pondasi
-- Besi Tulangan Ulir
-- Pancang
-- Pedestal
-- Pembesian
-- Pembesian Pondasi
-- Penetrasi Tiang Pancang
-- Pengecoran
-- Pengecoran Pondasi
-- Pengadaan Tiang Pancang
-- Pile Cap
-- Sambungan Pancang
-- Sloof
-- Tie Beam
-- Pemotongan Kepala Pancang
-
----
-
-## 12. Tanah
-- Buis Beton 30cm
-- Galian
-- Galian Biasa
-- Lantai Kerja
-- Mengangkut Tanah
-- Pemadatan
-- Pemadatan Tanah
-- Urugan
-- Urugan Pasir
-- Urugan Split
-- Urugan Tanah
-- Urugan Tanah Biasa

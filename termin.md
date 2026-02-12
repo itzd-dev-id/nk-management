@@ -31,7 +31,11 @@ Berikut adalah daftar pekerjaan yang disusun berdasarkan urutan pelaksanaan di l
 1. **Pondasi & Beton Bawah**
    - Pondasi Batu Belah
    - Lantai Kerja (Lean Concrete)
-   - Pancang & Pemotongan Kepala Pancang
+   - Tiang Pancang:
+     - Pengadaan Tiang Pancang
+     - Penetrasi Tiang Pancang
+     - Sambungan Pancang
+     - Pemotongan Kepala Pancang
 2. **Struktur Utama Bawah**
    - Pile Cap (Bekisting, Pembesian, Pengecoran)
    - Tie Beam & Sloof
