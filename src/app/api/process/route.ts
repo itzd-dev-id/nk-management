@@ -48,10 +48,9 @@ export async function POST(req: NextRequest) {
 
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
-        const formattedIndex = (buildingIndex !== undefined) ? String(buildingIndex).padStart(2, '0') : '00';
-        const buildingFolder = showBuildingIndex
-            ? `${formattedIndex}. ${sanitizedBuildingName} (${sanitizedBuildingCode})`
-            : `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
+
+        // User requested to remove indices from building folder name
+        const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
 
         const extension = file.name.split('.').pop() || '';
 
@@ -71,10 +70,10 @@ export async function POST(req: NextRequest) {
         const gdrive = new GoogleDriveService(session.accessToken);
 
         console.log('API: Ensuring folder structure...');
-        // Hierarchy: [Category (optional)] -> [Building Folder] -> [Task Name - Building Name]
+        // New Hierarchy (Location-centric): [Building Folder] -> [Category (optional)] -> [Task Name - Building Name]
         const folderParts = [];
-        if (categoryPart) folderParts.push(categoryPart.trim());
         folderParts.push(buildingFolder);
+        if (categoryPart) folderParts.push(categoryPart.trim());
 
         // Final folder: Task Name - Building Name
         const finalTaskFolder = `${taskPart.trim()} - ${sanitizedBuildingName}`;
