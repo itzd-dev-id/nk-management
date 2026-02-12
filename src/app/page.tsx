@@ -32,6 +32,11 @@ export default function Home() {
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [postKeyword, setPostKeyword] = useState('');
+  const [postTags, setPostTags] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const keywordInputRef = React.useRef<HTMLInputElement>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -86,6 +91,82 @@ export default function Home() {
     if (savedStorageType) setStorageType(savedStorageType);
     if (savedShowIndex !== null) setShowBuildingIndex(savedShowIndex === 'true');
   }, []);
+
+  // Keyword Suggestions Logic
+  useEffect(() => {
+    if (postKeyword.trim().length > 0) {
+      const normalizedInput = postKeyword.toLowerCase().replace(/_/g, ' ');
+      const matches: string[] = [];
+
+      // Search through building names first
+      for (const building of allBuildings) {
+        const buildingNameNormalized = building.name.toLowerCase();
+        const buildingCodeNormalized = building.code.toLowerCase();
+        const displayString = `[${building.code}] ${building.name}`;
+
+        if ((buildingNameNormalized.includes(normalizedInput) || buildingCodeNormalized.includes(normalizedInput)) && !postTags.includes(displayString)) {
+          matches.push(displayString);
+          if (matches.length >= 10) break;
+        }
+      }
+
+      // Then search through all tasks
+      if (matches.length < 10) {
+        for (const group of allHierarchy) {
+          for (const task of group.tasks) {
+            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+            if (taskNormalized.includes(normalizedInput) && !postTags.includes(task)) {
+              matches.push(task);
+              if (matches.length >= 10) break;
+            }
+          }
+          if (matches.length >= 10) break;
+        }
+      }
+
+      setSuggestions(matches);
+      setShowDropdown(matches.length > 0);
+      setSelectedIndex(0);
+    } else {
+      setSuggestions([]);
+      setShowDropdown(false);
+    }
+  }, [postKeyword, allHierarchy, allBuildings, postTags]);
+
+  const addTag = useCallback((tag: string) => {
+    if (tag && !postTags.includes(tag)) {
+      setPostTags([...postTags, tag]);
+      setPostKeyword('');
+      setSuggestions([]);
+      setShowDropdown(false);
+      keywordInputRef.current?.focus();
+    }
+  }, [postTags]);
+
+  const removeTag = useCallback((index: number) => {
+    setPostTags(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (showDropdown && suggestions.length > 0) {
+        addTag(suggestions[selectedIndex]);
+      } else if (postKeyword.trim()) {
+        addTag(postKeyword.trim());
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false);
+    } else if (e.key === 'Backspace' && !postKeyword && postTags.length > 0) {
+      removeTag(postTags.length - 1);
+    }
+  };
 
   // Sync Config from Vercel KV
   const fetchConfig = useCallback(async (filename: string) => {
@@ -468,7 +549,7 @@ export default function Home() {
 
                       // 1. Keyword & Building Detection (from Filename + Input)
                       const fileName = file.name.split('.')[0];
-                      const fullKeyword = `${postKeyword}, ${fileName}`;
+                      const fullKeyword = [...postTags, fileName].join(', ');
 
                       // Detect Building
                       const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
@@ -528,7 +609,8 @@ export default function Home() {
                         const result = await res.json();
                         if (result.success) {
                           addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
-                          setPostKeyword(''); // Reset keyword after success
+                          setPostTags([]); // Reset tags after success
+                          setPostKeyword('');
                         } else {
                           addLog(`[ERROR] Gagal: ${result.error}`);
                         }
@@ -556,20 +638,87 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="relative space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Quick Detect Keyword / Hints</label>
-                  <div className="relative group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                      <Zap className="w-4 h-4 text-slate-300 group-focus-within:text-orange-500 transition-colors" />
-                    </div>
+                  <div className="min-h-[56px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap transition-all focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500">
+                    <Zap className={`w-4 h-4 shrink-0 ${(postTags.length > 0 || postKeyword) ? 'text-orange-500' : 'text-slate-300'}`} />
+
+                    {/* Tags */}
+                    <AnimatePresence mode="popLayout">
+                      {postTags.map((tag, index) => {
+                        const isWorkTask = allHierarchy.some(group => group.tasks.some(task => task.toLowerCase() === tag.toLowerCase()));
+                        const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
+
+                        return (
+                          <motion.div
+                            key={tag}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            className={`inline-flex items-center gap-1.5 text-white rounded-xl px-3 py-1.5 whitespace-nowrap shadow-sm ${isWorkTask ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                          >
+                            {isBuildingMatch ? (
+                              <div className="flex items-center gap-1.5">
+                                <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
+                                <span className="text-xs font-bold">{tag.split(']')[1].trim()}</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs font-bold">{tag.replace(/_/g, ' ')}</span>
+                            )}
+                            <button onClick={() => removeTag(index)} className="hover:bg-white/20 rounded-full p-0.5 transition-colors">
+                              <XCircle className="w-3.5 h-3.5" />
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+
                     <input
+                      ref={keywordInputRef}
                       type="text"
                       value={postKeyword}
                       onChange={(e) => setPostKeyword(e.target.value)}
-                      placeholder="Type building codes or work keywords..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                      onKeyDown={handleKeywordKeyDown}
+                      onFocus={() => postKeyword && suggestions.length > 0 && setShowDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                      placeholder={postTags.length === 0 ? "Type building or work keywords..." : ""}
+                      className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300"
                     />
                   </div>
+
+                  {/* Autocomplete Dropdown */}
+                  <AnimatePresence>
+                    {showDropdown && suggestions.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden z-[100] max-h-[250px] overflow-y-auto"
+                      >
+                        <div className="p-2 space-y-1">
+                          {suggestions.map((suggestion, index) => {
+                            const isBuildingSug = suggestion.startsWith('[') && suggestion.includes(']');
+                            return (
+                              <button
+                                key={suggestion}
+                                onClick={() => addTag(suggestion)}
+                                className={`w-full px-4 py-3 text-left text-sm font-bold transition-all flex items-center gap-3 rounded-2xl ${index === selectedIndex ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-slate-700 hover:bg-slate-50'}`}
+                              >
+                                {isBuildingSug ? (
+                                  <>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black ${index === selectedIndex ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
+                                    <span>{suggestion.split(']')[1].trim()}</span>
+                                  </>
+                                ) : (
+                                  suggestion.replace(/_/g, ' ')
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
