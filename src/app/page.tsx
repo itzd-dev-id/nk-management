@@ -425,22 +425,26 @@ export default function Home() {
                 <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
                 <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl py-4 flex items-center justify-center gap-1 group relative">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={progress}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        if (val.length <= 3) setProgress(val);
-                      }}
-                      className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
-                      style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
-                      placeholder="0"
-                    />
-                    <span className="text-lg font-black text-slate-400 mt-1">%</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+                    <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl px-6 py-3 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={progress}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 3) setProgress(val);
+                        }}
+                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
+                        style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
+                        placeholder="0"
+                      />
+                      <span className="text-lg font-black text-slate-400 mt-1">%</span>
+                    </div>
+                    <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-slate-200 to-transparent" />
                   </div>
                 </div>
 
