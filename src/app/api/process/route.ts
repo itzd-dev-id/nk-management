@@ -53,39 +53,40 @@ export async function POST(req: NextRequest) {
         const sanitizedBuildingCode = sanitizePath(buildingCode);
 
         // User requested to remove indices from building folder name
-        const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
-
         const extension = file.name.split('.').pop() || '';
-
-        // Filename parts - KEEP underscores for filenames
-        // We only use the task name part for the filename to match the preview
-        const fileWork = sanitizePath(taskPart).replace(/\s+/g, '_').replace(/\//g, '-');
-        const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
-        const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
-
-        const progressPart = progress ? `${progress}%_` : '';
-        const prefix = `${detectedDate}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}`;
 
         const folderId = extractGDriveId(outputPath);
         console.log('API: Preparing GDrive upload under Folder ID:', folderId);
 
+
+
         // GOOGLE DRIVE LOGIC
         const gdrive = new GoogleDriveService(session.accessToken);
 
-        // New Condensed Hierarchy: [Building Folder] -> [Category | Task]
+        // New Requested Hierarchy: [Date] -> [Building Name]
         const folderParts = [];
-        folderParts.push(buildingFolder);
 
-        const combinedTaskFolder = cleanCategory
-            ? `${cleanCategory} | ${taskPart.trim()}`
-            : taskPart.trim();
+        // 1. Date Folder
+        folderParts.push(detectedDate);
 
-        folderParts.push(combinedTaskFolder);
+        // 2. Building Folder
+        folderParts.push(sanitizedBuildingName);
 
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);
 
-        // 2. Calculate Sequence
+        // 3. Filename Format: Category_Work_Index.ext
+        // Clean category part - remove numbers if present (already done in cleanCategory)
+        // If no category, just use taskPart
+        const safeCategory = cleanCategory ? cleanCategory.replace(/\s+/g, '_') : '';
+        const safeTask = taskPart.trim().replace(/\s+/g, '_').replace(/\//g, '-');
+        const safeBuilding = sanitizedBuildingName.replace(/\s+/g, '_');
+
+        const prefix = safeCategory
+            ? `${safeCategory}_${safeTask}_${safeBuilding}_`
+            : `${safeTask}_${safeBuilding}_`;
+
+        // 4. Calculate Sequence (Index)
         const sequence = await gdrive.getNextSequence(targetFolderId, prefix, extension);
         const finalName = `${prefix}${sequence}.${extension}`;
 
