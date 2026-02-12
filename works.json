@@ -21,6 +21,7 @@
         "category": "02. Pekerjaan Tanah",
         "_description": "Pekerjaan Galian, Urugan, dan Pemadatan Tanah",
         "tasks": [
+            "Buis Beton 30cm",
             "Galian",
             "Galian Biasa",
             "Mengangkut Tanah",
@@ -39,9 +40,13 @@
             "Pancang",
             "Pedestal",
             "Pembesian Pondasi",
+            "Pemotongan Kepala Pancang",
+            "Penetrasi Tiang Pancang",
             "Pengecoran Pondasi",
+            "Pengadaan Tiang Pancang",
             "Pile Cap",
             "Pondasi Batu Belah",
+            "Sambungan Pancang",
             "Sloof",
             "Tie Beam"
         ]
@@ -88,6 +93,8 @@
             "Nok Atap",
             "Pasangan Bata",
             "Penutup Atap",
+            "Plafon Gypsum",
+            "Plafon Kalsiboard",
             "Plafond UPVC",
             "Plesteran",
             "Railing Tangga",
@@ -104,6 +111,7 @@
             "Cubicle 20KV",
             "Fire Alarm",
             "Genset",
+            "Genset 300KVA Silent",
             "Grounding",
             "Instalasi AC",
             "Instalasi Listrik",
@@ -112,9 +120,11 @@
             "Panel Listrik",
             "Pompa Air",
             "Smoke Detector",
+            "Split AC",
             "Stop Kontak",
             "Tandon Air",
-            "Titik Lampu"
+            "Titik Lampu",
+            "VRV AC"
         ]
     },
     {
@@ -132,6 +142,8 @@
             "Penanaman Pohon",
             "Penanaman Rumput",
             "Ring Basket",
+            "Rumput",
+            "Saluran Drainase",
             "Taman"
         ]
     },
