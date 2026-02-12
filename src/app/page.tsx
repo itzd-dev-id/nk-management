@@ -599,7 +599,7 @@ export default function Home() {
           <h1 className="text-sm font-black tracking-widest text-slate-900 uppercase">
             {activeTab === 'archive' && (selectedBuilding?.code || 'NK-POST')}
             {activeTab === 'edit' && 'EDIT DATABASE'}
-            {activeTab === 'queue' && 'STATUS'}
+            {activeTab === 'termin' && 'DOKUMEN TERMIN'}
             {activeTab === 'settings' && 'SETTINGS'}
           </h1>
 
