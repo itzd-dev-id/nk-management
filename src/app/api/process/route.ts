@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
 
         const sanitizedBuildingName = sanitizePath(buildingName).replace(/_/g, ' ');
         const sanitizedBuildingCode = sanitizePath(buildingCode);
+        const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
 
         // User requested to remove indices from building folder name
         const extension = file.name.split('.').pop() || '';
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
         folderParts.push(detectedDate);
 
         // 2. Building Folder
-        folderParts.push(sanitizedBuildingName);
+        folderParts.push(buildingFolder);
 
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);

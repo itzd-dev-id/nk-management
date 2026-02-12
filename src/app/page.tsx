@@ -25,6 +25,7 @@ export default function Home() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [workName, setWorkName] = useState('');
   const [progress, setProgress] = useState('');
+  const [selectedDate, setSelectedDate] = useState(getDefaultDate());
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
   const [terminPath, setTerminPath] = useState('');
@@ -556,6 +557,23 @@ export default function Home() {
                     </div>
                     <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-slate-200 to-transparent" />
                   </div>
+
+                  {/* Date Picker */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Date</label>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+                      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-2 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
+                        <input
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                          className="bg-transparent text-center text-lg font-bold text-slate-900 outline-none p-0 m-0 w-auto"
+                        />
+                      </div>
+                      <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-slate-200 to-transparent" />
+                    </div>
+                  </div>
                 </div>
 
                 {/* New Single Drop Zone for Post */}
@@ -759,7 +777,7 @@ export default function Home() {
                     const formData = new FormData();
                     formData.append('file', uploadFile, file.name);
                     formData.append('metadata', JSON.stringify({
-                      detectedDate,
+                      detectedDate: selectedDate, // Use manual date for folder
                       workName: workName || 'Documentation',
                       buildingCode: selectedBuilding.code,
                       buildingName: selectedBuilding.name,
