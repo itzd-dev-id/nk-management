@@ -8,6 +8,7 @@ export const BUILDINGS: Building[] = [
     { code: 'T-KP', name: 'Kantin Pekerja', index: 104 },
     { code: 'T-MP', name: 'Mushola Pekerja', index: 105 },
     { code: 'T-TP', name: 'Toilet Pekerja', index: 106 },
+    { code: 'MS', name: 'Material On Site', index: 107 },
     { code: 'A', name: 'Rusun Guru', index: 0 },
     { code: 'B', name: 'Asrama Putra SD', index: 2 },
     { code: 'C', name: 'Asrama Putri SD', index: 4 },
