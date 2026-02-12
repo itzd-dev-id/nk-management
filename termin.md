@@ -2,113 +2,115 @@
 
 Berikut adalah daftar pekerjaan yang disusun berdasarkan urutan pelaksanaan di lapangan, mulai dari tahap awal hingga penyelesaian akhir.
 
-## 1. Persiapan (Preliminary)
-1. **Pekerjaan Pematangan Lahan**
-   - Galian Biasa
-   - Urugan Tanah Biasa atau Tanah Liat Berpasir
-   - Mengangkut Tanah Lepas (Jarak Angkut 50 s.d 100 M)
-2. **Fasilitas Proyek**
-   - Sewa Direksi Keet
-   - Sewa Gudang
-   - Sewa Pagar Sementara Proyek (Seng Gelombang t=2m)
-   - Papan Nama Proyek
+## 01. Persiapan & SMKK
+1. **Pekerjaan Persiapan Lahan**
+   - Pematangan Lahan
+   - Pembersihan Lahan
+   - Mobilisasi Alat
+2. **Fasilitas & Keamanan Proyek**
    - Barak Tenaga dan Barang
+   - Pagar Sementara
+   - Papan Nama Proyek
+   - Bouwplank
+3. **Sistem Manajemen Keselamatan Konstruksi (SMKK)**
+   - Induction, Toolbox Meeting
+   - Rambu Safety, Safety Sign, Jaring Pengaman
 
 ---
 
-## 2. Sistem Manajemen Keselamatan Konstruksi (SMKK)
-1. **Penyiapan Rencana Keselamatan Konstruksi (RKK)**
-   - Pembuatan Dokumen Rencana Keselamatan Konstruksi
-2. **Sosialisasi, Promosi, dan Pelatihan**
-   - Induction, Safety Morning, Toolbox Meeting
-3. **Alat Pelindung Kerja dan Alat Pelindung Diri**
-   - Helmet, Rompi, Safety Shoes, Jaring Pengaman
-4. **Fasilitas Sarana Kesehatan & Rambu-Rambu**
-   - P3K, Rambu Safety, Safety Sign/Signage
+## 02. Pekerjaan Tanah
+1. **Galian & Urugan**
+   - Galian Biasa
+   - Urugan Tanah & Pasir
+   - Urugan Split (untuk resapan/drainase)
+   - Mengangkut Tanah & Pemadatan Tanah
 
 ---
 
-## 3. Pekerjaan Struktur (Structural)
-1. **Struktur Bawah (Sub-structure)**
-   - Galian Pondasi PC-2 s.d PC-15A
-   - Urugan Pasir tebal 10 cm
-2. **Pekerjaan Pondasi & Beton Bawah**
+## 03. Struktur Bawah
+1. **Pondasi & Beton Bawah**
+   - Pondasi Batu Belah
    - Lantai Kerja (Lean Concrete)
-   - Pembuatan Pile Cap (Beton fc 25 MPa, Besi Tulangan, Bekisting)
-   - Pekerjaan Tie Beam (TB-1, TB-2)
-3. **Struktur Atas (Super-structure)**
-   - Pekerjaan Kolom (K-1 s.d K-6)
-   - Pekerjaan Balok (B-1, B-2)
-   - Pekerjaan Plat Lantai (t = 120 mm, t = 150 mm)
-   - Pekerjaan Tangga & Ramp (Beton Bertulang)
+   - Pancang & Pemotongan Kepala Pancang
+2. **Struktur Utama Bawah**
+   - Pile Cap (Bekisting, Pembesian, Pengecoran)
+   - Tie Beam & Sloof
+   - Pedestal
 
 ---
 
-## 4. Pekerjaan Arsitektur (Architectural)
-1. **Pekerjaan Dinding**
-   - Pasangan Bata Ringan & Bata Merah
-   - Plesteran (Render) & Acian
-   - Pasangan Dinding Rooster & Kawat Nyamuk
-2. **Pekerjaan Kusen, Pintu, dan Jendela**
-   - Pintu Jendela PJ1, P1, P2, P3
-   - Boven B1 s.d B5
-3. **Pekerjaan Plafond (Langit-Langit)**
-   - Pemasangan Rangka Metalfuring
-   - Penutup Plafond UPVC & List UPVC
+## 04. Struktur Atas
+1. **Rangka Bangunan**
+   - Kolom & Kolom Praktis
+   - Balok & Balok Praktis
+   - Plat Lantai (Pembesian, Bekisting, Pengecoran)
+   - Tangga & Ramp
+   - Finish Trowel & Wiremesh
+
+---
+
+## 05. Arsitektur & Atap
+1. **Dinding & Kusen**
+   - Pasangan Bata (Ringan/Merah)
+   - Plesteran, Acian, Dinding Rooster
+   - Kusen, Daun Pintu, Daun Jendela
+2. **Lantai & Plafond**
+   - Keramik Lantai & Homogeneous Tile
+   - Guiding Block
+   - Rangka Metalfuring & Plafond UPVC
    - Finishing Beton Expose
-4. **Pekerjaan Lantai**
-   - Pemasangan Homogenous Tile (Polish/Unpolished) 60x60
-   - Pemasangan Plint & Guiding Block 30x30
-   - Pelapisan Waterproofing (Semen Base)
-5. **Pekerjaan Atap**
-   - Penutup Atap Metal Berpasir & Nok Atap
-   - Pemasangan Lisplank GRC
-   - Pemasangan Talang Datar & Jurai
-6. **Pekerjaan Pengecatan**
-   - Pengecatan Tembok (Interior & Eksterior)
-   - Pengecatan Langit-langit (Plafond)
-7. **Pekerjaan Sanitary**
-   - Floor Drain, Kloset (Duduk/Jongkok), Urinoir
-   - Lavatory (Wastafel), Kran, Shower, Cermin
-8. **Pekerjaan Akhir Arsitektur**
-   - Pekerjaan Railing Tangga & Grab Bar Difable
-   - Pemasangan Signage Acrylic
+3. **Pekerjaan Atap**
+   - Rangka Atap & Penutup Atap
+   - Nok Atap, Lisplang, Kanopi
+4. **Sanitary & Finishing Akhir**
+   - Closet, Wastafel, Floor Drain, Sanitary
+   - Cat Interior & Cat Eksterior
+   - Railing Tangga
 
 ---
 
-## 5. Pekerjaan MEP (Mechanical, Electrical, Plumbing)
-1. **Pekerjaan Elektrikal (Kawasan & Gedung)**
-   - Panel Listrik (LDS, LBS, Cubicle)
-   - Instalasi Kabel Tegangan Menengah & Rendah
-   - Grounding System
-2. **Pekerjaan Mekanikal (Genset & Pompa)**
-   - Pengadaan Genset 300 kVA Silent Type
-   - Instalasi Pipa dan Tangki Mingguan Genset
-   - Pompa Air & Sistem Distribusi
-3. **Pekerjaan Penunjang MEP**
-   - Smoke Detector & Fire Alarm
-   - CCTV System
+## 06. MEP (Mechanical, Electrical, Plumbing)
+1. **Elektrikal**
+   - Panel Listrik, Cubicle 20KV
+   - Instalasi Listrik, Titik Lampu, Stop Kontak
+   - Grounding & Fire Alarm
+2. **Mekanikal & Plumbing**
+   - Genset, Pompa Air, Tandon Air
+   - Instalasi Pipa Air (Bersih/Limbah)
+   - AC (Instalasi & Unit)
+   - Smoke Detector & CCTV
 
 ---
 
-## 6. Pekerjaan Lapangan (External Works)
-1. **Lansekap Area**
-   - Land Clearing & Leveling Media Tanam
-   - Pratanam & Penanaman Rumput Matrella (Tandur Berjalur)
-   - Sistem Penyiraman (Tandon & Pompa Alkon)
-2. **Fasilitas Olahraga & Upacara**
-   - Lapangan Upacara (Penanaman Rumput)
-   - Lapangan Basket & Voli (Pondasi, Beton, Epoxy)
-   - Pengadaan Ring Basket & Net Voli Portable
-   - Pembuatan Garis Marka Lapangan
+## 07. Lansekap & Lapangan
+1. **Area Luar**
+   - Taman, Penanaman Pohon, Rumput
+   - Land Clearing & Media Tanam
+2. **Lapangan Olahraga**
+   - Paving Block, Grass Block
+   - Ring Basket, Net Voli, Marka Lapangan
+   - Jaring Pengaman Lapangan
 
 ---
 
-## 7. Pekerjaan Furniture (Interior)
-1. **Furniture Sekolah (SD/SMP/SMA)**
-   - Meja & Kursi Siswa/Guru
-   - Almari, Lemari Lab, Nakas
-   - Papan Tulis & Signage Ruangan
-2. **Furniture Area Umum**
-   - Furniture Kantin, Asrama, dan Guest House
-   - Sofa & Meja Rapat
+## 08. Furniture
+1. **Interior Gedung**
+   - Meja & Kursi (Kelas, Guru, Rapat)
+   - Almari, Lemari, Nakas
+   - Papan Tulis, Sofa, Bed UKS, Kitchen Set
+   - Signage Ruangan
+
+---
+
+## 09. Dokumentasi
+1. **Pelaporan & Inspeksi**
+   - Progress (Harian, Mingguan, Bulanan)
+   - Dokumentasi Material & Drone View
+   - Inspeksi Bersama & As Built Drawing
+
+---
+
+## 10. Logistik & Material
+1. **Kedatangan Material (On Site)**
+   - Pengiriman Besi, Beton, Semen, Pasir
+   - Pengiriman Bata, Batu, Keramik, Tanah
