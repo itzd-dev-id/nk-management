@@ -40,19 +40,9 @@
         "index": 0
     },
     {
-        "code": "A.1",
-        "name": "Rusun Guru",
-        "index": 1
-    },
-    {
         "code": "B",
         "name": "Asrama Putra SD",
         "index": 2
-    },
-    {
-        "code": "B.1",
-        "name": "Asrama Putra SD",
-        "index": 3
     },
     {
         "code": "C",
@@ -60,19 +50,9 @@
         "index": 4
     },
     {
-        "code": "C.1",
-        "name": "Asrama Putri SD",
-        "index": 5
-    },
-    {
         "code": "D",
         "name": "Asrama Putri SMP",
         "index": 6
-    },
-    {
-        "code": "D.1",
-        "name": "Asrama Putra SMP",
-        "index": 7
     },
     {
         "code": "E",
@@ -80,24 +60,9 @@
         "index": 8
     },
     {
-        "code": "E.1",
-        "name": "Asrama Putri SMA",
-        "index": 9
-    },
-    {
         "code": "F",
         "name": "Kantin SD",
         "index": 10
-    },
-    {
-        "code": "F.1",
-        "name": "Kantin SMP",
-        "index": 11
-    },
-    {
-        "code": "F.2",
-        "name": "Kantin SMA",
-        "index": 12
     },
     {
         "code": "G",
