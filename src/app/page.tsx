@@ -59,7 +59,7 @@ const processTimestampImage = async (
         } else {
           address = data.display_name || address;
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("Nominatim error", e);
         addLog(`[ERROR] Gagal menghubungi OpenStreetMap: ${e.message}`);
       }
@@ -74,7 +74,7 @@ const processTimestampImage = async (
         if (data.current_weather) {
           weather = `${data.current_weather.temperature}°C`;
         }
-      } catch (e) {
+      } catch (e: any) {
         console.error("Weather error", e);
       }
     }
@@ -127,7 +127,7 @@ const processTimestampImage = async (
 
         ctx.drawImage(logo, padding, padding, logoWidth, logoHeight);
       }
-    } catch (e) { }
+    } catch (e: any) { }
 
 
 
@@ -413,7 +413,7 @@ export default function Home() {
       const res = await fetch(`/api/config?filename=${filename}`);
       const { success, data } = await res.json();
       return success ? data : null;
-    } catch (e) {
+    } catch (e: any) {
       console.error(`Failed to sync ${filename}`, e);
       return null;
     }
@@ -431,7 +431,7 @@ export default function Home() {
       if (resData.success && message) {
         showToast(message, 'success');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(`Failed to save ${filename}`, e);
       showToast(`Gagal menyimpan ${filename}`, 'error');
     } finally {
@@ -476,7 +476,7 @@ export default function Home() {
       }
 
       showToast('Database sinkron dengan Cloud', 'info');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to load all configs', e);
     } finally {
       setIsSyncing(false);
@@ -619,7 +619,7 @@ export default function Home() {
               const date = new Date(exif.DateTimeOriginal);
               detectedDate = date.toISOString().split('T')[0];
             }
-          } catch (e) {
+          } catch (e: any) {
             console.warn('Failed to parse EXIF', e);
           }
         }
