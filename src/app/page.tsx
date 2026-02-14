@@ -1749,23 +1749,51 @@ export default function Home() {
                           }
 
                           const tryIpFallback = async (reason: string) => {
+                            addLog(`[INFO] GPS Browser bermasalah: ${reason}. Mencoba fallback ke IP Geolocation...`);
                             setTestLocation(`GPS Gagal (${reason}). Mencoba Geolocation via IP...`);
+
                             try {
+                              // TIER 1: ipapi.co
+                              addLog("[INFO] Mencoba IP Geolocation Tier 1 (ipapi.co)...");
                               const ipRes = await fetch('https://ipapi.co/json/');
+                              if (!ipRes.ok) throw new Error("Tier 1 failed");
                               const ipData = await ipRes.json();
+
                               if (ipData.latitude && ipData.longitude) {
                                 const lat = ipData.latitude;
                                 const lon = ipData.longitude;
-                                setTestLocation(`Lokasi IP: ${lat}, ${lon}. Mencari alamat...`);
+                                addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 1): ${lat}, ${lon}`);
+                                setTestLocation(`Lokasi IP (Tier 1): ${lat}, ${lon}. Mencari alamat...`);
                                 const addr = await fetchReverseGeocode(lat, lon);
                                 setTestLocation(addr);
                                 showToast("Lokasi ditemukan via IP", "success");
-                              } else {
-                                throw new Error("IP Geolocation failed");
+                                return;
                               }
-                            } catch (e: any) {
-                              setTestLocation("Gagal mendapatkan lokasi via GPS maupun IP.");
-                              showToast("Akses Lokasi Gagal Total", "error");
+                              throw new Error("No coordinates in tier 1");
+                            } catch (e1: any) {
+                              addLog(`[WARN] IP Geolocation Tier 1 gagal. Mencoba Tier 2...`);
+                              try {
+                                // TIER 2: ipinfo.io (Basic)
+                                addLog("[INFO] Mencoba IP Geolocation Tier 2 (ipinfo.io)...");
+                                const ipRes2 = await fetch('https://ipinfo.io/json');
+                                if (!ipRes2.ok) throw new Error("Tier 2 failed");
+                                const ipData2 = await ipRes2.json();
+
+                                if (ipData2.loc) {
+                                  const [lat, lon] = ipData2.loc.split(',').map(Number);
+                                  addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 2): ${lat}, ${lon}`);
+                                  setTestLocation(`Lokasi IP (Tier 2): ${lat}, ${lon}. Mencari alamat...`);
+                                  const addr = await fetchReverseGeocode(lat, lon);
+                                  setTestLocation(addr);
+                                  showToast("Lokasi ditemukan via IP (Backup)", "success");
+                                  return;
+                                }
+                                throw new Error("No coordinates in tier 2");
+                              } catch (e2: any) {
+                                addLog("[ERROR] Semua metode Geolocation gagal.");
+                                setTestLocation("Gagal mendapatkan lokasi via GPS maupun IP.");
+                                showToast("Akses Lokasi Gagal Total", "error");
+                              }
                             } finally {
                               setIsTestingLocation(false);
                             }
