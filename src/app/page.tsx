@@ -17,6 +17,27 @@ import { ProcessLog } from '@/components/ProcessLog';
 import { detectWorkFromKeyword } from '@/lib/utils';
 
 
+const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
+      headers: {
+        'User-Agent': 'NK-Management-App/1.0'
+      }
+    });
+    if (!res.ok) throw new Error(`Status: ${res.status}`);
+    const data = await res.json();
+    if (data.address) {
+      const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
+      const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
+      return [area, city].filter(Boolean).join(', ') || data.display_name || "Lokasi tidak ditemukan";
+    }
+    return data.display_name || "Lokasi tidak ditemukan";
+  } catch (e: any) {
+    console.error("Reverse geocoding error:", e);
+    return "Lokasi tidak ditemukan (API Error)";
+  }
+};
+
 const processTimestampImage = async (
   file: File,
   addLog: (msg: string) => void
@@ -38,30 +59,11 @@ const processTimestampImage = async (
     let address = "Lokasi tidak ditemukan";
     if (lat && lon) {
       addLog(`[INFO] Koordinat ditemukan: ${lat}, ${lon}. Mengambil nama lokasi...`);
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
-          headers: {
-            'User-Agent': 'NK-Management-App/1.0'
-          }
-        });
-
-        if (!res.ok) {
-          addLog(`[ERROR] Nominatim API gagal (${res.status}): ${res.statusText}`);
-          throw new Error(`Nominatim failed: ${res.status}`);
-        }
-
-        const data = await res.json();
-        if (data.address) {
-          const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
-          const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
-          address = [area, city].filter(Boolean).join(', ') || data.display_name || address;
-          addLog(`[SUCCESS] Lokasi ditemukan: ${address}`);
-        } else {
-          address = data.display_name || address;
-        }
-      } catch (e: any) {
-        console.error("Nominatim error", e);
-        addLog(`[ERROR] Gagal menghubungi OpenStreetMap: ${e.message}`);
+      address = await fetchReverseGeocode(lat, lon);
+      if (address.includes("API Error")) {
+        addLog(`[ERROR] Gagal menghubungi OpenStreetMap.`);
+      } else {
+        addLog(`[SUCCESS] Lokasi ditemukan: ${address}`);
       }
     }
 
@@ -1742,9 +1744,35 @@ export default function Home() {
                           setIsTestingLocation(true);
                           setTestLocation("Mengambil koordinat...");
 
+                          if (!window.isSecureContext) {
+                            addLog("[WARN] Akses via non-HTTPS detected. GPS browser mungkin diblokir.");
+                          }
+
+                          const tryIpFallback = async (reason: string) => {
+                            setTestLocation(`GPS Gagal (${reason}). Mencoba Geolocation via IP...`);
+                            try {
+                              const ipRes = await fetch('https://ipapi.co/json/');
+                              const ipData = await ipRes.json();
+                              if (ipData.latitude && ipData.longitude) {
+                                const lat = ipData.latitude;
+                                const lon = ipData.longitude;
+                                setTestLocation(`Lokasi IP: ${lat}, ${lon}. Mencari alamat...`);
+                                const addr = await fetchReverseGeocode(lat, lon);
+                                setTestLocation(addr);
+                                showToast("Lokasi ditemukan via IP", "success");
+                              } else {
+                                throw new Error("IP Geolocation failed");
+                              }
+                            } catch (e: any) {
+                              setTestLocation("Gagal mendapatkan lokasi via GPS maupun IP.");
+                              showToast("Akses Lokasi Gagal Total", "error");
+                            } finally {
+                              setIsTestingLocation(false);
+                            }
+                          };
+
                           if (!navigator.geolocation) {
-                            setTestLocation("Geolocation tidak didukung browser ini.");
-                            setIsTestingLocation(false);
+                            await tryIpFallback("Browser tidak mendukung GPS");
                             return;
                           }
 
@@ -1753,28 +1781,16 @@ export default function Home() {
                               const lat = pos.coords.latitude;
                               const lon = pos.coords.longitude;
                               setTestLocation(`Koord: ${lat.toFixed(6)}, ${lon.toFixed(6)}. Mencari alamat...`);
-
-                              try {
-                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
-                                  headers: { 'User-Agent': 'NK-Management-App/1.0' }
-                                });
-                                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-                                const data = await res.json();
-                                setTestLocation(data.display_name || "Alamat tidak ditemukan");
-                                showToast("GPS & API Berjalan Normal", "success");
-                              } catch (e: any) {
-                                setTestLocation(`API Error: ${e.message}`);
-                                showToast("API Nominatim Bermasalah", "error");
-                              } finally {
-                                setIsTestingLocation(false);
-                              }
-                            },
-                            (err) => {
-                              setTestLocation(`GPS Error: ${err.message}`);
-                              showToast("Gagal mengambil GPS", "error");
+                              const addr = await fetchReverseGeocode(lat, lon);
+                              setTestLocation(addr);
+                              showToast("GPS & API Berjalan Normal", "success");
                               setIsTestingLocation(false);
                             },
-                            { enableHighAccuracy: true, timeout: 10000 }
+                            async (err) => {
+                              console.warn("GPS Error, falling back to IP:", err);
+                              await tryIpFallback(err.message);
+                            },
+                            { enableHighAccuracy: true, timeout: 8000 }
                           );
                         }}
                         className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
