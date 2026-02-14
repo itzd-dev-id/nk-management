@@ -25,7 +25,7 @@ const processTimestampImage = async (
 
   try {
     // 1. Extract GPS & Date
-    const exif = await exifr.parse(file, { gps: true, timestamp: true });
+    const exif = await exifr.parse(file, { gps: true });
     const lat = exif?.latitude;
     const lon = exif?.longitude;
     const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
