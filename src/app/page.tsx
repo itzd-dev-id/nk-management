@@ -92,7 +92,7 @@ const processTimestampImage = async (
       });
 
       if (logo.complete && logo.naturalWidth > 0) {
-        const logoHeight = 60 * scale; // Smaller logo
+        const logoHeight = 48 * scale; // Smaller logo
         const logoWidth = (logo.naturalWidth / logo.naturalHeight) * logoHeight;
         const cornerRadius = 10 * scale;
 
@@ -117,7 +117,7 @@ const processTimestampImage = async (
 
 
     // DRAW OVERLAY BACKGROUND (Bottom Footer)
-    const overlayHeight = 100 * scale; // Minimal footer height
+    const overlayHeight = 130 * scale; // Slightly taller for larger fonts
     const gradient = ctx.createLinearGradient(0, canvas.height - overlayHeight, 0, canvas.height);
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
     gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
@@ -127,14 +127,14 @@ const processTimestampImage = async (
 
     // DRAW INFORMATION (Single Horizontal Line)
     const textXStart = padding;
-    const textY = canvas.height - (padding * 0.8);
+    const textY = canvas.height - (overlayHeight / 2.2); // Vertically centered in footer
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'bottom';
+    ctx.textBaseline = 'middle'; // Vertical middle alignment for all text
 
     // 1. Time
     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     ctx.fillStyle = '#f97316'; // Orange
-    ctx.font = `900 ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `900 ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(timeStr, textXStart, textY);
     let currentX = textXStart + ctx.measureText(timeStr).width;
 
@@ -143,14 +143,14 @@ const processTimestampImage = async (
     const dayStr = getDayNameIndo(dateObj);
     const dayDateStr = ` | ${dayStr}, ${dateStr}`;
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(dayDateStr, currentX + (15 * scale), textY);
     currentX += ctx.measureText(dayDateStr).width + (15 * scale);
 
     // 3. Location (Simplified)
     const locStr = ` | ${address}`;
     ctx.fillStyle = 'white';
-    ctx.font = `500 ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `500 ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(locStr, currentX + (15 * scale), textY);
     currentX += ctx.measureText(locStr).width + (15 * scale);
 
@@ -159,14 +159,14 @@ const processTimestampImage = async (
       ? ` | ${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
       : ' | GPS tidak tersedia';
     ctx.fillStyle = '#fbbf24'; // Yellow
-    ctx.font = `bold ${16 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(gpsStr, currentX + (15 * scale), textY);
     currentX += ctx.measureText(gpsStr).width + (15 * scale);
 
     // 5. Weather
     const weatherStr = ` | ${weather}`;
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(weatherStr, currentX + (15 * scale), textY);
 
     // Convert back to File
