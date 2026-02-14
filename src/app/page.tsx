@@ -34,9 +34,17 @@ const processTimestampImage = async (
     let address = "Lokasi tidak ditemukan";
     if (lat && lon) {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
+          headers: {
+            'User-Agent': 'NK-Management-App/1.0'
+          }
+        });
         const data = await res.json();
-        address = data.display_name || address;
+        if (data.address) {
+          const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
+          const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
+          address = [area, city].filter(Boolean).join(', ') || data.display_name || address;
+        }
       } catch (e) {
         console.error("Nominatim error", e);
       }
@@ -108,67 +116,58 @@ const processTimestampImage = async (
 
 
 
-    // DRAW OVERLAY BACKGROUND (Bottom)
-    const overlayHeight = 220 * scale; // Slightly shorter
+    // DRAW OVERLAY BACKGROUND (Bottom Footer)
+    const overlayHeight = 100 * scale; // Minimal footer height
     const gradient = ctx.createLinearGradient(0, canvas.height - overlayHeight, 0, canvas.height);
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.5)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
 
-    // DRAW INFORMATION (Bottom-Left)
+    // DRAW INFORMATION (Single Horizontal Line)
+    const textXStart = padding;
+    const textY = canvas.height - (padding * 0.8);
     ctx.textAlign = 'left';
-    const textX = padding;
-    let textY = canvas.height - (overlayHeight / 2.5);
+    ctx.textBaseline = 'bottom';
 
-    // Time & Date & Day
+    // 1. Time
     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    ctx.fillStyle = '#f97316'; // Orange
+    ctx.font = `900 ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(timeStr, textXStart, textY);
+    let currentX = textXStart + ctx.measureText(timeStr).width;
+
+    // 2. Day & Date 
     const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
     const dayStr = getDayNameIndo(dateObj);
-
-    ctx.fillStyle = '#f97316'; // Orange
-    ctx.font = `900 ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(`${timeStr}`, textX, textY);
-
+    const dayDateStr = ` | ${dayStr}, ${dateStr}`;
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const timeWidth = ctx.measureText(timeStr).width;
-    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (48 * scale), textY);
+    ctx.font = `bold ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(dayDateStr, currentX + (15 * scale), textY);
+    currentX += ctx.measureText(dayDateStr).width + (15 * scale);
 
-    textY += 32 * scale;
+    // 3. Location (Simplified)
+    const locStr = ` | ${address}`;
+    ctx.fillStyle = 'white';
+    ctx.font = `500 ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(locStr, currentX + (15 * scale), textY);
+    currentX += ctx.measureText(locStr).width + (15 * scale);
 
-    // Location Name
-    ctx.font = `500 ${16 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    const maxWidth = canvas.width - (padding * 2);
-    const words = address.split(' ');
-    let line = '';
-    let lines = [];
-    for (let n = 0; n < words.length; n++) {
-      let testLine = line + words[n] + ' ';
-      let metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
-        lines.push(line);
-        line = words[n] + ' ';
-      } else {
-        line = testLine;
-      }
-    }
-    lines.push(line);
-
-    lines.slice(0, 2).forEach((l, i) => {
-      ctx.fillText(l.trim(), textX, textY + (i * 20 * scale));
-    });
-
-    textY += (Math.min(lines.length, 2) * 20 + 8) * scale;
-
-    // GPS & Weather
+    // 4. GPS
     const gpsStr = (lat && lon)
-      ? `${formatDecimalMinutes(lat, true)}   ${formatDecimalMinutes(lon, false)}`
-      : 'GPS tidak tersedia';
+      ? ` | ${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
+      : ' | GPS tidak tersedia';
     ctx.fillStyle = '#fbbf24'; // Yellow
-    ctx.font = `bold ${14 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillText(`${gpsStr}   |   ${weather}`, textX, textY);
+    ctx.font = `bold ${16 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(gpsStr, currentX + (15 * scale), textY);
+    currentX += ctx.measureText(gpsStr).width + (15 * scale);
+
+    // 5. Weather
+    const weatherStr = ` | ${weather}`;
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(weatherStr, currentX + (15 * scale), textY);
 
     // Convert back to File
     return new Promise((resolve) => {
