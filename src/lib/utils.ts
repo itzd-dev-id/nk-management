@@ -16,7 +16,15 @@ export function generateNewName(
 ): string {
     // For file names, we still use underscores for separation as requested
     // And we replace slashes (subfolders) with dashes in the filename
-    const fileWork = sanitizePath(workName).replace(/\s+/g, '_').replace(/\//g, '-');
+    // Split workName to clean category (remove leading numbers like "01. ")
+    const workParts = workName.split(' / ');
+    const categoryPart = workParts.length > 1 ? workParts[0].replace(/^\d+\.\s*/, '').trim() : null;
+    const taskPart = workParts[workParts.length - 1].trim();
+
+    const safeCategory = categoryPart ? categoryPart.replace(/\s+/g, '_') : '';
+    const safeTask = taskPart.replace(/\s+/g, '_').replace(/\//g, '-');
+
+    const fileWork = safeCategory ? `${safeCategory}_${safeTask}` : safeTask;
     const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');

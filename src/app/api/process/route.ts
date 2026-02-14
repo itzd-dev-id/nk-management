@@ -83,9 +83,10 @@ export async function POST(req: NextRequest) {
         const safeTask = taskPart.trim().replace(/\s+/g, '_').replace(/\//g, '-');
         const safeBuilding = sanitizedBuildingName.replace(/\s+/g, '_');
 
-        const prefix = safeCategory
-            ? `${safeCategory}_${safeTask}_${safeBuilding}_`
-            : `${safeTask}_${safeBuilding}_`;
+        const safeCode = sanitizedBuildingCode.replace(/\s+/g, '_');
+        const progressPart = progress ? `${progress}%_` : '';
+
+        const prefix = `${detectedDate}_${safeCategory ? safeCategory + '_' : ''}${safeTask}_${safeBuilding}_${safeCode}_${progressPart}`;
 
         // 4. Calculate Sequence (Index)
         const sequence = await gdrive.getNextSequence(targetFolderId, prefix, extension);
