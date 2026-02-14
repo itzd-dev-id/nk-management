@@ -125,49 +125,70 @@ const processTimestampImage = async (
     ctx.fillStyle = gradient;
     ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
 
-    // DRAW INFORMATION (Single Horizontal Line)
+    // DRAW INFORMATION (Single Horizontal Line with Drawn Dividers)
     const textXStart = padding;
-    const textY = canvas.height - (overlayHeight / 2.2); // Vertically centered in footer
+    const textY = canvas.height - (overlayHeight / 2.2);
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle'; // Vertical middle alignment for all text
+    ctx.textBaseline = 'middle';
+
+    const drawDivider = (x: number) => {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 1 * scale;
+      ctx.beginPath();
+      ctx.moveTo(x, textY - (15 * scale));
+      ctx.lineTo(x, textY + (15 * scale));
+      ctx.stroke();
+    };
+
+    const gap = 30 * scale; // Breathable category gap
 
     // 1. Time
     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     ctx.fillStyle = '#f97316'; // Orange
     ctx.font = `900 ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
     ctx.fillText(timeStr, textXStart, textY);
-    let currentX = textXStart + ctx.measureText(timeStr).width;
+    let currentX = textXStart + ctx.measureText(timeStr).width + gap;
+
+    // Divider 1
+    drawDivider(currentX - (gap / 2));
 
     // 2. Day & Date 
     const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
     const dayStr = getDayNameIndo(dateObj);
-    const dayDateStr = ` | ${dayStr}, ${dateStr}`;
+    const dayDateStr = `${dayStr}, ${dateStr}`;
     ctx.fillStyle = 'white';
     ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
-    ctx.fillText(dayDateStr, currentX + (15 * scale), textY);
-    currentX += ctx.measureText(dayDateStr).width + (15 * scale);
+    ctx.fillText(dayDateStr, currentX, textY);
+    currentX += ctx.measureText(dayDateStr).width + gap;
+
+    // Divider 2
+    drawDivider(currentX - (gap / 2));
 
     // 3. Location (Simplified)
-    const locStr = ` | ${address}`;
     ctx.fillStyle = 'white';
     ctx.font = `500 ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
-    ctx.fillText(locStr, currentX + (15 * scale), textY);
-    currentX += ctx.measureText(locStr).width + (15 * scale);
+    ctx.fillText(address, currentX, textY);
+    currentX += ctx.measureText(address).width + gap;
+
+    // Divider 3
+    drawDivider(currentX - (gap / 2));
 
     // 4. GPS
     const gpsStr = (lat && lon)
-      ? ` | ${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
-      : ' | GPS tidak tersedia';
+      ? `${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
+      : 'GPS tidak tersedia';
     ctx.fillStyle = '#fbbf24'; // Yellow
     ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
-    ctx.fillText(gpsStr, currentX + (15 * scale), textY);
-    currentX += ctx.measureText(gpsStr).width + (15 * scale);
+    ctx.fillText(gpsStr, currentX, textY);
+    currentX += ctx.measureText(gpsStr).width + gap;
+
+    // Divider 4
+    drawDivider(currentX - (gap / 2));
 
     // 5. Weather
-    const weatherStr = ` | ${weather}`;
     ctx.fillStyle = 'white';
     ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
-    ctx.fillText(weatherStr, currentX + (15 * scale), textY);
+    ctx.fillText(weather, currentX, textY);
 
     // Convert back to File
     return new Promise((resolve) => {
