@@ -19,22 +19,33 @@ import { detectWorkFromKeyword } from '@/lib/utils';
 
 const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> => {
   try {
+    // Tier 1: OpenStreetMap Nominatim
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
-      headers: {
-        'User-Agent': 'NK-Management-App/1.0'
-      }
+      headers: { 'User-Agent': 'NK-Management-App/1.0' }
     });
-    if (!res.ok) throw new Error(`Status: ${res.status}`);
-    const data = await res.json();
-    if (data.address) {
-      const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
-      const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
-      return [area, city].filter(Boolean).join(', ') || data.display_name || "Lokasi tidak ditemukan";
+    if (res.ok) {
+      const data = await res.json();
+      if (data.address) {
+        const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
+        const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
+        return [area, city].filter(Boolean).join(', ') || data.display_name || "Lokasi tidak ditemukan";
+      }
     }
-    return data.display_name || "Lokasi tidak ditemukan";
+    throw new Error("Tier 1 Failed");
   } catch (e: any) {
-    console.error("Reverse geocoding error:", e);
-    return "Lokasi tidak ditemukan (API Error)";
+    console.warn("Nominatim failed, trying BigDataCloud:", e.message);
+    try {
+      // Tier 2: BigDataCloud (Free, No Key)
+      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
+      if (!res.ok) throw new Error("Tier 2 Status: " + res.status);
+      const data = await res.json();
+      const area = data.locality || data.principalSubdivision || '';
+      const city = data.city || '';
+      return [area, city].filter(Boolean).join(', ') || "Lokasi tidak ditemukan";
+    } catch (e2: any) {
+      console.error("All geocoding sources failed:", e2);
+      return "Lokasi tidak ditemukan (API Error)";
+    }
   }
 };
 
