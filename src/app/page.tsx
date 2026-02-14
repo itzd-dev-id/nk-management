@@ -84,10 +84,24 @@ const processTimestampImage = async (
       });
 
       if (logo.complete && logo.naturalWidth > 0) {
-        const logoHeight = 80 * scale;
+        const logoHeight = 60 * scale; // Smaller logo
         const logoWidth = (logo.naturalWidth / logo.naturalHeight) * logoHeight;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(padding - (5 * scale), padding - (5 * scale), logoWidth + (10 * scale), logoHeight + (10 * scale));
+        const cornerRadius = 10 * scale;
+
+        // Draw rounded background box
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(padding - (8 * scale), padding - (8 * scale), logoWidth + (16 * scale), logoHeight + (16 * scale), cornerRadius);
+        } else {
+          // Fallback for older environments
+          ctx.rect(padding - (8 * scale), padding - (8 * scale), logoWidth + (16 * scale), logoHeight + (16 * scale));
+        }
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.lineWidth = 1 * scale;
+        ctx.stroke();
+
         ctx.drawImage(logo, padding, padding, logoWidth, logoHeight);
       }
     } catch (e) { }
@@ -95,18 +109,18 @@ const processTimestampImage = async (
 
 
     // DRAW OVERLAY BACKGROUND (Bottom)
-    const overlayHeight = 250 * scale;
+    const overlayHeight = 220 * scale; // Slightly shorter
     const gradient = ctx.createLinearGradient(0, canvas.height - overlayHeight, 0, canvas.height);
     gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.7)');
+    gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.5)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
 
     // DRAW INFORMATION (Bottom-Left)
     ctx.textAlign = 'left';
     const textX = padding;
-    let textY = canvas.height - (overlayHeight / 2.2);
+    let textY = canvas.height - (overlayHeight / 2.5);
 
     // Time & Date & Day
     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -114,18 +128,18 @@ const processTimestampImage = async (
     const dayStr = getDayNameIndo(dateObj);
 
     ctx.fillStyle = '#f97316'; // Orange
-    ctx.font = `900 ${36 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `900 ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(`${timeStr}`, textX, textY);
 
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const timeWidth = ctx.measureText(timeStr).width;
-    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (24 * scale), textY); // Increased from 12
+    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (48 * scale), textY);
 
-    textY += 35 * scale; // Reduced from 45
+    textY += 32 * scale;
 
     // Location Name
-    ctx.font = `500 ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `500 ${16 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const maxWidth = canvas.width - (padding * 2);
     const words = address.split(' ');
     let line = '';
@@ -143,17 +157,17 @@ const processTimestampImage = async (
     lines.push(line);
 
     lines.slice(0, 2).forEach((l, i) => {
-      ctx.fillText(l.trim(), textX, textY + (i * 22 * scale)); // Reduced from 28
+      ctx.fillText(l.trim(), textX, textY + (i * 20 * scale));
     });
 
-    textY += (Math.min(lines.length, 2) * 22 + 10) * scale; // Reduced from 28+15
+    textY += (Math.min(lines.length, 2) * 20 + 8) * scale;
 
     // GPS & Weather
     const gpsStr = (lat && lon)
       ? `${formatDecimalMinutes(lat, true)}   ${formatDecimalMinutes(lon, false)}`
       : 'GPS tidak tersedia';
     ctx.fillStyle = '#fbbf24'; // Yellow
-    ctx.font = `bold ${16 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `bold ${14 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(`${gpsStr}   |   ${weather}`, textX, textY);
 
     // Convert back to File
