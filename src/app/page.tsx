@@ -46,13 +46,19 @@ const processTimestampImage = async (
 
   try {
     // 1. Extract GPS & Date
-    const exif = await exifr.parse(file, { gps: true });
+    const exif = await exifr.parse(file, true); // Get all tags for debugging
     const lat = exif?.latitude;
     const lon = exif?.longitude;
     const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
 
     if (!lat || !lon) {
-      addLog(`[WARN] Data GPS tidak ditemukan di metadata foto ${file.name}.`);
+      const foundTags = Object.keys(exif || {}).filter(t => typeof exif[t] !== 'object').slice(0, 10).join(', ');
+      addLog(`[WARN] Data GPS tidak ditemukan di metadata ${file.name}.`);
+      if (foundTags) {
+        addLog(`[DEBUG] Tags ditemukan: ${foundTags}... (Pastikan "Location Tags" aktif di Kamera HP)`);
+      } else {
+        addLog(`[DEBUG] Tidak ada metadata terdeteksi. (WhatsApp/sosmed sering menghapus metadata)`);
+      }
     }
 
     // 2. Fetch Location (Nominatim)
