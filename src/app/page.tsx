@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,153 @@ import { ProcessLog } from '@/components/ProcessLog';
 import { detectWorkFromKeyword } from '@/lib/utils';
 
 
+const processTimestampImage = async (
+  file: File,
+  addLog: (msg: string) => void
+): Promise<File> => {
+  addLog(`[INFO] Processing Timestamp for ${file.name}...`);
+
+  try {
+    // 1. Extract GPS & Date
+    const exif = await exifr.parse(file, { gps: true, timestamp: true });
+    const lat = exif?.latitude;
+    const lon = exif?.longitude;
+    const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
+
+    // 2. Fetch Location (Nominatim)
+    let address = "Lokasi tidak ditemukan";
+    if (lat && lon) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`);
+        const data = await res.json();
+        address = data.display_name || address;
+      } catch (e) {
+        console.error("Nominatim error", e);
+      }
+    }
+
+    // 3. Fetch Weather (Open-Meteo)
+    let weather = "Cuaca tidak diketahui";
+    if (lat && lon) {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        if (data.current_weather) {
+          weather = `${data.current_weather.temperature}°C`;
+        }
+      } catch (e) {
+        console.error("Weather error", e);
+      }
+    }
+
+    // 4. Create Canvas
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await new Promise((resolve) => (img.onload = resolve));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+
+    // Draw original image
+    ctx.drawImage(img, 0, 0);
+
+    // Define scale based on image size
+    const scale = canvas.width / 1500;
+    const padding = 40 * scale;
+
+    // DRAW LOGO PLACEHOLDER (Top-Left)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fillRect(padding, padding, 250 * scale, 100 * scale);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeRect(padding, padding, 250 * scale, 100 * scale);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('LOGO PLACEHOLDER', padding + (125 * scale), padding + (60 * scale));
+
+    // DRAW OVERLAY BACKGROUND (Bottom)
+    const overlayHeight = 350 * scale;
+    const gradient = ctx.createLinearGradient(0, canvas.height - overlayHeight, 0, canvas.height);
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
+
+    // DRAW INFORMATION (Bottom-Left)
+    ctx.textAlign = 'left';
+    const textX = padding;
+    let textY = canvas.height - (overlayHeight / 1.8);
+
+    // Time & Date & Day
+    const timeStr = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const dateStr = dateObj.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    const dayStr = getDayNameIndo(dateObj);
+
+    ctx.fillStyle = '#f97316'; // Orange
+    ctx.font = `900 ${48 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(`${timeStr}`, textX, textY);
+
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    const timeWidth = ctx.measureText(timeStr).width;
+    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (10 * scale), textY);
+
+    textY += 60 * scale;
+
+    // Location Name
+    ctx.font = `500 ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    const maxWidth = canvas.width - (padding * 2);
+    const words = address.split(' ');
+    let line = '';
+    let lines = [];
+    for (let n = 0; n < words.length; n++) {
+      let testLine = line + words[n] + ' ';
+      let metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        lines.push(line);
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+
+    lines.slice(0, 3).forEach((l, i) => {
+      ctx.fillText(l.trim(), textX, textY + (i * 35 * scale));
+    });
+
+    textY += (Math.min(lines.length, 3) * 35 + 20) * scale;
+
+    // GPS & Weather
+    const gpsStr = (lat && lon)
+      ? `${formatDecimalMinutes(lat, true)}   ${formatDecimalMinutes(lon, false)}`
+      : 'GPS tidak tersedia';
+    ctx.fillStyle = '#fbbf24'; // Yellow
+    ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.fillText(`${gpsStr}   |   ${weather}`, textX, textY);
+
+    // Convert back to File
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) return resolve(file);
+        const newFile = new File([blob], file.name, { type: 'image/jpeg' });
+        URL.revokeObjectURL(img.src);
+        resolve(newFile);
+      }, 'image/jpeg', 0.9);
+    });
+  } catch (err) {
+    console.error("Timestamp processing failed", err);
+    addLog(`[WARN] Terdapat kendala saat menambahkan timestamp. Menggunakan file asli.`);
+    return file;
+  }
+};
+
 export default function Home() {
   const { data: session } = useSession() as any;
 
@@ -26,6 +173,7 @@ export default function Home() {
   const [workName, setWorkName] = useState('');
   const [progress, setProgress] = useState('');
   const [selectedDate, setSelectedDate] = useState(getDefaultDate());
+  const [useTimestamp, setUseTimestamp] = useState(false);
   const [storageType, setStorageType] = useState<'local' | 'gdrive'>('local');
   const [outputPath, setOutputPath] = useState('');
   const [terminPath, setTerminPath] = useState('');
@@ -87,11 +235,13 @@ export default function Home() {
     const savedTerminPath = localStorage.getItem('nk_termin_path');
     const savedStorageType = localStorage.getItem('nk_storage_type') as 'local' | 'gdrive';
     const savedShowIndex = localStorage.getItem('nk_show_building_index');
+    const savedUseTimestamp = localStorage.getItem('nk_use_timestamp');
 
     if (savedPath) setOutputPath(savedPath);
     if (savedTerminPath) setTerminPath(savedTerminPath);
     if (savedStorageType) setStorageType(savedStorageType);
     if (savedShowIndex !== null) setShowBuildingIndex(savedShowIndex === 'true');
+    if (savedUseTimestamp !== null) setUseTimestamp(savedUseTimestamp === 'true');
   }, []);
 
   // Keyword Suggestions Logic
@@ -379,6 +529,10 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('nk_show_building_index', String(showBuildingIndex));
   }, [showBuildingIndex]);
+
+  useEffect(() => {
+    localStorage.setItem('nk_use_timestamp', String(useTimestamp));
+  }, [useTimestamp]);
 
   useEffect(() => {
     if (selectedBuilding) {
@@ -743,9 +897,15 @@ export default function Home() {
                     const file = pendingPostFile;
                     let uploadFile: File | Blob = file;
 
-                    // 1. Image Compression
+                    // 1. Image Processing (Timestamp & Compression)
                     if (file.type.startsWith('image/')) {
                       try {
+                        // 1a. Auto Timestamp
+                        if (useTimestamp) {
+                          uploadFile = await processTimestampImage(file, addLog);
+                        }
+
+                        // 1b. Compression
                         addLog(`[INFO] Compressing image...`);
                         const options = {
                           maxSizeMB: 1,
@@ -753,11 +913,11 @@ export default function Home() {
                           useWebWorker: true,
                           preserveExif: true
                         };
-                        uploadFile = await imageCompression(file, options);
-                        addLog(`[INFO] Compression done: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`);
+                        uploadFile = await imageCompression(uploadFile as File, options);
+                        addLog(`[INFO] Processing done: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`);
                       } catch (err) {
-                        console.error('Compression error:', err);
-                        addLog(`[WARN] Compression failed, using original.`);
+                        console.error('Image processing error:', err);
+                        addLog(`[WARN] Processing failed, using original.`);
                       }
                     }
 
@@ -785,6 +945,7 @@ export default function Home() {
                       progress: progress || '0',
                       outputPath: outputPath,
                       showBuildingIndex: showBuildingIndex,
+                      isTimestamp: useTimestamp,
                     }));
 
                     try {
@@ -1538,6 +1699,26 @@ export default function Home() {
                       </div>
                       <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors ${showBuildingIndex ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>
                         {showBuildingIndex ? 'ON' : 'OFF'}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setUseTimestamp(!useTimestamp)}
+                      className="w-full flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl active:bg-slate-50 transition-all group mt-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${useTimestamp ? 'bg-orange-500 border-orange-500' : 'bg-white border-slate-300'}`}>
+                          {useTimestamp && <Check className="w-4 h-4 text-white" />}
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                          <span className="text-sm font-black text-slate-900 leading-tight">Auto-Timestamp Overlay</span>
+                          <span className="text-[10px] font-medium text-slate-400 leading-tight mt-0.5">
+                            Visual time & location on photos
+                          </span>
+                        </div>
+                      </div>
+                      <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest transition-colors ${useTimestamp ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-400'}`}>
+                        {useTimestamp ? 'ON' : 'OFF'}
                       </div>
                     </button>
                   </div>

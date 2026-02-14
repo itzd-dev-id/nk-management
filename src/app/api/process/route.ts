@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
             buildingIndex,
             progress,
             outputPath,
-            showBuildingIndex = true
+            showBuildingIndex = true,
+            isTimestamp = false
         } = metadata;
 
         if (!outputPath) {
@@ -72,6 +73,11 @@ export async function POST(req: NextRequest) {
 
         // 2. Building Folder
         folderParts.push(buildingFolder);
+
+        // 3. Optional Timestamp Subfolder
+        if (isTimestamp) {
+            folderParts.push("Timestamp");
+        }
 
         const targetFolderId = await gdrive.ensureFolderStructure(folderParts, folderId);
         console.log('API: Target Folder ID resolved:', targetFolderId);

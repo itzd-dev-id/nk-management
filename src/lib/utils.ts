@@ -44,6 +44,21 @@ export function getDefaultDate(): string {
     return format(new Date(), 'yyyy-MM-dd');
 }
 
+export function formatDecimalMinutes(coord: number, isLat: boolean): string {
+    const absolute = Math.abs(coord);
+    const degrees = Math.floor(absolute);
+    const minutes = ((absolute - degrees) * 60).toFixed(3);
+    const direction = isLat
+        ? (coord >= 0 ? 'N' : 'S')
+        : (coord >= 0 ? 'E' : 'W');
+    return `${degrees}° ${minutes}' ${direction}`;
+}
+
+export function getDayNameIndo(date: Date): string {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return days[date.getDay()];
+}
+
 export function extractGDriveId(idOrUrl: string): string {
     if (!idOrUrl) return '';
     // If it's a URL, extract the ID
