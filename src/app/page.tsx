@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -25,28 +25,43 @@ const processTimestampImage = async (
 
   try {
     // 1. Extract GPS & Date
-    const exif = await exifr.parse(file, { gps: true });
+    const exif = await exifr.parse(file, { gps: true, timestamp: true });
     const lat = exif?.latitude;
     const lon = exif?.longitude;
     const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
 
+    if (!lat || !lon) {
+      addLog(`[WARN] Data GPS tidak ditemukan di metadata foto ${file.name}.`);
+    }
+
     // 2. Fetch Location (Nominatim)
     let address = "Lokasi tidak ditemukan";
     if (lat && lon) {
+      addLog(`[INFO] Koordinat ditemukan: ${lat}, ${lon}. Mengambil nama lokasi...`);
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
           headers: {
             'User-Agent': 'NK-Management-App/1.0'
           }
         });
+
+        if (!res.ok) {
+          addLog(`[ERROR] Nominatim API gagal (${res.status}): ${res.statusText}`);
+          throw new Error(`Nominatim failed: ${res.status}`);
+        }
+
         const data = await res.json();
         if (data.address) {
           const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
           const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
           address = [area, city].filter(Boolean).join(', ') || data.display_name || address;
+          addLog(`[SUCCESS] Lokasi ditemukan: ${address}`);
+        } else {
+          address = data.display_name || address;
         }
       } catch (e) {
         console.error("Nominatim error", e);
+        addLog(`[ERROR] Gagal menghubungi OpenStreetMap: ${e.message}`);
       }
     }
 
@@ -243,6 +258,8 @@ export default function Home() {
   const [taskSearch, setTaskSearch] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
   const [showBuildingIndex, setShowBuildingIndex] = useState(true);
+  const [testLocation, setTestLocation] = useState<string | null>(null);
+  const [isTestingLocation, setIsTestingLocation] = useState(false);
 
   // Toast Helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -1707,6 +1724,73 @@ export default function Home() {
                       )}
                     </div>
                     <p className="text-[10px] font-medium text-slate-400 leading-relaxed text-center">Dokumen pembiayaan termin akan otomatis tersimpan dalam folder Cloud khusus ini.</p>
+                  </div>
+
+                  {/* GPS TEST SECTION */}
+                  <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 shrink-0">
+                        <MapPin className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">Test Lokasi (GPS)</h4>
+                        <p className="text-[10px] text-slate-400 font-medium">Verifikasi koordinat & API OpenStreetMap</p>
+                      </div>
+                      <button
+                        disabled={isTestingLocation}
+                        onClick={async () => {
+                          setIsTestingLocation(true);
+                          setTestLocation("Mengambil koordinat...");
+
+                          if (!navigator.geolocation) {
+                            setTestLocation("Geolocation tidak didukung browser ini.");
+                            setIsTestingLocation(false);
+                            return;
+                          }
+
+                          navigator.geolocation.getCurrentPosition(
+                            async (pos) => {
+                              const lat = pos.coords.latitude;
+                              const lon = pos.coords.longitude;
+                              setTestLocation(`Koord: ${lat.toFixed(6)}, ${lon.toFixed(6)}. Mencari alamat...`);
+
+                              try {
+                                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
+                                  headers: { 'User-Agent': 'NK-Management-App/1.0' }
+                                });
+                                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                                const data = await res.json();
+                                setTestLocation(data.display_name || "Alamat tidak ditemukan");
+                                showToast("GPS & API Berjalan Normal", "success");
+                              } catch (e: any) {
+                                setTestLocation(`API Error: ${e.message}`);
+                                showToast("API Nominatim Bermasalah", "error");
+                              } finally {
+                                setIsTestingLocation(false);
+                              }
+                            },
+                            (err) => {
+                              setTestLocation(`GPS Error: ${err.message}`);
+                              showToast("Gagal mengambil GPS", "error");
+                              setIsTestingLocation(false);
+                            },
+                            { enableHighAccuracy: true, timeout: 10000 }
+                          );
+                        }}
+                        className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
+                      >
+                        {isTestingLocation && <Loader2 className="w-3 h-3 animate-spin" />}
+                        Test
+                      </button>
+                    </div>
+
+                    {testLocation && (
+                      <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                        <p className="text-[11px] font-bold text-slate-600 break-words leading-relaxed">
+                          {testLocation}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
