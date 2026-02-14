@@ -74,17 +74,25 @@ const processTimestampImage = async (
     const scale = canvas.width / 1500;
     const padding = 40 * scale;
 
-    // DRAW LOGO PLACEHOLDER (Top-Left)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.fillRect(padding, padding, 250 * scale, 100 * scale);
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 2 * scale;
-    ctx.strokeRect(padding, padding, 250 * scale, 100 * scale);
+    // DRAW LOGO (Top-Left)
+    try {
+      const logo = new Image();
+      logo.src = '/logo.png';
+      await new Promise((resolve) => {
+        logo.onload = resolve;
+        logo.onerror = resolve;
+      });
 
-    ctx.fillStyle = '#64748b';
-    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.fillText('LOGO PLACEHOLDER', padding + (125 * scale), padding + (60 * scale));
+      if (logo.complete && logo.naturalWidth > 0) {
+        const logoHeight = 80 * scale;
+        const logoWidth = (logo.naturalWidth / logo.naturalHeight) * logoHeight;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(padding - (5 * scale), padding - (5 * scale), logoWidth + (10 * scale), logoHeight + (10 * scale));
+        ctx.drawImage(logo, padding, padding, logoWidth, logoHeight);
+      }
+    } catch (e) { }
+
+
 
     // DRAW OVERLAY BACKGROUND (Bottom)
     const overlayHeight = 250 * scale;
@@ -895,74 +903,64 @@ export default function Home() {
                     addLog(`[INFO] Submitting documentation...`);
 
                     const file = pendingPostFile;
-                    let uploadFile: File | Blob = file;
+                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
 
-                    // 1. Image Processing (Timestamp & Compression)
-                    if (file.type.startsWith('image/')) {
-                      try {
-                        // 1a. Auto Timestamp
-                        if (useTimestamp) {
-                          uploadFile = await processTimestampImage(file, addLog);
-                        }
+                    const uploadToApi = async (f: File | Blob, isTs: boolean) => {
+                      const formData = new FormData();
+                      formData.append('file', f, file.name);
+                      formData.append('metadata', JSON.stringify({
+                        detectedDate: selectedDate,
+                        workName: workName || 'Documentation',
+                        buildingCode: selectedBuilding.code,
+                        buildingName: selectedBuilding.name,
+                        buildingIndex: selectedBuilding.index,
+                        progress: progress || '0',
+                        outputPath: outputPath,
+                        showBuildingIndex: showBuildingIndex,
+                        isTimestamp: isTs,
+                      }));
 
-                        // 1b. Compression
-                        addLog(`[INFO] Compressing image...`);
-                        const options = {
-                          maxSizeMB: 1,
-                          maxWidthOrHeight: 1920,
-                          useWebWorker: true,
-                          preserveExif: true
-                        };
-                        uploadFile = await imageCompression(uploadFile as File, options);
-                        addLog(`[INFO] Processing done: ${(uploadFile.size / 1024 / 1024).toFixed(2)} MB`);
-                      } catch (err) {
-                        console.error('Image processing error:', err);
-                        addLog(`[WARN] Processing failed, using original.`);
-                      }
-                    }
-
-                    // 2. Final Metadata Prep
-                    let detectedDate = getDefaultDate();
-                    if (file.type.startsWith('image/')) {
-                      try {
-                        const exif = await exifr.parse(file);
-                        if (exif?.DateTimeOriginal) {
-                          detectedDate = new Date(exif.DateTimeOriginal).toISOString().split('T')[0];
-                        }
-                      } catch (e) {
-                        console.warn('Metadata skip', e);
-                      }
-                    }
-
-                    const formData = new FormData();
-                    formData.append('file', uploadFile, file.name);
-                    formData.append('metadata', JSON.stringify({
-                      detectedDate: selectedDate, // Use manual date for folder
-                      workName: workName || 'Documentation',
-                      buildingCode: selectedBuilding.code,
-                      buildingName: selectedBuilding.name,
-                      buildingIndex: selectedBuilding.index,
-                      progress: progress || '0',
-                      outputPath: outputPath,
-                      showBuildingIndex: showBuildingIndex,
-                      isTimestamp: useTimestamp,
-                    }));
+                      const res = await fetch('/api/process', { method: 'POST', body: formData });
+                      return await res.json();
+                    };
 
                     try {
-                      const res = await fetch('/api/process', { method: 'POST', body: formData });
-                      const result = await res.json();
-                      if (result.success) {
-                        addLog(`[SUCCESS] Berhasil: ${result.finalName}`);
-                        setPendingPostFile(null);
-                        setPostTags([]);
-                        setPostKeyword('');
-                        showToast("Documentation uploaded successfully!", "success");
+                      // 1. Process and Upload Original (Clean)
+                      addLog(`[INFO] Compressing original...`);
+                      const compressedOriginal = await imageCompression(file, options);
+                      addLog(`[INFO] Uploading original version...`);
+                      const mainRes = await uploadToApi(compressedOriginal, false);
+
+                      if (mainRes.success) {
+                        addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
                       } else {
-                        addLog(`[ERROR] Gagal: ${result.error}`);
-                        showToast(result.error, "error");
+                        throw new Error(`Original upload failed: ${mainRes.error}`);
                       }
+
+                      // 2. Process and Upload Timestamp (if enabled)
+                      if (useTimestamp && file.type.startsWith('image/')) {
+                        addLog(`[INFO] Processing timestamped version...`);
+                        const timestampedFile = await processTimestampImage(file, addLog);
+                        addLog(`[INFO] Compressing timestamped version...`);
+                        const compressedTs = await imageCompression(timestampedFile, options);
+                        addLog(`[INFO] Uploading timestamped version...`);
+                        const tsRes = await uploadToApi(compressedTs, true);
+
+                        if (tsRes.success) {
+                          addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+                        } else {
+                          addLog(`[WARN] Timestamped upload failed: ${tsRes.error}`);
+                        }
+                      }
+
+                      // Final success state
+                      setPendingPostFile(null);
+                      setPostTags([]);
+                      setPostKeyword('');
+                      showToast(useTimestamp ? "Both versions uploaded!" : "Original uploaded!", "success");
+
                     } catch (err: any) {
-                      addLog(`[ERROR] Gagal sistem: ${err.message}`);
+                      addLog(`[ERROR] Gagal: ${err.message}`);
                       showToast(err.message, "error");
                     }
 
