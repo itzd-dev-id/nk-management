@@ -112,9 +112,9 @@ const processTimestampImage = async (
     ctx.fillStyle = 'white';
     ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     const timeWidth = ctx.measureText(timeStr).width;
-    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (12 * scale), textY);
+    ctx.fillText(` | ${dayStr}, ${dateStr}`, textX + timeWidth + (24 * scale), textY); // Increased from 12
 
-    textY += 45 * scale;
+    textY += 35 * scale; // Reduced from 45
 
     // Location Name
     ctx.font = `500 ${18 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
@@ -135,10 +135,10 @@ const processTimestampImage = async (
     lines.push(line);
 
     lines.slice(0, 2).forEach((l, i) => {
-      ctx.fillText(l.trim(), textX, textY + (i * 28 * scale));
+      ctx.fillText(l.trim(), textX, textY + (i * 22 * scale)); // Reduced from 28
     });
 
-    textY += (Math.min(lines.length, 2) * 28 + 15) * scale;
+    textY += (Math.min(lines.length, 2) * 22 + 10) * scale; // Reduced from 28+15
 
     // GPS & Weather
     const gpsStr = (lat && lon)
