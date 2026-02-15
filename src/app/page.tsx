@@ -326,6 +326,8 @@ interface PostSlot {
   file: File | null;
   keyword: string;
   tags: string[];
+  detectedBuilding: Building | null;
+  detectedWorkName: string;
 }
 
 export default function Home() {
@@ -345,7 +347,7 @@ export default function Home() {
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [slots, setSlots] = useState<PostSlot[]>(
-    Array(5).fill(null).map(() => ({ file: null, keyword: '', tags: [] }))
+    Array(5).fill(null).map(() => ({ file: null, keyword: '', tags: [], detectedBuilding: null, detectedWorkName: '' }))
   );
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -477,30 +479,46 @@ export default function Home() {
       const slot = { ...next[slotIndex] };
       const currentTags = [...slot.tags];
 
-      if (tag.includes(' / ')) {
-        const parts = tag.split(' / ');
-        const groupName = parts[1];
-        const taskName = parts[parts.length - 1];
+      const newTag = tag.includes(' / ') ? tag.split(' / ').pop() || tag : tag;
+      if (!slot.tags.includes(newTag)) {
+        slot.tags = [...slot.tags, newTag];
 
-        if (!currentTags.includes(groupName)) currentTags.push(groupName);
-        const cleanTaskName = taskName.replace(/_/g, ' ');
-        if (!currentTags.includes(cleanTaskName)) currentTags.push(cleanTaskName);
-      } else {
-        if (tag && !currentTags.includes(tag)) {
-          currentTags.push(tag);
+        // RE-DETECT for this slot
+        const slotKeywords: string[] = [];
+        if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
+        slotKeywords.push(...slot.tags);
+        const fullKeyword = slotKeywords.join(', ');
+
+        slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+        const rawT = detectWorkFromKeyword(
+          fullKeyword,
+          allHierarchy,
+          (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
+        );
+        if (rawT) {
+          if (rawT.includes(' / ')) {
+            slot.detectedWorkName = rawT;
+          } else {
+            for (const cat of allHierarchy) {
+              const group = cat.groups.find(g => g.tasks.includes(rawT));
+              if (group) {
+                slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                break;
+              }
+            }
+          }
+        } else {
+          slot.detectedWorkName = '';
         }
       }
-
-      slot.tags = currentTags;
       slot.keyword = '';
       next[slotIndex] = slot;
       return next;
     });
-
     setSuggestions([]);
     setShowDropdown(false);
     keywordInputRefs.current[slotIndex]?.focus();
-  }, [slots]);
+  }, [allBuildings, allHierarchy]);
 
   const removeTag = useCallback((tagIndex: number, slotIndex: number) => {
     setSlots(prev => {
@@ -534,46 +552,49 @@ export default function Home() {
     }
   };
 
-  // Deferred Detection Effect: Run when any slot's tags or file changes
+  // Per-Slot Detection Effect
   useEffect(() => {
-    // Collect all keywords from all slots
-    const allKeywords: string[] = [];
-    slots.forEach(slot => {
-      if (slot.file) allKeywords.push(slot.file.name.split('.')[0]);
-      allKeywords.push(...slot.tags);
-    });
+    setSlots(prev => prev.map(slot => {
+      const slotKeywords: string[] = [];
+      if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
+      slotKeywords.push(...slot.tags);
 
-    if (allKeywords.length === 0) return;
+      if (slotKeywords.length === 0) return { ...slot, detectedBuilding: null, detectedWorkName: '' };
 
-    const fullKeyword = allKeywords.join(', ');
+      const fullKeyword = slotKeywords.join(', ');
 
-    // Detect Building
-    const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
-    if (detectedB) {
-      setSelectedBuilding(detectedB);
-    }
+      // Detect Building
+      const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
 
-    // Detect Task
-    const detectedT = detectWorkFromKeyword(
-      fullKeyword,
-      allHierarchy,
-      (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
-    );
+      // Detect Task
+      const detectedTRaw = detectWorkFromKeyword(
+        fullKeyword,
+        allHierarchy,
+        (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
+      );
 
-    if (detectedT) {
-      if (detectedT.includes(' / ')) {
-        setWorkName(detectedT);
-      } else {
-        for (const cat of allHierarchy) {
-          const group = cat.groups.find(g => g.tasks.includes(detectedT));
-          if (group) {
-            setWorkName(`${cat.category} / ${group.name} / ${detectedT}`);
-            break;
+      let detectedT = '';
+      if (detectedTRaw) {
+        if (detectedTRaw.includes(' / ')) {
+          detectedT = detectedTRaw;
+        } else {
+          for (const cat of allHierarchy) {
+            const group = cat.groups.find(g => g.tasks.includes(detectedTRaw));
+            if (group) {
+              detectedT = `${cat.category} / ${group.name} / ${detectedTRaw}`;
+              break;
+            }
           }
         }
       }
-    }
-  }, [slots, allBuildings, allHierarchy]);
+
+      return {
+        ...slot,
+        detectedBuilding: detectedB,
+        detectedWorkName: detectedT
+      };
+    }));
+  }, [allBuildings, allHierarchy]); // We only re-run detection if buildings or hierarchy change, or when tags are added manually via setSlots calls in handlers
 
   // Sync Config from Vercel KV
   const fetchConfig = useCallback(async (filename: string) => {
@@ -815,45 +836,46 @@ export default function Home() {
 
   // Update naming preview for all active slots
   useEffect(() => {
-    if (selectedBuilding && workName) {
-      const activeSlots = slots.filter(s => s.file);
-      if (activeSlots.length === 0) {
-        setFiles([]);
-        return;
-      }
-
-      const previews = activeSlots.map((slot, idx) => {
-        const file = slot.file!;
-        const extension = getFileExtension(file.name);
-        const newName = generateNewName(
-          selectedDate,
-          workName,
-          selectedBuilding.name,
-          selectedBuilding.code,
-          progress || '0',
-          idx + 1,
-          extension
-        );
-
-        return {
-          id: `preview-${idx}`,
-          file,
-          originalName: file.name,
-          newName,
-          detectedDate: selectedDate,
-          workName,
-          building: selectedBuilding,
-          progress: progress || '0',
-          sequence: idx + 1,
-          status: 'pending' as const
-        };
-      });
-
-      setFiles(previews);
-    } else {
+    const activeSlots = slots.filter(s => s.file);
+    if (activeSlots.length === 0) {
       setFiles([]);
+      return;
     }
-  }, [selectedBuilding, workName, progress, slots, selectedDate]);
+
+    const previews = activeSlots.map((slot, idx) => {
+      const file = slot.file!;
+      const extension = getFileExtension(file.name);
+
+      // Use detected values or fallbacks
+      const b = slot.detectedBuilding || selectedBuilding || { code: '?-?', name: 'Select Building' };
+      const w = slot.detectedWorkName || workName || 'Work Name';
+
+      const newName = generateNewName(
+        selectedDate,
+        w,
+        b.name,
+        b.code,
+        progress || '0',
+        idx + 1,
+        extension
+      );
+
+      return {
+        id: `preview-${idx}`,
+        file,
+        originalName: file.name,
+        newName,
+        detectedDate: selectedDate,
+        workName: w,
+        building: b,
+        progress: progress || '0',
+        sequence: idx + 1,
+        status: 'pending' as const
+      };
+    });
+
+    setFiles(previews);
+  }, [slots, selectedDate, selectedBuilding, workName, progress]);
 
   const handleUpdateDate = (id: string, newDate: string) => {
     setFiles((prev) =>
@@ -933,10 +955,12 @@ export default function Home() {
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Daily Construction Documentation</p>
               </div>
 
-              {/* Step 1: Location & Work */}
+              {/* Step 1: Location & Work - Disabled/Hidden but kodenya tetap ada */}
               <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 space-y-6">
-                <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
-                <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
+                <div className="hidden">
+                  <BuildingSelector selectedBuilding={selectedBuilding} onSelect={setSelectedBuilding} buildings={allBuildings} />
+                  <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
+                </div>
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
@@ -990,7 +1014,27 @@ export default function Home() {
                         if (!file) return;
                         setSlots(prev => {
                           const next = [...prev];
-                          next[0] = { ...next[0], file };
+                          const slot = { ...next[0], file };
+
+                          // RE-DETECT
+                          const slotKeywords = [file.name.split('.')[0], ...slot.tags];
+                          const fullKeyword = slotKeywords.join(', ');
+                          slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                          const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                          if (rawT) {
+                            if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
+                            else {
+                              for (const cat of allHierarchy) {
+                                const group = cat.groups.find(g => g.tasks.includes(rawT));
+                                if (group) {
+                                  slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                                  break;
+                                }
+                              }
+                            }
+                          }
+
+                          next[0] = slot;
                           return next;
                         });
                         addLog(`[FILE] Slot 1: ${file.name}`);
@@ -1055,7 +1099,27 @@ export default function Home() {
                             if (!file) return;
                             setSlots(prev => {
                               const next = [...prev];
-                              next[idx] = { ...next[idx], file };
+                              const slot = { ...next[idx], file };
+
+                              // RE-DETECT
+                              const slotKeywords = [file.name.split('.')[0], ...slot.tags];
+                              const fullKeyword = slotKeywords.join(', ');
+                              slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                              const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                              if (rawT) {
+                                if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
+                                else {
+                                  for (const cat of allHierarchy) {
+                                    const group = cat.groups.find(g => g.tasks.includes(rawT));
+                                    if (group) {
+                                      slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                                      break;
+                                    }
+                                  }
+                                }
+                              }
+
+                              next[idx] = slot;
                               return next;
                             });
                             addLog(`[FILE] Slot ${idx + 1}: ${file.name}`);
@@ -1218,8 +1282,17 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   onClick={async () => {
-                    if (!selectedBuilding || !outputPath) {
-                      showToast("Pilih Gedung dan Isi Folder ID di Settings dulu!", "error");
+                    // Check if all active slots have a detected building
+                    const activeSlots = slots.filter(s => s.file !== null);
+                    const missingBuilding = activeSlots.find(s => !s.detectedBuilding && !selectedBuilding);
+
+                    if (missingBuilding) {
+                      showToast("Gedung tidak terdeteksi untuk beberapa file. Masukkan keyword gedung!", "error");
+                      return;
+                    }
+
+                    if (!outputPath) {
+                      showToast("Isi Folder ID di Settings dulu!", "error");
                       return;
                     }
 
@@ -1227,12 +1300,13 @@ export default function Home() {
                     setProcessLogs([]);
                     addLog(`[INFO] Submitting documentation for all active slots...`);
 
-                    const activeSlots = slots.filter(s => s.file !== null);
-
                     try {
                       for (const slot of activeSlots) {
                         const fileToProcess = slot.file!;
-                        addLog(`[INFO] Processing file: ${fileToProcess.name}...`);
+                        const b = slot.detectedBuilding || selectedBuilding!;
+                        const w = slot.detectedWorkName || workName || 'Documentation';
+
+                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w})`);
 
                         let file = fileToProcess;
                         const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
@@ -1242,10 +1316,10 @@ export default function Home() {
                           formData.append('file', f, fileToProcess.name);
                           formData.append('metadata', JSON.stringify({
                             detectedDate: selectedDate,
-                            workName: workName || 'Documentation',
-                            buildingCode: selectedBuilding.code,
-                            buildingName: selectedBuilding.name,
-                            buildingIndex: selectedBuilding.index,
+                            workName: w,
+                            buildingCode: b.code,
+                            buildingName: b.name,
+                            buildingIndex: b.index,
                             progress: progress || '0',
                             outputPath: outputPath,
                             showBuildingIndex: showBuildingIndex,
