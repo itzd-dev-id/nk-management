@@ -10,16 +10,23 @@
                     "Bouwplank",
                     "Mobilisasi Alat",
                     "Pagar Sementara",
+                    "Pagar Proyek",
                     "Papan Nama Proyek",
                     "Pematangan Lahan",
-                    "Pembersihan Lahan"
+                    "Pembersihan Lahan",
+                    "Direksi Keet",
+                    "Mushola Pekerja",
+                    "Kantin Pekerja",
+                    "Gudang Sementara",
+                    "Toilet Pekerja",
+                    "Gudang Material"
                 ]
             }
         ]
     },
     {
         "category": "SMKK",
-        "_description": "Sistem Manajemen Keselamatan Konstruksi",
+        "_description": "Sistem Manajemen Keselamatan Konstruksi dan K3",
         "groups": [
             {
                 "name": "Keselamatan",
@@ -28,7 +35,15 @@
                     "Jaring Pengaman",
                     "Rambu Safety",
                     "Safety Sign",
-                    "Toolbox Meeting"
+                    "Toolbox Meeting",
+                    "Safety Net",
+                    "Scaffolding",
+                    "Perancah",
+                    "Barricade",
+                    "Pagar Pengaman",
+                    "Helmet Area",
+                    "Audit Mingguan",
+                    "Audit K3"
                 ]
             }
         ]
@@ -40,16 +55,22 @@
             {
                 "name": "Tanah",
                 "tasks": [
+                    "Galian",
                     "Galian Tanah",
+                    "Galian Biasa",
                     "Pemadatan Tanah",
                     "Mengangkut Tanah",
                     "Urugan Tanah",
                     "Urugan Pasir",
-                    "Urugan Split"
+                    "Urugan Split",
+                    "Urugan Tanah Biasa",
+                    "Lantai Kerja",
+                    "Buis Beton 30cm"
                 ]
             },
             {
                 "name": "Footplat",
+                "_description": "Pekerjaan Pondasi dan Struktur Bawah",
                 "tasks": [
                     "Galian",
                     "Lantai Kerja",
@@ -58,7 +79,12 @@
                     "Pengecoran",
                     "Pile Cap",
                     "Bored Pile",
-                    "Pancang"
+                    "Pancang",
+                    "Pengadaan Tiang Pancang",
+                    "Penetrasi Tiang Pancang",
+                    "Sambungan Pancang",
+                    "Pemotongan Kepala Pancang",
+                    "Besi Tulangan Ulir"
                 ]
             },
             {
@@ -77,8 +103,11 @@
                 "tasks": [
                     "Galian",
                     "Bekisting",
+                    "Bekisting Kolom",
                     "Pembesian",
+                    "Pembesian Kolom",
                     "Pengecoran",
+                    "Pengecoran Kolom",
                     "Pedestal",
                     "Kolom Praktis"
                 ]
@@ -88,8 +117,11 @@
                 "_description": "Balok Struktur di Lantai 2 dan seterusnya",
                 "tasks": [
                     "Bekisting",
+                    "Bekisting Balok",
                     "Pembesian",
+                    "Pembesian Balok",
                     "Pengecoran",
+                    "Pengecoran Balok",
                     "Balok Praktis"
                 ]
             },
@@ -98,9 +130,14 @@
                 "_description": "Pelat Lantai Beton",
                 "tasks": [
                     "Bekisting",
+                    "Bekisting Plat",
                     "Pembesian",
+                    "Pembesian Plat",
                     "Pengecoran",
-                    "Wiremesh"
+                    "Pengecoran Plat",
+                    "Wiremesh",
+                    "Plat Lantai",
+                    "Plat t=120"
                 ]
             },
             {
@@ -120,7 +157,11 @@
                     "Finish Trowel",
                     "Lean_Concrete",
                     "Buis Beton",
-                    "Penyemprotan Anti Rayap"
+                    "Penyemprotan Anti Rayap",
+                    "Bekisting Tangga",
+                    "Pembesian Tangga",
+                    "Pengecoran Tangga",
+                    "Lift Shaft"
                 ]
             },
             {
@@ -141,7 +182,11 @@
                 "tasks": [
                     "Pasangan Bata",
                     "Bata Ringan",
+                    "Pasangan Batako",
                     "Plesteran",
+                    "Plesteran Mortar Siap Pakai",
+                    "Plesteran Dalam",
+                    "Plesteran Luar",
                     "Acian",
                     "Dinding Rooster",
                     "Finishing Beton Expose"
@@ -151,9 +196,12 @@
                 "name": "Lantai",
                 "tasks": [
                     "Keramik Lantai",
+                    "Keramik Dinding",
+                    "Granit Lantai",
                     "Homogeneous Tile Polish",
                     "Homogeneous Tile Unpolished",
-                    "Guiding Block"
+                    "Guiding Block",
+                    "Cat Epoxy"
                 ]
             },
             {
@@ -162,23 +210,34 @@
                     "Plafon Gypsum",
                     "Plafon Kalsiboard",
                     "Plafond UPVC",
-                    "Rangka Metalfuring"
+                    "Rangka Metalfuring",
+                    "List Plafond"
                 ]
             },
             {
                 "name": "Pintu & Jendela",
                 "tasks": [
                     "Kusen",
+                    "Kusen Pintu",
+                    "Kusen Jendela",
                     "Daun Pintu",
-                    "Daun Jendela"
+                    "Daun Jendela",
+                    "Kaca Jendela",
+                    "Kaca Pintu"
                 ]
             },
             {
                 "name": "Atap",
                 "tasks": [
+                    "Rangka Atap",
+                    "Rangka Baja",
+                    "Rangka Kayu",
                     "Penutup Atap",
+                    "Penutup Genteng",
+                    "Penutup Spandek",
                     "Nok Atap",
-                    "Lisplang"
+                    "Lisplang",
+                    "Talang"
                 ]
             },
             {
@@ -187,16 +246,20 @@
                     "Sanitary",
                     "Closet",
                     "Wastafel",
+                    "Shower",
                     "Floor Drain"
                 ]
             },
             {
-                "name": "Lainnya",
+                "name": "Finishing Lainnya",
                 "tasks": [
                     "Cat Eksterior",
                     "Cat Interior",
                     "Kanopi",
-                    "Railing Tangga"
+                    "Railing Tangga",
+                    "Handrail Tangga",
+                    "Railing Balkon",
+                    "Bordes Tangga"
                 ]
             }
         ]
@@ -209,8 +272,13 @@
                 "name": "Listrik",
                 "tasks": [
                     "Instalasi Listrik",
+                    "Instalasi Kabel",
                     "Panel Listrik",
+                    "Panel Tegangan Menengah",
                     "Cubicle 20KV",
+                    "Load Break Switch",
+                    "Circuit Breaker",
+                    "Trafo Oil Ester",
                     "Titik Lampu",
                     "Stop Kontak",
                     "Grounding"
@@ -221,7 +289,10 @@
                 "tasks": [
                     "Instalasi Pipa Air",
                     "Instalasi Pipa Limbah",
+                    "Instalasi Hydrant",
                     "Pompa Air",
+                    "Pompa Alkon",
+                    "Tangki Air",
                     "Tandon Air"
                 ]
             },
@@ -236,7 +307,7 @@
             {
                 "name": "Penyelamatan",
                 "tasks": [
-                    "Fire Alarm",
+                    "Instalasi Fire Alarm",
                     "Smoke Detector",
                     "CCTV"
                 ]
@@ -245,7 +316,12 @@
                 "name": "Genset",
                 "tasks": [
                     "Genset",
-                    "Genset 300KVA Silent"
+                    "Genset 300KVA Silent",
+                    "Panel Genset AMF",
+                    "Battery Charger",
+                    "Tanki Genset",
+                    "Knalpot Silencer",
+                    "Flow Meter"
                 ]
             }
         ]
@@ -258,11 +334,16 @@
                 "name": "Lansekap",
                 "tasks": [
                     "Land Clearing",
+                    "Weed Killer",
+                    "Leveling Subgrade",
+                    "Geotextil",
                     "Media Tanam",
+                    "Pratanam",
                     "Penanaman Pohon",
                     "Penanaman Rumput",
                     "Rumput",
                     "Grow In",
+                    "Pasca Grow In",
                     "Taman"
                 ]
             },
@@ -270,7 +351,10 @@
                 "name": "Fasilitas Luar",
                 "tasks": [
                     "Paving Block",
+                    "Paving Jalan",
+                    "Paving Trotoar",
                     "Grass Block",
+                    "Saluran",
                     "Saluran Drainase",
                     "Jaring Pengaman Lapangan",
                     "Marka Lapangan",
@@ -288,11 +372,12 @@
                 "name": "Pengiriman",
                 "tasks": [
                     "Pengiriman Material",
-                    "Pengiriman Semen",
-                    "Pengiriman Pasir",
-                    "Pengiriman Batu",
                     "Pengiriman Tanah",
+                    "Pengiriman Tiang Pancang",
                     "Pengiriman Besi",
+                    "Pengiriman Pasir",
+                    "Pengiriman Semen",
+                    "Pengiriman Batu",
                     "Pengiriman Beton",
                     "Pengiriman Bata",
                     "Pengiriman Keramik",
@@ -311,9 +396,14 @@
                     "Meja Kelas",
                     "Meja Guru",
                     "Meja Rapat",
+                    "Meja Sofa",
+                    "Meja Lab",
                     "Kursi Kelas",
                     "Kursi Guru",
-                    "Kursi Rapat"
+                    "Kursi Rapat",
+                    "Kursi Nakes",
+                    "Kursi Pasien",
+                    "Kursi Lab"
                 ]
             },
             {
@@ -321,6 +411,7 @@
                 "tasks": [
                     "Lemari",
                     "Almari",
+                    "Nakas",
                     "Kitchen Set"
                 ]
             },
@@ -330,7 +421,11 @@
                     "Bed UKS",
                     "Papan Tulis",
                     "Sofa",
-                    "Signage"
+                    "Marking Parkir",
+                    "Signage",
+                    "Papan Nama",
+                    "Cleaning",
+                    "Pembersihan Akhir"
                 ]
             }
         ]
@@ -352,13 +447,10 @@
                 "name": "Visual",
                 "tasks": [
                     "Drone View",
+                    "Foto Udara",
+                    "Joint Inspection",
+                    "Inspeksi Bersama",
                     "Dokumentasi Material"
-                ]
-            },
-            {
-                "name": "Inspeksi",
-                "tasks": [
-                    "Inspeksi Bersama"
                 ]
             }
         ]

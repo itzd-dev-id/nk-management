@@ -35,352 +35,443 @@ export const BUILDINGS: Building[] = [
 
 export const WORK_HIERARCHY = [
     {
-        category: 'Persiapan',
+        category: "Persiapan",
         groups: [
             {
-                name: 'Umum',
+                name: "Umum",
                 tasks: [
-                    'Barak Tenaga dan Barang',
-                    'Bouwplank',
-                    'Mobilisasi Alat',
-                    'Pagar Sementara',
-                    'Papan Nama Proyek',
-                    'Pematangan Lahan',
-                    'Pembersihan Lahan'
+                    "Barak Tenaga dan Barang",
+                    "Bouwplank",
+                    "Mobilisasi Alat",
+                    "Pagar Sementara",
+                    "Pagar Proyek",
+                    "Papan Nama Proyek",
+                    "Pematangan Lahan",
+                    "Pembersihan Lahan",
+                    "Direksi Keet",
+                    "Mushola Pekerja",
+                    "Kantin Pekerja",
+                    "Gudang Sementara",
+                    "Toilet Pekerja",
+                    "Gudang Material"
                 ]
             }
         ]
     },
     {
-        category: 'SMKK',
+        category: "SMKK",
         groups: [
             {
-                name: 'Keselamatan',
+                name: "Keselamatan",
                 tasks: [
-                    'Induction',
-                    'Jaring Pengaman',
-                    'Rambu Safety',
-                    'Safety Sign',
-                    'Toolbox Meeting'
+                    "Induction",
+                    "Jaring Pengaman",
+                    "Rambu Safety",
+                    "Safety Sign",
+                    "Toolbox Meeting",
+                    "Safety Net",
+                    "Scaffolding",
+                    "Perancah",
+                    "Barricade",
+                    "Pagar Pengaman",
+                    "Helmet Area",
+                    "Audit Mingguan",
+                    "Audit K3"
                 ]
             }
         ]
     },
     {
-        category: 'Struktur',
+        category: "Struktur",
         groups: [
             {
-                name: 'Tanah',
+                name: "Tanah",
                 tasks: [
-                    'Galian Tanah',
-                    'Pemadatan Tanah',
-                    'Mengangkut Tanah',
-                    'Urugan Tanah',
-                    'Urugan Pasir',
-                    'Urugan Split'
+                    "Galian",
+                    "Galian Tanah",
+                    "Galian Biasa",
+                    "Pemadatan Tanah",
+                    "Mengangkut Tanah",
+                    "Urugan Tanah",
+                    "Urugan Pasir",
+                    "Urugan Split",
+                    "Urugan Tanah Biasa",
+                    "Lantai Kerja",
+                    "Buis Beton 30cm"
                 ]
             },
             {
-                name: 'Footplat',
+                name: "Footplat",
                 tasks: [
-                    'Galian',
-                    'Lantai Kerja',
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran',
-                    'Pile Cap',
-                    'Bored Pile',
-                    'Pancang'
+                    "Galian",
+                    "Lantai Kerja",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Pile Cap",
+                    "Bored Pile",
+                    "Pancang",
+                    "Pengadaan Tiang Pancang",
+                    "Penetrasi Tiang Pancang",
+                    "Sambungan Pancang",
+                    "Pemotongan Kepala Pancang",
+                    "Besi Tulangan Ulir"
                 ]
             },
             {
-                name: 'Tie Beam',
+                name: "Tie Beam",
                 tasks: [
-                    'Galian',
-                    'Lantai Kerja',
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran'
+                    "Galian",
+                    "Lantai Kerja",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran"
                 ]
             },
             {
-                name: 'Kolom',
+                name: "Kolom",
                 tasks: [
-                    'Galian',
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran',
-                    'Pedestal',
-                    'Kolom Praktis'
+                    "Galian",
+                    "Bekisting",
+                    "Bekisting Kolom",
+                    "Pembesian",
+                    "Pembesian Kolom",
+                    "Pengecoran",
+                    "Pengecoran Kolom",
+                    "Pedestal",
+                    "Kolom Praktis"
                 ]
             },
             {
-                name: 'Balok',
+                name: "Balok",
                 tasks: [
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran',
-                    'Balok Praktis'
+                    "Bekisting",
+                    "Bekisting Balok",
+                    "Pembesian",
+                    "Pembesian Balok",
+                    "Pengecoran",
+                    "Pengecoran Balok",
+                    "Balok Praktis"
                 ]
             },
             {
-                name: 'Pelat',
+                name: "Pelat",
                 tasks: [
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran',
-                    'Wiremesh'
+                    "Bekisting",
+                    "Bekisting Plat",
+                    "Pembesian",
+                    "Pembesian Plat",
+                    "Pengecoran",
+                    "Pengecoran Plat",
+                    "Wiremesh",
+                    "Plat Lantai",
+                    "Plat t=120"
                 ]
             },
             {
-                name: 'Ring Balok',
+                name: "Ring Balok",
                 tasks: [
-                    'Bekisting',
-                    'Pembesian',
-                    'Pengecoran'
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran"
                 ]
             },
             {
-                name: 'Lainnya',
+                name: "Lainnya",
                 tasks: [
-                    'Tangga',
-                    'Ramp',
-                    'Finish Trowel',
-                    'Lean_Concrete',
-                    'Buis Beton',
-                    'Penyemprotan Anti Rayap'
+                    "Tangga",
+                    "Ramp",
+                    "Finish Trowel",
+                    "Lean_Concrete",
+                    "Buis Beton",
+                    "Penyemprotan Anti Rayap",
+                    "Bekisting Tangga",
+                    "Pembesian Tangga",
+                    "Pengecoran Tangga",
+                    "Lift Shaft"
                 ]
             },
             {
-                name: 'Pabrikasi',
+                name: "Pabrikasi",
                 tasks: [
-                    'Pabrikasi Bekisting',
-                    'Pabrikasi Besi'
+                    "Pabrikasi Bekisting",
+                    "Pabrikasi Besi"
                 ]
             }
         ]
     },
     {
-        category: 'Arsitektur',
+        category: "Arsitektur",
         groups: [
             {
-                name: 'Dinding',
+                name: "Dinding",
                 tasks: [
-                    'Pasangan Bata',
-                    'Bata Ringan',
-                    'Plesteran',
-                    'Acian',
-                    'Dinding Rooster',
-                    'Finishing Beton Expose'
+                    "Pasangan Bata",
+                    "Bata Ringan",
+                    "Pasangan Batako",
+                    "Plesteran",
+                    "Plesteran Mortar Siap Pakai",
+                    "Plesteran Dalam",
+                    "Plesteran Luar",
+                    "Acian",
+                    "Dinding Rooster",
+                    "Finishing Beton Expose"
                 ]
             },
             {
-                name: 'Lantai',
+                name: "Lantai",
                 tasks: [
-                    'Keramik Lantai',
-                    'Homogeneous Tile Polish',
-                    'Homogeneous Tile Unpolished',
-                    'Guiding Block'
+                    "Keramik Lantai",
+                    "Keramik Dinding",
+                    "Granit Lantai",
+                    "Homogeneous Tile Polish",
+                    "Homogeneous Tile Unpolished",
+                    "Guiding Block",
+                    "Cat Epoxy"
                 ]
             },
             {
-                name: 'Plafon',
+                name: "Plafon",
                 tasks: [
-                    'Plafon Gypsum',
-                    'Plafon Kalsiboard',
-                    'Plafond UPVC',
-                    'Rangka Metalfuring'
+                    "Plafon Gypsum",
+                    "Plafon Kalsiboard",
+                    "Plafond UPVC",
+                    "Rangka Metalfuring",
+                    "List Plafond"
                 ]
             },
             {
-                name: 'Pintu & Jendela',
+                name: "Pintu & Jendela",
                 tasks: [
-                    'Kusen',
-                    'Daun Pintu',
-                    'Daun Jendela'
+                    "Kusen",
+                    "Kusen Pintu",
+                    "Kusen Jendela",
+                    "Daun Pintu",
+                    "Daun Jendela",
+                    "Kaca Jendela",
+                    "Kaca Pintu"
                 ]
             },
             {
-                name: 'Atap',
+                name: "Atap",
                 tasks: [
-                    'Penutup Atap',
-                    'Nok Atap',
-                    'Lisplang'
+                    "Rangka Atap",
+                    "Rangka Baja",
+                    "Rangka Kayu",
+                    "Penutup Atap",
+                    "Penutup Genteng",
+                    "Penutup Spandek",
+                    "Nok Atap",
+                    "Lisplang",
+                    "Talang"
                 ]
             },
             {
-                name: 'Sanitasi',
+                name: "Sanitasi",
                 tasks: [
-                    'Sanitary',
-                    'Closet',
-                    'Wastafel',
-                    'Floor Drain'
+                    "Sanitary",
+                    "Closet",
+                    "Wastafel",
+                    "Shower",
+                    "Floor Drain"
                 ]
             },
             {
-                name: 'Lainnya',
+                name: "Finishing Lainnya",
                 tasks: [
-                    'Cat Eksterior',
-                    'Cat Interior',
-                    'Kanopi',
-                    'Railing Tangga'
+                    "Cat Eksterior",
+                    "Cat Interior",
+                    "Kanopi",
+                    "Railing Tangga",
+                    "Handrail Tangga",
+                    "Railing Balkon",
+                    "Bordes Tangga"
                 ]
             }
         ]
     },
     {
-        category: 'MEP',
+        category: "MEP",
         groups: [
             {
-                name: 'Listrik',
+                name: "Listrik",
                 tasks: [
-                    'Instalasi Listrik',
-                    'Panel Listrik',
+                    "Instalasi Listrik",
+                    "Instalasi Kabel",
+                    "Panel Listrik",
+                    "Panel Tegangan Menengah",
                     "Cubicle 20KV",
-                    'Titik Lampu',
-                    'Stop Kontak',
-                    'Grounding'
+                    "Load Break Switch",
+                    "Circuit Breaker",
+                    "Trafo Oil Ester",
+                    "Titik Lampu",
+                    "Stop Kontak",
+                    "Grounding"
                 ]
             },
             {
-                name: 'Air & Plumbing',
+                name: "Air & Plumbing",
                 tasks: [
-                    'Instalasi Pipa Air',
-                    'Instalasi Pipa Limbah',
-                    'Pompa Air',
-                    'Tandon Air'
+                    "Instalasi Pipa Air",
+                    "Instalasi Pipa Limbah",
+                    "Instalasi Hydrant",
+                    "Pompa Air",
+                    "Pompa Alkon",
+                    "Tangki Air",
+                    "Tandon Air"
                 ]
             },
             {
-                name: 'HVAC',
+                name: "HVAC",
                 tasks: [
-                    'Instalasi AC',
-                    'Split AC',
-                    'VRV AC'
+                    "Instalasi AC",
+                    "Split AC",
+                    "VRV AC"
                 ]
             },
             {
-                name: 'Penyelamatan',
+                name: "Penyelamatan",
                 tasks: [
-                    'Fire Alarm',
-                    'Smoke Detector',
-                    'CCTV'
+                    "Instalasi Fire Alarm",
+                    "Smoke Detector",
+                    "CCTV"
                 ]
             },
             {
-                name: 'Genset',
+                name: "Genset",
                 tasks: [
-                    'Genset',
-                    'Genset 300KVA Silent'
+                    "Genset",
+                    "Genset 300KVA Silent",
+                    "Panel Genset AMF",
+                    "Battery Charger",
+                    "Tanki Genset",
+                    "Knalpot Silencer",
+                    "Flow Meter"
                 ]
             }
         ]
     },
     {
-        category: 'Pekerjaan Lapangan',
+        category: "Pekerjaan Lapangan",
         groups: [
             {
-                name: 'Lansekap',
+                name: "Lansekap",
                 tasks: [
-                    'Land Clearing',
-                    'Media Tanam',
-                    'Penanaman Pohon',
-                    'Penanaman Rumput',
-                    'Rumput',
-                    'Grow In',
-                    'Taman'
+                    "Land Clearing",
+                    "Weed Killer",
+                    "Leveling Subgrade",
+                    "Geotextil",
+                    "Media Tanam",
+                    "Pratanam",
+                    "Penanaman Pohon",
+                    "Penanaman Rumput",
+                    "Rumput",
+                    "Grow In",
+                    "Pasca Grow In",
+                    "Taman"
                 ]
             },
             {
-                name: 'Fasilitas Luar',
+                name: "Fasilitas Luar",
                 tasks: [
-                    'Paving Block',
-                    'Grass Block',
-                    'Saluran Drainase',
-                    'Jaring Pengaman Lapangan',
-                    'Marka Lapangan',
-                    'Ring Basket',
-                    'Net Voli'
+                    "Paving Block",
+                    "Paving Jalan",
+                    "Paving Trotoar",
+                    "Grass Block",
+                    "Saluran",
+                    "Saluran Drainase",
+                    "Jaring Pengaman Lapangan",
+                    "Marka Lapangan",
+                    "Ring Basket",
+                    "Net Voli"
                 ]
             }
         ]
     },
     {
-        category: 'Logistik & Material',
+        category: "Logistik & Material",
         groups: [
             {
-                name: 'Pengiriman',
+                name: "Pengiriman",
                 tasks: [
-                    'Pengiriman Material',
-                    'Pengiriman Semen',
-                    'Pengiriman Pasir',
-                    'Pengiriman Batu',
-                    'Pengiriman Tanah',
-                    'Pengiriman Besi',
-                    'Pengiriman Beton',
-                    'Pengiriman Bata',
-                    'Pengiriman Keramik',
-                    'Pengiriman Pancang'
+                    "Pengiriman Material",
+                    "Pengiriman Tanah",
+                    "Pengiriman Tiang Pancang",
+                    "Pengiriman Besi",
+                    "Pengiriman Pasir",
+                    "Pengiriman Semen",
+                    "Pengiriman Batu",
+                    "Pengiriman Beton",
+                    "Pengiriman Bata",
+                    "Pengiriman Keramik",
+                    "Pengiriman Pancang"
                 ]
             }
         ]
     },
     {
-        category: 'Furniture',
+        category: "Furniture",
         groups: [
             {
-                name: 'Meja & Kursi',
+                name: "Meja & Kursi",
                 tasks: [
-                    'Meja Kelas',
-                    'Meja Guru',
-                    'Meja Rapat',
-                    'Kursi Kelas',
-                    'Kursi Guru',
-                    'Kursi Rapat'
+                    "Meja Kelas",
+                    "Meja Guru",
+                    "Meja Rapat",
+                    "Meja Sofa",
+                    "Meja Lab",
+                    "Kursi Kelas",
+                    "Kursi Guru",
+                    "Kursi Rapat",
+                    "Kursi Nakes",
+                    "Kursi Pasien",
+                    "Kursi Lab"
                 ]
             },
             {
-                name: 'Penyimpanan',
-                tasks: [
-                    'Lemari',
-                    'Almari',
-                    'Kitchen Set'
+                "name": "Penyimpanan",
+                "tasks": [
+                    "Lemari",
+                    "Almari",
+                    "Nakas",
+                    "Kitchen Set"
                 ]
             },
             {
-                name: 'Lainnya',
-                tasks: [
-                    'Bed UKS',
-                    'Papan Tulis',
-                    'Sofa',
-                    'Signage'
+                "name": "Lainnya",
+                "tasks": [
+                    "Bed UKS",
+                    "Papan Tulis",
+                    "Sofa",
+                    "Marking Parkir",
+                    "Signage",
+                    "Papan Nama",
+                    "Cleaning",
+                    "Pembersihan Akhir"
                 ]
             }
         ]
     },
     {
-        category: 'Dokumentasi',
+        category: "Dokumentasi",
         groups: [
             {
-                name: 'Laporan',
+                name: "Laporan",
                 tasks: [
-                    'Progress Harian',
-                    'Progress Mingguan',
-                    'Progress Bulanan',
-                    'As Built Drawing'
+                    "Progress Harian",
+                    "Progress Mingguan",
+                    "Progress Bulanan",
+                    "As Built Drawing"
                 ]
             },
             {
-                name: 'Visual',
+                name: "Visual",
                 tasks: [
-                    'Drone View',
-                    'Dokumentasi Material'
-                ]
-            },
-            {
-                name: 'Inspeksi',
-                tasks: [
-                    'Inspeksi Bersama'
+                    "Drone View",
+                    "Foto Udara",
+                    "Joint Inspection",
+                    "Inspeksi Bersama",
+                    "Dokumentasi Material"
                 ]
             }
         ]
