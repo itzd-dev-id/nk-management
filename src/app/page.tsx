@@ -221,7 +221,7 @@ const processTimestampImage = async (
     // 1. Time
     const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     ctx.fillStyle = '#f97316'; // Orange
-    ctx.font = `900 ${32 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
+    ctx.font = `bold ${28 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(timeStr, textXStart, textY);
     let currentX = textXStart + ctx.measureText(timeStr).width + gap;
 
@@ -233,7 +233,7 @@ const processTimestampImage = async (
     const dayStr = getDayNameIndo(dateObj);
     const dayDateStr = `${dayStr}, ${dateStr}`;
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
+    ctx.font = `bold ${28 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(dayDateStr, currentX, textY);
     currentX += ctx.measureText(dayDateStr).width + gap;
 
@@ -242,7 +242,7 @@ const processTimestampImage = async (
 
     // 3. Location (Simplified)
     ctx.fillStyle = 'white';
-    ctx.font = `500 ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
+    ctx.font = `bold ${28 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(address, currentX, textY);
     currentX += ctx.measureText(address).width + gap;
 
@@ -254,7 +254,7 @@ const processTimestampImage = async (
       ? `${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
       : 'GPS tidak tersedia';
     ctx.fillStyle = '#fbbf24'; // Yellow
-    ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
+    ctx.font = `bold ${28 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(gpsStr, currentX, textY);
     currentX += ctx.measureText(gpsStr).width + gap;
 
@@ -263,7 +263,7 @@ const processTimestampImage = async (
 
     // 5. Weather
     ctx.fillStyle = 'white';
-    ctx.font = `bold ${24 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`; // Larger
+    ctx.font = `bold ${28 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     ctx.fillText(weather, currentX, textY);
 
     // Convert back to File
