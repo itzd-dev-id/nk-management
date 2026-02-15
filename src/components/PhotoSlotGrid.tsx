@@ -81,10 +81,16 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
             // Then search through all tasks
             if (matches.length < 10) {
                 for (const cat of allHierarchy) {
+                    const catNormalized = cat.category.toLowerCase().replace(/_/g, ' ');
                     for (const group of cat.groups) {
+                        const groupNormalized = group.name.toLowerCase().replace(/_/g, ' ');
                         for (const task of group.tasks) {
                             const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                            if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
+
+                            // Search in category, group, and task names for better matching
+                            const searchableText = `${catNormalized} ${groupNormalized} ${taskNormalized}`;
+
+                            if (searchableText.includes(normalizedInput) && !tags.includes(task)) {
                                 // Include hierarchy for visual context
                                 matches.push(`${cat.category} / ${group.name} / ${task}`);
                                 if (matches.length >= 10) break;
