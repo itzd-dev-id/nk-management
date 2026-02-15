@@ -1084,22 +1084,36 @@ export default function Home() {
                       addLog(`[INFO] Capturing original metadata before compression...`);
                       let originalExif = await getExifData(file);
 
-                      // LIVE INJECTION: If photo is from camera (empty EXIF), try to get browser GPS
-                      if (!originalExif && navigator.geolocation) {
-                        addLog(`[INFO] Metadata tidak ditemukan (Camera photo). Mengambil GPS HP...`);
+                      // IMPROVED DETECTION: Use exifr to check if GPS actually exists
+                      const buffer = await file.arrayBuffer();
+                      const existingExif = await exifr.parse(buffer, { gps: true });
+                      const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+
+                      // LIVE INJECTION: If photo lacks GPS (Camera photo/Social media), use browser GPS
+                      if (!hasGps && navigator.geolocation) {
+                        addLog(`[INFO] GPS tidak ditemukan di metadata. Mencoba Live Injection via HP...`);
                         try {
                           const pos = await new Promise<GeolocationPosition>((res, rej) => {
-                            navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 5000 });
+                            navigator.geolocation.getCurrentPosition(res, rej, {
+                              enableHighAccuracy: true,
+                              timeout: 8000
+                            });
                           });
+
+                          addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
                           originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
 
                           // ENRICH FILE: Inject the new GPS so that both Clean and Timestamp processes use it
                           file = await injectExif(file, originalExif, file.name, file.type);
 
-                          addLog(`[SUCCESS] Lokasi HP berhasil disuntikkan ke metadata (Live Injection).`);
+                          addLog(`[SUCCESS] Metadata lokasi berhasil disuntikkan secara otomatis.`);
                         } catch (gpsErr: any) {
                           addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}. Foto tetap diunggah tanpa GPS.`);
                         }
+                      } else if (!hasGps && !navigator.geolocation) {
+                        addLog(`[WARN] Metadata GPS kosong & Browser tidak mengijinkan akses lokas (non-HTTPS?).`);
+                      } else if (hasGps) {
+                        addLog(`[INFO] Metadata GPS ditemukan (${existingExif.latitude.toFixed(6)}, ${existingExif.longitude.toFixed(6)}).`);
                       }
 
                       // 1. Process and Upload Original (Clean)
