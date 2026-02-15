@@ -16,13 +16,17 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
     const [search, setSearch] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const filteredHierarchy = hierarchy.map(group => ({
-        ...group,
-        tasks: group.tasks.filter(task =>
-            task.toLowerCase().includes(search.toLowerCase()) ||
-            group.category.toLowerCase().includes(search.toLowerCase())
-        )
-    })).filter(group => group.tasks.length > 0);
+    const filteredHierarchy = (hierarchy as any[]).map(cat => ({
+        ...cat,
+        groups: cat.groups.map((group: any) => ({
+            ...group,
+            tasks: group.tasks.filter((task: string) =>
+                task.toLowerCase().includes(search.toLowerCase()) ||
+                group.name.toLowerCase().includes(search.toLowerCase()) ||
+                cat.category.toLowerCase().includes(search.toLowerCase())
+            )
+        })).filter((group: any) => group.tasks.length > 0)
+    })).filter(cat => cat.groups.length > 0);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -44,14 +48,14 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                 {/* Dropdown Toggle & Display - NARROWED */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="w-full md:w-40 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
+                    className="w-full md:w-48 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
                 >
                     <div className="flex flex-col truncate">
-                        <span className={`text-[10px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
-                            {value ? value.split(' / ')[0] : 'Category'}
+                        <span className={`text-[9px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
+                            {value ? value.split(' / ').slice(0, -1).join(' / ') : 'Category'}
                         </span>
                         <span className={`font-bold truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>
-                            {value ? (value.split(' / ')[1] || value).replace(/_/g, ' ') : 'Select Work...'}
+                            {value ? (value.split(' / ').pop() || '').replace(/_/g, ' ') : 'Select Work...'}
                         </span>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
@@ -62,7 +66,7 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                     <Search className="w-4 h-4 text-slate-400 mr-2" />
                     <input
                         type="text"
-                        placeholder="Type to search..."
+                        placeholder="Type to search (e.g. 'Galian' or 'Footplat')..."
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -94,43 +98,52 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                                     transition: { staggerChildren: 0.05 }
                                 }
                             }}
-                            className="max-h-[400px] overflow-y-auto custom-scrollbar"
+                            className="max-h-[450px] overflow-y-auto custom-scrollbar"
                         >
                             {filteredHierarchy.length > 0 ? (
-                                filteredHierarchy.map((group) => (
+                                filteredHierarchy.map((cat) => (
                                     <motion.div
-                                        key={group.category}
+                                        key={cat.category}
                                         variants={{
                                             hidden: { opacity: 0, y: -10 },
                                             show: { opacity: 1, y: 0 }
                                         }}
                                         className="border-b border-slate-100 last:border-0"
                                     >
-                                        <div className="bg-slate-50/50 px-5 py-2 flex items-center gap-2">
+                                        <div className="bg-slate-50/50 px-5 py-2 flex items-center gap-2 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-100">
                                             <FolderOpen className="w-3 h-3 text-slate-400" />
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{group.category}</span>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{cat.category}</span>
                                         </div>
-                                        <div className="py-1">
-                                            {group.tasks.map((task) => {
-                                                const fullName = `${group.category} / ${task}`;
-                                                const isSelected = value === fullName;
-                                                return (
-                                                    <button
-                                                        key={task}
-                                                        onClick={() => {
-                                                            onChange(fullName);
-                                                            setIsOpen(false);
-                                                            setSearch('');
-                                                        }}
-                                                        className="w-full flex items-center justify-between px-8 py-2.5 hover:bg-orange-50 text-left transition-colors group"
-                                                    >
-                                                        <span className={`text-sm font-medium ${isSelected ? 'text-orange-600' : 'text-slate-700'}`}>
-                                                            {task.replace(/_/g, ' ')}
-                                                        </span>
-                                                        {isSelected && <Check className="w-4 h-4 text-orange-500" />}
-                                                    </button>
-                                                );
-                                            })}
+                                        <div className="py-2">
+                                            {cat.groups.map((group: any) => (
+                                                <div key={group.name} className="mb-2 last:mb-0">
+                                                    <div className="px-8 py-1">
+                                                        <span className="text-[9px] font-bold text-orange-400 uppercase tracking-wider">{group.name}</span>
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        {group.tasks.map((task: string) => {
+                                                            const fullName = `${cat.category} / ${group.name} / ${task}`;
+                                                            const isSelected = value === fullName;
+                                                            return (
+                                                                <button
+                                                                    key={task}
+                                                                    onClick={() => {
+                                                                        onChange(fullName);
+                                                                        setIsOpen(false);
+                                                                        setSearch('');
+                                                                    }}
+                                                                    className="w-full flex items-center justify-between px-10 py-2 hover:bg-orange-50 text-left transition-colors group"
+                                                                >
+                                                                    <span className={`text-sm font-medium ${isSelected ? 'text-orange-600' : 'text-slate-700'}`}>
+                                                                        {task.replace(/_/g, ' ')}
+                                                                    </span>
+                                                                    {isSelected && <Check className="w-4 h-4 text-orange-500" />}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </motion.div>
                                 ))

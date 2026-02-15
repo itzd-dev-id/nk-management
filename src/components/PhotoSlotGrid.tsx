@@ -18,7 +18,7 @@ interface PhotoSlotGridProps {
     slots: SlotData[];
     onUpdateSlot: (id: number, data: Partial<SlotData>) => void;
     onRemoveFile: (id: number) => void;
-    allHierarchy: { category: string; tasks: string[] }[];
+    allHierarchy: { category: string; groups: { name: string; tasks: string[] }[] }[];
     allBuildings: { code: string; name: string; index?: number }[];
 }
 
@@ -39,7 +39,7 @@ export function PhotoSlotGrid({ slots, onUpdateSlot, onRemoveFile, allHierarchy,
     );
 }
 
-function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void; allHierarchy: { category: string; tasks: string[] }[]; allBuildings: { code: string; name: string; index?: number }[] }) {
+function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { slot: SlotData; onUpdate: (data: Partial<SlotData>) => void; onRemove: () => void; allHierarchy: { category: string; groups: { name: string; tasks: string[] }[] }[]; allBuildings: { code: string; name: string; index?: number }[] }) {
     const [inputValue, setInputValue] = useState('');
     const [tags, setTags] = useState<string[]>([]);
     const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -78,15 +78,20 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
             }
 
             // Then search through all tasks
-            for (const group of allHierarchy) {
-                for (const task of group.tasks) {
-                    const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                    if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
-                        matches.push(task);
+            if (matches.length < 10) {
+                for (const cat of allHierarchy) {
+                    for (const group of cat.groups) {
+                        for (const task of group.tasks) {
+                            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                            if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
+                                matches.push(task);
+                                if (matches.length >= 10) break;
+                            }
+                        }
                         if (matches.length >= 10) break;
                     }
+                    if (matches.length >= 10) break;
                 }
-                if (matches.length >= 10) break;
             }
 
             setSuggestions(matches);
@@ -243,9 +248,11 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                         <AnimatePresence mode="popLayout">
                             {tags.map((tag, index) => {
                                 // Check if this tag is a work task (green) or building/other (orange)
-                                const isWorkTask = allHierarchy.some(group =>
-                                    group.tasks.some(task =>
-                                        task.toLowerCase() === tag.toLowerCase()
+                                const isWorkTask = allHierarchy.some(cat =>
+                                    cat.groups.some(group =>
+                                        group.tasks.some(task =>
+                                            task.toLowerCase() === tag.toLowerCase()
+                                        )
                                     )
                                 );
 

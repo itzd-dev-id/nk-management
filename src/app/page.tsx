@@ -354,7 +354,7 @@ export default function Home() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeStep, setActiveStep] = useState<'building' | 'work' | 'upload'>('building');
   const [editingBuilding, setEditingBuilding] = useState<{ index?: number, name: string } | null>(null);
-  const [editingTask, setEditingTask] = useState<{ catIndex?: number, taskIndex?: number, name: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<{ catIndex?: number, groupIndex?: number, taskIndex?: number, name: string } | null>(null);
   const [editingCategory, setEditingCategory] = useState<{ index?: number, name: string } | null>(null);
   const [buildingSearch, setBuildingSearch] = useState('');
   const [taskSearch, setTaskSearch] = useState('');
@@ -389,7 +389,7 @@ export default function Home() {
 
   // Unified Data State (Dynamic Database) - Load from Supabase only
   const [allBuildings, setAllBuildings] = useState<Building[]>([]);
-  const [allHierarchy, setAllHierarchy] = useState<{ category: string; tasks: string[] }[]>([]);
+  const [allHierarchy, setAllHierarchy] = useState<{ category: string; groups: { name: string; tasks: string[] }[] }[]>([]);
 
   // Persistence
   useEffect(() => {
@@ -426,13 +426,16 @@ export default function Home() {
 
       // Then search through all tasks
       if (matches.length < 10) {
-        for (const group of allHierarchy) {
-          for (const task of group.tasks) {
-            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-            if (taskNormalized.includes(normalizedInput) && !postTags.includes(task)) {
-              matches.push(task);
-              if (matches.length >= 10) break;
+        for (const cat of allHierarchy) {
+          for (const group of cat.groups) {
+            for (const task of group.tasks) {
+              const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+              if (taskNormalized.includes(normalizedInput) && !postTags.includes(task)) {
+                matches.push(task);
+                if (matches.length >= 10) break;
+              }
             }
+            if (matches.length >= 10) break;
           }
           if (matches.length >= 10) break;
         }
@@ -503,9 +506,21 @@ export default function Home() {
     );
 
     if (detectedT) {
-      const category = allHierarchy.find(h => h.tasks.includes(detectedT))?.category;
-      if (category) {
-        setWorkName(`${category} / ${detectedT}`);
+      // Find category and group for the detected task
+      let foundCategory = '';
+      let foundGroup = '';
+
+      for (const cat of allHierarchy) {
+        const group = cat.groups.find(g => g.tasks.includes(detectedT));
+        if (group) {
+          foundCategory = cat.category;
+          foundGroup = group.name;
+          break;
+        }
+      }
+
+      if (foundCategory) {
+        setWorkName(`${foundCategory} / ${foundGroup} / ${detectedT}`);
       }
     }
   }, [postTags, pendingPostFile, allBuildings, allHierarchy]);
@@ -966,7 +981,7 @@ export default function Home() {
                     {/* Tags */}
                     <AnimatePresence mode="popLayout">
                       {postTags.map((tag, index) => {
-                        const isWorkTask = allHierarchy.some(group => group.tasks.some(task => task.toLowerCase() === tag.toLowerCase()));
+                        const isWorkTask = allHierarchy.some(cat => cat.groups.some(group => group.tasks.some(task => task.toLowerCase() === tag.toLowerCase())));
                         const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
 
                         return (
@@ -1253,7 +1268,7 @@ export default function Home() {
                 <div key={idx} className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-6 space-y-4">
                   <div className="flex items-center justify-between px-2">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{cat.category}</span>
-                    <span className="text-[10px] font-bold text-orange-500 uppercase">{cat.tasks.length} Tasks</span>
+                    <span className="text-[10px] font-bold text-orange-500 uppercase">{allHierarchy.reduce((acc, cat) => acc + cat.groups.reduce((gAcc, g) => gAcc + g.tasks.length, 0), 0)} Tasks</span>
                   </div>
 
                   <div className="relative group">
@@ -1557,9 +1572,15 @@ export default function Home() {
                         </div>
                       </div>
                       <input
+                        id="new-work-group"
+                        type="text"
+                        placeholder="Group Name (ex: Balok)"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                      />
+                      <input
                         id="new-work-task"
                         type="text"
-                        placeholder="Task Name (ex: Cat Dinding)"
+                        placeholder="Task Name (ex: Bekisting)"
                         className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                     </div>
@@ -1567,30 +1588,42 @@ export default function Home() {
                       disabled={isSavingCloud}
                       onClick={() => {
                         const catInput = document.getElementById('new-work-cat') as HTMLSelectElement;
+                        const groupInput = document.getElementById('new-work-group') as HTMLInputElement;
                         const taskInput = document.getElementById('new-work-task') as HTMLInputElement;
-                        if (catInput.value && taskInput.value) {
+                        if (catInput.value && groupInput.value && taskInput.value) {
                           const next = [...allHierarchy];
                           const catName = catInput.value.trim();
+                          const groupName = groupInput.value.trim();
                           const taskName = taskInput.value.trim().replace(/\s+/g, '_');
+
                           const existingCat = next.find(w => w.category.toLowerCase() === catName.toLowerCase());
                           if (existingCat) {
-                            if (existingCat.tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
-                              showToast(`Pekerjaan "${taskInput.value}" sudah ada di kategori ini!`, 'error');
-                              return;
+                            const existingGroup = existingCat.groups.find(g => g.name.toLowerCase() === groupName.toLowerCase());
+                            if (existingGroup) {
+                              if (existingGroup.tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
+                                showToast(`Pekerjaan "${taskInput.value}" sudah ada di grup ini!`, 'error');
+                                return;
+                              }
+                              existingGroup.tasks = [...existingGroup.tasks, taskName].sort((a, b) => a.localeCompare(b));
+                            } else {
+                              existingCat.groups.push({ name: groupName, tasks: [taskName] });
+                              existingCat.groups.sort((a, b) => a.name.localeCompare(b.name));
                             }
-                            existingCat.tasks = [...existingCat.tasks, taskName].sort((a, b) => a.localeCompare(b));
                           } else {
-                            // Should not happen with dropdown, but safe to keep
-                            next.push({ category: catName, tasks: [taskName] });
+                            next.push({
+                              category: catName,
+                              groups: [{ name: groupName, tasks: [taskName] }]
+                            });
                             next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                           }
                           setAllHierarchy(next);
                           setHasUnsavedChanges(true);
-                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName}`, 'success');
+                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName} / ${groupName}`, 'success');
                           catInput.value = '';
+                          groupInput.value = '';
                           taskInput.value = '';
                         } else {
-                          showToast('Mohon pilih kategori dan isi nama tugas', 'error');
+                          showToast('Mohon isi semua bidang (Kategori, Grup, dan Tugas)', 'error');
                         }
                       }}
                       className="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
@@ -1603,7 +1636,10 @@ export default function Home() {
                       {allHierarchy
                         .filter(w =>
                           w.category.toLowerCase().includes(taskSearch.toLowerCase()) ||
-                          w.tasks.some(t => t.toLowerCase().includes(taskSearch.toLowerCase()))
+                          w.groups.some(g =>
+                            g.name.toLowerCase().includes(taskSearch.toLowerCase()) ||
+                            g.tasks.some(t => t.toLowerCase().includes(taskSearch.toLowerCase()))
+                          )
                         )
                         .map((w, i) => (
                           <div key={i} className="space-y-1">
@@ -1655,77 +1691,91 @@ export default function Home() {
                                 </>
                               )}
                             </div>
-                            <div className="space-y-1">
-                              {w.tasks.map((t, ti) => (
-                                <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
-                                  <div className="flex-1 min-w-0">
-                                    {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
-                                      <input
-                                        type="text"
-                                        value={editingTask.name.replace(/_/g, ' ')}
-                                        onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
-                                        autoFocus
-                                        className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') {
-                                            const next = [...allHierarchy];
-                                            next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                            setAllHierarchy(next);
-                                            setHasUnsavedChanges(true);
-                                            setEditingTask(null);
-                                            showToast(`Pekerjaan diperbarui`, 'success');
-                                          }
-                                        }}
-                                      />
-                                    ) : (
-                                      <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t.replace(/_/g, ' ')}</span>
-                                    )}
+                            <div className="space-y-3">
+                              {w.groups.map((g, gi) => (
+                                <div key={gi} className="space-y-1">
+                                  <div className="px-4 py-1">
+                                    <span className="text-[8px] font-bold text-orange-400 uppercase tracking-wider">{g.name}</span>
                                   </div>
-                                  <div className="flex items-center gap-1 shrink-0">
-                                    {editingTask?.catIndex === i && editingTask?.taskIndex === ti ? (
-                                      <>
-                                        <button
-                                          onClick={() => {
-                                            const next = [...allHierarchy];
-                                            next[i].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                            setAllHierarchy(next);
-                                            setHasUnsavedChanges(true);
-                                            setEditingTask(null);
-                                            showToast(`Pekerjaan diperbarui`, 'success');
-                                          }}
-                                          className="text-emerald-500 p-2"
-                                        >
-                                          <Save className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
-                                          <XCircle className="w-3.5 h-3.5" />
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <button onClick={() => setEditingTask({ catIndex: i, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
-                                          <Edit3 className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
-                                              const next = [...allHierarchy];
-                                              next[i].tasks = next[i].tasks.filter((_, idx) => idx !== ti);
-                                              if (next[i].tasks.length === 0) {
-                                                setAllHierarchy(next.filter((_, idx) => idx !== i));
-                                              } else {
-                                                setAllHierarchy(next);
-                                              }
-                                              setHasUnsavedChanges(true);
-                                              showToast(`Tugas ${t} dihapus`, 'info');
-                                            }
-                                          }}
-                                          className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
-                                        >
-                                          <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                      </>
-                                    )}
+                                  <div className="space-y-1">
+                                    {g.tasks.map((t, ti) => (
+                                      <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
+                                        <div className="flex-1 min-w-0">
+                                          {editingTask?.catIndex === i && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
+                                            <input
+                                              type="text"
+                                              value={editingTask.name.replace(/_/g, ' ')}
+                                              onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                                              autoFocus
+                                              className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
+                                              onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                  const next = [...allHierarchy];
+                                                  next[i].groups[gi].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
+                                                  setAllHierarchy(next);
+                                                  setHasUnsavedChanges(true);
+                                                  setEditingTask(null);
+                                                  showToast(`Pekerjaan diperbarui`, 'success');
+                                                }
+                                              }}
+                                            />
+                                          ) : (
+                                            <span className="text-xs font-bold text-slate-700 line-clamp-2 break-words leading-tight">{t.replace(/_/g, ' ')}</span>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-1 shrink-0">
+                                          {editingTask?.catIndex === i && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
+                                            <>
+                                              <button
+                                                onClick={() => {
+                                                  const next = [...allHierarchy];
+                                                  next[i].groups[gi].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
+                                                  setAllHierarchy(next);
+                                                  setHasUnsavedChanges(true);
+                                                  setEditingTask(null);
+                                                  showToast(`Pekerjaan diperbarui`, 'success');
+                                                }}
+                                                className="text-emerald-500 p-2"
+                                              >
+                                                <Save className="w-3.5 h-3.5" />
+                                              </button>
+                                              <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
+                                                <XCircle className="w-3.5 h-3.5" />
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <button onClick={() => setEditingTask({ catIndex: i, groupIndex: gi, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                                <Edit3 className="w-3.5 h-3.5" />
+                                              </button>
+                                              <button
+                                                onClick={() => {
+                                                  if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
+                                                    const next = [...allHierarchy];
+                                                    next[i].groups[gi].tasks = next[i].groups[gi].tasks.filter((_, idx) => idx !== ti);
+                                                    if (next[i].groups[gi].tasks.length === 0) {
+                                                      next[i].groups = next[i].groups.filter((_, idx) => idx !== gi);
+                                                      if (next[i].groups.length === 0) {
+                                                        setAllHierarchy(next.filter((_, idx) => idx !== i));
+                                                      } else {
+                                                        setAllHierarchy(next);
+                                                      }
+                                                    } else {
+                                                      setAllHierarchy(next);
+                                                    }
+                                                    setHasUnsavedChanges(true);
+                                                    showToast(`Tugas ${t} dihapus`, 'info');
+                                                  }
+                                                }}
+                                                className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
+                                              >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                              </button>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               ))}
@@ -2011,7 +2061,7 @@ export default function Home() {
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Gedung</span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-4 flex flex-col items-center justify-center text-center gap-1">
-                    <span className="text-xl font-black text-slate-900">{allHierarchy.reduce((acc, cat) => acc + cat.tasks.length, 0)}</span>
+                    <span className="text-xl font-black text-slate-900">{allHierarchy.reduce((acc, cat) => acc + cat.groups.reduce((gAcc, g) => gAcc + g.tasks.length, 0), 0)}</span>
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Pekerjaan</span>
                   </div>
                 </div>

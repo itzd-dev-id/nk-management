@@ -52,7 +52,6 @@ Total: **12 Kategori** dengan **~200+ Jenis Pekerjaan**
 - Pemotongan Kepala Pancang
 - Pile Cap
 - Tie Beam
-- Sloof
 - Pedestal
 - Besi Tulangan Ulir
 - Pembesian

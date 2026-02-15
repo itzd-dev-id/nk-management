@@ -50,24 +50,21 @@ export function generateNewName(
     sequence: number,
     extension: string
 ): string {
-    // For file names, we still use underscores for separation as requested
-    // And we replace slashes (subfolders) with dashes in the filename
-    // Split workName to clean category (remove leading numbers like "01. ")
+    // workName format: "Category / Group / Task" or "Category / Task"
     const workParts = workName.split(' / ');
-    const categoryPart = workParts.length > 1 ? workParts[0].replace(/^\d+\.\s*/, '').trim() : null;
+    const categoryPart = workParts.length > 0 ? workParts[0].replace(/^\d+\.\s*/, '').trim() : '';
+    const groupPart = workParts.length > 2 ? workParts[1].trim() : '';
     const taskPart = workParts[workParts.length - 1].trim();
 
-    const safeCategory = categoryPart ? categoryPart.replace(/\s+/g, '_') : '';
+    const safeCategory = categoryPart.replace(/\s+/g, '_');
+    const safeGroup = groupPart ? groupPart.replace(/\s+/g, '_') : '';
     const safeTask = taskPart.replace(/\s+/g, '_').replace(/\//g, '-');
 
-    const fileWork = safeCategory ? `${safeCategory}_${safeTask}` : safeTask;
+    const fileWork = [safeCategory, safeGroup, safeTask].filter(Boolean).join('_');
     const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');
 
-    // Format: 2026-02-01_Pekerjaan_Building_A_10%_001.jpg
-    // Building name is now cleaned of redundant codes in buildings.json
-    // If progress is empty, omit it
     const progressPart = progress ? `${progress}%_` : '';
     return `${dateStr}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
 }
@@ -171,7 +168,7 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
 
 export function detectWorkFromKeyword(
     keyword: string,
-    hierarchy: { category: string; tasks: string[] }[],
+    hierarchy: { category: string; groups: { name: string; tasks: string[] }[] }[],
     categoryFilter?: string
 ): string {
     if (!keyword) return '';
@@ -193,68 +190,61 @@ export function detectWorkFromKeyword(
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    // PASS 1: Try exact match on full phrase
-    for (const group of filteredHierarchy) {
-        for (const task of group.tasks) {
-            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-            if (taskNormalized === normalizedWorkPart) {
-                return task;
-            }
-        }
-    }
-
-    // PASS 2: Try partial match on full phrase (must contain the entire search phrase)
-    for (const group of filteredHierarchy) {
-        for (const task of group.tasks) {
-            const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-            if (taskNormalized.includes(normalizedWorkPart)) {
-                return task;
-            }
-        }
-    }
-
-    // PASS 3: Check if search phrase matches category
-    for (const group of filteredHierarchy) {
-        if (group.category.toLowerCase().includes(normalizedWorkPart)) {
-            return group.tasks[0] || '';
-        }
-    }
-
-    // PASS 4: Fall back to individual word matching (for queries like "tanah" or "batu")
-    const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
-
-    for (const term of terms) {
-        // For very short terms (1-3 chars), ONLY use exact match to avoid false positives
-        const isShortTerm = term.length <= 3;
-
-        // Try exact match on individual word
-        for (const group of filteredHierarchy) {
+    // PASS 1: Try exact match on task name
+    for (const cat of filteredHierarchy) {
+        for (const group of cat.groups) {
             for (const task of group.tasks) {
                 const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                if (taskNormalized === term) {
+                if (taskNormalized === normalizedWorkPart) {
                     return task;
                 }
             }
         }
+    }
 
-        // For longer terms, try partial match with word boundary
-        if (!isShortTerm) {
-            for (const group of filteredHierarchy) {
+    // PASS 2: Try partial match on task name
+    for (const cat of filteredHierarchy) {
+        for (const group of cat.groups) {
+            for (const task of group.tasks) {
+                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+                if (taskNormalized.includes(normalizedWorkPart)) {
+                    return task;
+                }
+            }
+        }
+    }
+
+    // PASS 3: Try match on Group Name
+    for (const cat of filteredHierarchy) {
+        for (const group of cat.groups) {
+            if (group.name.toLowerCase().includes(normalizedWorkPart)) {
+                return group.tasks[0] || '';
+            }
+        }
+    }
+
+    // PASS 4: Check if search phrase matches category
+    for (const cat of filteredHierarchy) {
+        if (cat.category.toLowerCase().includes(normalizedWorkPart)) {
+            return cat.groups[0]?.tasks[0] || '';
+        }
+    }
+
+    // PASS 5: Fall back to individual word matching
+    const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
+
+    for (const term of terms) {
+        const isShortTerm = term.length <= 3;
+        if (isShortTerm) continue;
+
+        for (const cat of filteredHierarchy) {
+            for (const group of cat.groups) {
                 for (const task of group.tasks) {
                     const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                    // Use word boundary regex to match whole words only
                     const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
                     if (wordBoundaryRegex.test(taskNormalized)) {
                         return task;
                     }
-                }
-            }
-
-            // Try match in categories
-            for (const group of filteredHierarchy) {
-                const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
-                if (wordBoundaryRegex.test(group.category.toLowerCase())) {
-                    return group.tasks[0] || '';
                 }
             }
         }
