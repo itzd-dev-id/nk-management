@@ -107,7 +107,10 @@ export async function POST(req: NextRequest) {
         const finalName = `${prefix}${sequence}.${extension}`;
 
         console.log('API: Uploading file as:', finalName);
-        const uploadRes = await gdrive.uploadFile(file, finalName, targetFolderId, file.type);
+
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const uploadRes = await gdrive.uploadFile(buffer, finalName, targetFolderId, file.type);
 
         if (uploadRes) {
             return NextResponse.json({ success: true, fileId: uploadRes.id, finalName });
