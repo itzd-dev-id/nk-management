@@ -322,6 +322,11 @@ const processTimestampImage = async (
     return file;
   }
 };
+interface PostSlot {
+  file: File | null;
+  keyword: string;
+  tags: string[];
+}
 
 export default function Home() {
   const { data: session } = useSession() as any;
@@ -339,13 +344,14 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
-  const [postKeyword, setPostKeyword] = useState('');
-  const [postTags, setPostTags] = useState<string[]>([]);
+  const [slots, setSlots] = useState<PostSlot[]>(
+    Array(5).fill(null).map(() => ({ file: null, keyword: '', tags: [] }))
+  );
+  const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
-  const keywordInputRef = React.useRef<HTMLInputElement>(null);
-  const [pendingPostFile, setPendingPostFile] = useState<File | null>(null);
+  const keywordInputRefs = React.useRef<(HTMLInputElement | null)[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -408,90 +414,112 @@ export default function Home() {
 
   // Keyword Suggestions Logic
   useEffect(() => {
-    if (postKeyword.trim().length > 0) {
-      const normalizedInput = postKeyword.toLowerCase().replace(/_/g, ' ');
-      const matches: string[] = [];
+    if (activeSlotIndex !== null) {
+      const slot = slots[activeSlotIndex];
+      const keyword = slot.keyword;
+      const tags = slot.tags;
 
-      // Search through building names first
-      for (const building of allBuildings) {
-        const buildingNameNormalized = building.name.toLowerCase();
-        const buildingCodeNormalized = building.code.toLowerCase();
-        const displayString = `[${building.code}] ${building.name}`;
+      if (keyword.trim().length > 0) {
+        const normalizedInput = keyword.toLowerCase().replace(/_/g, ' ');
+        const matches: string[] = [];
 
-        if ((buildingNameNormalized.includes(normalizedInput) || buildingCodeNormalized.includes(normalizedInput)) && !postTags.includes(displayString)) {
-          matches.push(displayString);
-          if (matches.length >= 10) break;
+        // Search through building names first
+        for (const building of allBuildings) {
+          const buildingNameNormalized = building.name.toLowerCase();
+          const buildingCodeNormalized = building.code.toLowerCase();
+          const displayString = `[${building.code}] ${building.name}`;
+
+          if ((buildingNameNormalized.includes(normalizedInput) || buildingCodeNormalized.includes(normalizedInput)) && !tags.includes(displayString)) {
+            matches.push(displayString);
+            if (matches.length >= 10) break;
+          }
         }
-      }
 
-      // Then search through all tasks
-      if (matches.length < 10) {
-        for (const cat of allHierarchy) {
-          const catNormalized = cat.category.toLowerCase().replace(/_/g, ' ');
-          for (const group of cat.groups) {
-            const groupNormalized = group.name.toLowerCase().replace(/_/g, ' ');
-            for (const task of group.tasks) {
-              const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+        // Then search through all tasks
+        if (matches.length < 10) {
+          for (const cat of allHierarchy) {
+            const catNormalized = cat.category.toLowerCase().replace(/_/g, ' ');
+            for (const group of cat.groups) {
+              const groupNormalized = group.name.toLowerCase().replace(/_/g, ' ');
+              for (const task of group.tasks) {
+                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
 
-              // Search in category, group, and task names for better matching
-              const searchableText = `${catNormalized} ${groupNormalized} ${taskNormalized}`;
+                // Search in category, group, and task names for better matching
+                const searchableText = `${catNormalized} ${groupNormalized} ${taskNormalized}`;
 
-              if (searchableText.includes(normalizedInput) && !postTags.includes(task)) {
-                matches.push(`${cat.category} / ${group.name} / ${task}`);
-                if (matches.length >= 10) break;
+                if (searchableText.includes(normalizedInput) && !tags.includes(task)) {
+                  matches.push(`${cat.category} / ${group.name} / ${task}`);
+                  if (matches.length >= 10) break;
+                }
               }
+              if (matches.length >= 10) break;
             }
             if (matches.length >= 10) break;
           }
-          if (matches.length >= 10) break;
         }
-      }
 
-      setSuggestions(matches);
-      setShowDropdown(matches.length > 0);
-      setSelectedIndex(0);
+        setSuggestions(matches);
+        setShowDropdown(matches.length > 0);
+        setSelectedIndex(0);
+      } else {
+        setSuggestions([]);
+        setShowDropdown(false);
+      }
     } else {
       setSuggestions([]);
       setShowDropdown(false);
     }
-  }, [postKeyword, allHierarchy, allBuildings, postTags]);
+  }, [activeSlotIndex, slots, allHierarchy, allBuildings]);
 
-  const addTag = useCallback((tag: string) => {
-    if (tag.includes(' / ')) {
-      const parts = tag.split(' / ');
-      const groupName = parts[1];
-      const taskName = parts[parts.length - 1];
+  const addTag = useCallback((tag: string, slotIndex: number) => {
+    setSlots(prev => {
+      const next = [...prev];
+      const slot = { ...next[slotIndex] };
+      const currentTags = [...slot.tags];
 
-      // Add both group and task (if unique)
-      setPostTags(prev => {
-        const newTags = [...prev];
-        if (!newTags.includes(groupName)) newTags.push(groupName);
+      if (tag.includes(' / ')) {
+        const parts = tag.split(' / ');
+        const groupName = parts[1];
+        const taskName = parts[parts.length - 1];
+
+        if (!currentTags.includes(groupName)) currentTags.push(groupName);
         const cleanTaskName = taskName.replace(/_/g, ' ');
-        if (!newTags.includes(cleanTaskName)) newTags.push(cleanTaskName);
-        return newTags;
-      });
-    } else {
-      if (tag && !postTags.includes(tag)) {
-        setPostTags(prev => [...prev, tag]);
+        if (!currentTags.includes(cleanTaskName)) currentTags.push(cleanTaskName);
+      } else {
+        if (tag && !currentTags.includes(tag)) {
+          currentTags.push(tag);
+        }
       }
-    }
-    setPostKeyword('');
+
+      slot.tags = currentTags;
+      slot.keyword = '';
+      next[slotIndex] = slot;
+      return next;
+    });
+
     setSuggestions([]);
     setShowDropdown(false);
-    keywordInputRef.current?.focus();
-  }, [postTags]);
+    keywordInputRefs.current[slotIndex]?.focus();
+  }, [slots]);
 
-  const removeTag = useCallback((index: number) => {
-    setPostTags(prev => prev.filter((_, i) => i !== index));
+  const removeTag = useCallback((tagIndex: number, slotIndex: number) => {
+    setSlots(prev => {
+      const next = [...prev];
+      const slot = { ...next[slotIndex] };
+      slot.tags = slot.tags.filter((_, i) => i !== tagIndex);
+      next[slotIndex] = slot;
+      return next;
+    });
   }, []);
 
-  const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, slotIndex: number) => {
+    const slot = slots[slotIndex];
     if (e.key === 'Enter') {
       e.preventDefault();
       if (showDropdown && suggestions.length > 0) {
-        addTag(suggestions[selectedIndex]);
-      } else if (postKeyword.trim()) {
-        addTag(postKeyword.trim());
+        addTag(suggestions[selectedIndex], slotIndex);
+      } else if (slot.keyword.trim()) {
+        addTag(slot.keyword.trim(), slotIndex);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -501,17 +529,23 @@ export default function Home() {
       setSelectedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === 'Escape') {
       setShowDropdown(false);
-    } else if (e.key === 'Backspace' && !postKeyword && postTags.length > 0) {
-      removeTag(postTags.length - 1);
+    } else if (e.key === 'Backspace' && !slot.keyword && slot.tags.length > 0) {
+      removeTag(slot.tags.length - 1, slotIndex);
     }
   };
 
-  // Deferred Detection Effect: Run when tags or pending file changes
+  // Deferred Detection Effect: Run when any slot's tags or file changes
   useEffect(() => {
-    if (!pendingPostFile) return;
+    // Collect all keywords from all slots
+    const allKeywords: string[] = [];
+    slots.forEach(slot => {
+      if (slot.file) allKeywords.push(slot.file.name.split('.')[0]);
+      allKeywords.push(...slot.tags);
+    });
 
-    const fileName = pendingPostFile.name.split('.')[0];
-    const fullKeyword = [...postTags, fileName].join(', ');
+    if (allKeywords.length === 0) return;
+
+    const fullKeyword = allKeywords.join(', ');
 
     // Detect Building
     const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
@@ -539,7 +573,7 @@ export default function Home() {
         }
       }
     }
-  }, [postTags, pendingPostFile, allBuildings, allHierarchy]);
+  }, [slots, allBuildings, allHierarchy]);
 
   // Sync Config from Vercel KV
   const fetchConfig = useCallback(async (filename: string) => {
@@ -779,26 +813,47 @@ export default function Home() {
     setFiles((prev) => [...prev, ...fileMetadatas]);
   }, [selectedBuilding, workName, progress]);
 
-  // Update file metadata when global states change
+  // Update naming preview for all active slots
   useEffect(() => {
-    setFiles((prev) =>
-      prev.map((f, index) => ({
-        ...f,
-        building: selectedBuilding || f.building,
-        workName: workName || f.workName,
-        progress: progress || f.progress,
-        newName: generateNewName(
-          f.detectedDate,
-          workName || 'Work',
-          selectedBuilding?.name || 'Building',
-          selectedBuilding?.code || 'X',
-          progress,
-          index + 1, // Visual preview index
-          f.file.type.startsWith('image/') ? 'jpg' : getFileExtension(f.originalName)
-        )
-      }))
-    );
-  }, [selectedBuilding, workName, progress]);
+    if (selectedBuilding && workName) {
+      const activeSlots = slots.filter(s => s.file);
+      if (activeSlots.length === 0) {
+        setFiles([]);
+        return;
+      }
+
+      const previews = activeSlots.map((slot, idx) => {
+        const file = slot.file!;
+        const extension = getFileExtension(file.name);
+        const newName = generateNewName(
+          selectedDate,
+          workName,
+          selectedBuilding.name,
+          selectedBuilding.code,
+          progress || '0',
+          idx + 1,
+          extension
+        );
+
+        return {
+          id: `preview-${idx}`,
+          file,
+          originalName: file.name,
+          newName,
+          detectedDate: selectedDate,
+          workName,
+          building: selectedBuilding,
+          progress: progress || '0',
+          sequence: idx + 1,
+          status: 'pending' as const
+        };
+      });
+
+      setFiles(previews);
+    } else {
+      setFiles([]);
+    }
+  }, [selectedBuilding, workName, progress, slots, selectedDate]);
 
   const handleUpdateDate = (id: string, newDate: string) => {
     setFiles((prev) =>
@@ -923,174 +978,242 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* New Single Drop Zone for Post */}
-                <div className="relative group">
-                  <input
-                    type="file"
-                    className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      setPendingPostFile(file);
-                      addLog(`[FILE] File terpilih: ${file.name}`);
-                    }}
-                  />
-                  {pendingPostFile ? (
-                    <div className="bg-orange-50/50 border-2 border-orange-200 rounded-[2rem] p-4 flex items-center gap-4 relative overflow-hidden group">
-                      <div className="absolute top-2 right-2 z-20">
-                        <button
-                          onClick={() => {
-                            setPendingPostFile(null);
-                            setPostTags([]);
-                          }}
-                          className="bg-white/80 backdrop-blur shadow-sm text-slate-400 hover:text-red-500 rounded-full p-1.5 transition-colors"
-                        >
-                          <XCircle className="w-5 h-5" />
-                        </button>
+                {/* Drop Zones Section */}
+                <div className="space-y-4">
+                  {/* Slot 1: Main Large Dropzone */}
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setSlots(prev => {
+                          const next = [...prev];
+                          next[0] = { ...next[0], file };
+                          return next;
+                        });
+                        addLog(`[FILE] Slot 1: ${file.name}`);
+                      }}
+                    />
+                    {slots[0].file ? (
+                      <div className="bg-orange-50/50 border-2 border-orange-200 rounded-[2rem] p-4 flex items-center gap-4 relative overflow-hidden">
+                        <div className="absolute top-2 right-2 z-20">
+                          <button
+                            onClick={() => {
+                              setSlots(prev => {
+                                const next = [...prev];
+                                next[0] = { ...next[0], file: null, tags: [] };
+                                return next;
+                              });
+                            }}
+                            className="bg-white/80 backdrop-blur shadow-sm text-slate-400 hover:text-red-500 rounded-full p-1.5 transition-colors"
+                          >
+                            <XCircle className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white border border-orange-100 shrink-0 shadow-sm">
+                          {slots[0].file.type.startsWith('image/') ? (
+                            <img
+                              src={URL.createObjectURL(slots[0].file)}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <FileIcon className="w-8 h-8 text-orange-200" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0 pr-8">
+                          <span className="text-[10px] font-black text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full uppercase mb-1 inline-block">Slot 1</span>
+                          <p className="text-xs font-black text-slate-900 truncate uppercase mt-1">{slots[0].file.name}</p>
+                        </div>
                       </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-12 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
+                        <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                          <PlusCircle className="w-8 h-8 text-orange-500" />
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Main File (1)</span>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight mt-1">Capture or Upload</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
-                      <div className="w-20 h-20 rounded-2xl overflow-hidden bg-white border border-orange-100 shrink-0 shadow-sm">
-                        {pendingPostFile.type.startsWith('image/') ? (
-                          <img
-                            src={URL.createObjectURL(pendingPostFile)}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
+                  {/* Slots 2-5: Small Dropzones */}
+                  <div className="grid grid-cols-4 gap-3">
+                    {[1, 2, 3, 4].map((idx) => (
+                      <div key={idx} className="relative aspect-square group">
+                        <input
+                          type="file"
+                          className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setSlots(prev => {
+                              const next = [...prev];
+                              next[idx] = { ...next[idx], file };
+                              return next;
+                            });
+                            addLog(`[FILE] Slot ${idx + 1}: ${file.name}`);
+                          }}
+                        />
+                        {slots[idx].file ? (
+                          <div className="w-full h-full rounded-2xl border-2 border-orange-200 bg-orange-50/30 relative overflow-hidden p-1 shadow-sm">
+                            <button
+                              onClick={() => {
+                                setSlots(prev => {
+                                  const next = [...prev];
+                                  next[idx] = { ...next[idx], file: null, tags: [] };
+                                  return next;
+                                });
+                              }}
+                              className="absolute top-1 right-1 z-20 bg-white/80 rounded-full p-0.5 text-red-500 shadow-sm"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                            {slots[idx].file?.type.startsWith('image/') ? (
+                              <img
+                                src={URL.createObjectURL(slots[idx].file!)}
+                                alt="Small Preview"
+                                className="w-full h-full object-cover rounded-xl"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <FileIcon className="w-5 h-5 text-orange-200" />
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-sm py-0.5 text-center">
+                              <span className="text-[8px] font-black text-white">{idx + 1}</span>
+                            </div>
+                          </div>
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <FileIcon className="w-8 h-8 text-orange-200" />
+                          <div className="w-full h-full border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center bg-slate-50/50 group-hover:border-orange-400 transition-all">
+                            <PlusCircle className="w-5 h-5 text-slate-300 group-hover:text-orange-400 mb-1" />
+                            <span className="text-[9px] font-black text-slate-400">{idx + 1}</span>
                           </div>
                         )}
                       </div>
-
-                      <div className="flex-1 min-w-0 pr-8">
-                        <p className="text-xs font-black text-slate-900 truncate uppercase mt-1">{pendingPostFile.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[10px] font-bold text-orange-500/60 uppercase tracking-tight">READY TO PROCESS</span>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-slate-200 rounded-[2rem] py-16 flex flex-col items-center justify-center gap-3 group-hover:border-orange-500 group-hover:bg-orange-50/30 transition-all bg-slate-50/50">
-                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                        {isProcessing ? (
-                          <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
-                        ) : (
-                          <PlusCircle className="w-8 h-8 text-orange-500" />
-                        )}
-                      </div>
-                      <div className="text-center">
-                        <span className="text-base font-black text-slate-900 uppercase tracking-widest">{isProcessing ? 'Processing...' : 'Capture / Upload'}</span>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight mt-1">
-                          {selectedBuilding ? `Ready for ${selectedBuilding.code}` : 'Take Photo or Select File'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
 
-                <div className="relative space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Quick Detect Keyword / Hints</label>
-                  <div className="min-h-[56px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 flex items-center gap-2 flex-wrap transition-all focus-within:ring-2 focus-within:ring-orange-500/20 focus-within:border-orange-500">
-                    <Zap className={`w-4 h-4 shrink-0 ${(postTags.length > 0 || postKeyword) ? 'text-orange-500' : 'text-slate-300'}`} />
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Quick Detect Keywords / Hints</label>
 
-                    {/* Tags */}
-                    <AnimatePresence mode="popLayout">
-                      {postTags.map((tag, index) => {
-                        // Check if tag is a task
-                        const isWorkTask = allHierarchy.some(cat => cat.groups.some(group => group.tasks.some(task => task.toLowerCase() === tag.toLowerCase())));
-                        // Check if tag is a group name
-                        const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
-                        const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
+                  {slots.map((slot, sIdx) => (
+                    <div key={sIdx} className="relative space-y-2">
+                      <div className={`min-h-[56px] transition-all duration-300 rounded-[1.5rem] px-4 py-3 flex items-center gap-3 flex-wrap border ${activeSlotIndex === sIdx ? 'bg-white border-orange-500 ring-4 ring-orange-500/5 shadow-lg' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className={`text-[10px] font-black ${activeSlotIndex === sIdx ? 'text-orange-500' : 'text-slate-400'}`}>{sIdx + 1}</span>
+                          <span className="text-slate-200 font-light mx-0.5">|</span>
+                          <Zap className={`w-3.5 h-3.5 ${(slot.tags.length > 0 || slot.keyword) ? 'text-orange-500' : 'text-slate-300'}`} />
+                        </div>
 
-                        return (
-                          <motion.div
-                            key={tag}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            className={`inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 whitespace-nowrap shadow-sm border ${matchedGroup
-                              ? getBadgeColor(matchedGroup.name)
-                              : isWorkTask
-                                ? 'bg-emerald-500 border-emerald-600 text-white'
-                                : 'bg-orange-500 border-orange-600 text-white'
-                              }`}
-                          >
-                            {isBuildingMatch ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
-                                <span className="text-xs font-bold">{tag.split(']')[1].trim()}</span>
-                              </div>
-                            ) : matchedGroup ? (
-                              <span className="text-[10px] font-black uppercase tracking-tighter">{matchedGroup.name}</span>
-                            ) : (
-                              <span className="text-xs font-bold">{tag.replace(/_/g, ' ')}</span>
-                            )}
-                            <button onClick={() => removeTag(index)} className={`${matchedGroup ? 'hover:bg-black/5' : 'hover:bg-white/20'} rounded-full p-0.5 transition-colors`}>
-                              <XCircle className="w-3.5 h-3.5" />
-                            </button>
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
+                        {/* Tags */}
+                        <AnimatePresence mode="popLayout">
+                          {slot.tags.map((tag, tIdx) => {
+                            const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
+                            const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
 
-                    <input
-                      ref={keywordInputRef}
-                      type="text"
-                      value={postKeyword}
-                      onChange={(e) => setPostKeyword(e.target.value)}
-                      onKeyDown={handleKeywordKeyDown}
-                      onFocus={() => postKeyword && suggestions.length > 0 && setShowDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                      placeholder={postTags.length === 0 ? "Type building or work keywords..." : ""}
-                      className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm font-bold text-slate-900 placeholder:text-slate-300"
-                    />
-                  </div>
-
-                  {/* Autocomplete Dropdown */}
-                  <AnimatePresence>
-                    {showDropdown && suggestions.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-[2rem] shadow-2xl overflow-hidden z-[100] max-h-[250px] overflow-y-auto"
-                      >
-                        <div className="p-2 space-y-1">
-                          {suggestions.map((suggestion, index) => {
-                            const isBuildingSug = suggestion.startsWith('[') && suggestion.includes(']');
                             return (
-                              <button
-                                key={suggestion}
-                                onClick={() => addTag(suggestion)}
-                                className={`w-full px-4 py-3 text-left text-sm font-bold transition-all flex items-center gap-3 rounded-2xl ${index === selectedIndex ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'text-slate-700 hover:bg-slate-50'}`}
+                              <motion.div
+                                key={tag}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className={`inline-flex items-center gap-1.5 rounded-xl px-2 py-1 whitespace-nowrap border ${matchedGroup
+                                  ? getBadgeColor(matchedGroup.name)
+                                  : isBuildingMatch
+                                    ? 'bg-orange-500 border-orange-600 text-white'
+                                    : 'bg-emerald-500 border-emerald-600 text-white'
+                                  }`}
                               >
-                                {isBuildingSug ? (
-                                  <>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black ${index === selectedIndex ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
-                                    <span>{suggestion.split(']')[1].trim()}</span>
-                                  </>
-                                ) : suggestion.includes(' / ') ? (
-                                  <div className="flex items-center gap-2 overflow-hidden">
-                                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter shrink-0 border ${getBadgeColor(suggestion.split(' / ')[1], index === selectedIndex)}`}>
-                                      {suggestion.split(' / ')[1]}
-                                    </span>
-                                    <span className="truncate">{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
+                                {isBuildingMatch ? (
+                                  <div className="flex items-center gap-1 text-[10px]">
+                                    <span className="bg-white/20 px-1 rounded font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
+                                    <span className="font-bold">{tag.split(']')[1].trim()}</span>
                                   </div>
+                                ) : matchedGroup ? (
+                                  <span className="text-[9px] font-black uppercase tracking-tighter">{matchedGroup.name}</span>
                                 ) : (
-                                  suggestion.replace(/_/g, ' ')
+                                  <span className="text-[10px] font-bold">{tag.replace(/_/g, ' ')}</span>
                                 )}
-                              </button>
+                                <button onClick={() => removeTag(tIdx, sIdx)} className="hover:bg-black/5 rounded-full p-0.5 transition-colors">
+                                  <XCircle className="w-3 h-3" />
+                                </button>
+                              </motion.div>
                             );
                           })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        </AnimatePresence>
+
+                        <input
+                          ref={(el) => { keywordInputRefs.current[sIdx] = el; }}
+                          type="text"
+                          value={slot.keyword}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSlots(prev => {
+                              const next = [...prev];
+                              next[sIdx] = { ...next[sIdx], keyword: val };
+                              return next;
+                            });
+                          }}
+                          onKeyDown={(e) => handleKeywordKeyDown(e, sIdx)}
+                          onFocus={() => {
+                            setActiveSlotIndex(sIdx);
+                            if (slot.keyword && suggestions.length > 0) setShowDropdown(true);
+                          }}
+                          onBlur={() => setTimeout(() => {
+                            if (activeSlotIndex === sIdx) setShowDropdown(false);
+                          }, 200)}
+                          placeholder={slot.tags.length === 0 ? `Tags file ${sIdx + 1}...` : ""}
+                          className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs font-bold text-slate-900 placeholder:text-slate-300"
+                        />
+                      </div>
+
+                      {/* Autocomplete Dropdown - Only for the active slot */}
+                      <AnimatePresence>
+                        {showDropdown && activeSlotIndex === sIdx && suggestions.length > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-[1.5rem] shadow-2xl overflow-hidden z-[100] max-h-[200px] overflow-y-auto"
+                          >
+                            <div className="p-2 space-y-1">
+                              {suggestions.map((suggestion, index) => {
+                                const isBuildingSug = suggestion.startsWith('[') && suggestion.includes(']');
+                                return (
+                                  <button
+                                    key={suggestion}
+                                    onClick={() => addTag(suggestion, sIdx)}
+                                    className={`w-full px-4 py-2.5 text-left text-xs font-bold transition-all flex items-center gap-3 rounded-xl ${index === selectedIndex ? 'bg-orange-500 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                                  >
+                                    {isBuildingSug ? (
+                                      <>
+                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-black ${index === selectedIndex ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
+                                        <span>{suggestion.split(']')[1].trim()}</span>
+                                      </>
+                                    ) : (
+                                      suggestion.replace(/_/g, ' ')
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
               </div>
               {/* Submit Button */}
-              {pendingPostFile && (
+              {slots.some(s => s.file) && (
                 <motion.button
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -1102,118 +1225,97 @@ export default function Home() {
 
                     setIsProcessing(true);
                     setProcessLogs([]);
-                    addLog(`[INFO] Submitting documentation...`);
+                    addLog(`[INFO] Submitting documentation for all active slots...`);
 
-                    const fileToProcess = pendingPostFile;
-                    let file = fileToProcess;
-                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
-
-                    const uploadToApi = async (f: File | Blob, isTs: boolean) => {
-                      const formData = new FormData();
-                      formData.append('file', f, fileToProcess.name);
-                      formData.append('metadata', JSON.stringify({
-                        detectedDate: selectedDate,
-                        workName: workName || 'Documentation',
-                        buildingCode: selectedBuilding.code,
-                        buildingName: selectedBuilding.name,
-                        buildingIndex: selectedBuilding.index,
-                        progress: progress || '0',
-                        outputPath: outputPath,
-                        showBuildingIndex: showBuildingIndex,
-                        isTimestamp: isTs,
-                      }));
-
-                      const res = await fetch('/api/process', { method: 'POST', body: formData });
-                      return await res.json();
-                    };
+                    const activeSlots = slots.filter(s => s.file !== null);
 
                     try {
-                      // 0. GUARANTEE: Save original EXIF metadata before ANY processing
-                      addLog(`[INFO] Capturing original metadata before compression...`);
-                      let originalExif = await getExifData(file);
+                      for (const slot of activeSlots) {
+                        const fileToProcess = slot.file!;
+                        addLog(`[INFO] Processing file: ${fileToProcess.name}...`);
 
-                      // IMPROVED DETECTION: Use exifr to check if GPS actually exists
-                      const buffer = await file.arrayBuffer();
-                      const existingExif = await exifr.parse(buffer, { gps: true });
-                      const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+                        let file = fileToProcess;
+                        const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
 
-                      // LIVE INJECTION: If photo lacks GPS (Camera photo/Social media), use browser GPS
-                      if (!hasGps && navigator.geolocation) {
-                        addLog(`[INFO] GPS tidak ditemukan di metadata. Mencoba Live Injection via HP...`);
-                        try {
-                          const pos = await new Promise<GeolocationPosition>((res, rej) => {
-                            navigator.geolocation.getCurrentPosition(res, rej, {
-                              enableHighAccuracy: true,
-                              timeout: 8000
+                        const uploadToApi = async (f: File | Blob, isTs: boolean) => {
+                          const formData = new FormData();
+                          formData.append('file', f, fileToProcess.name);
+                          formData.append('metadata', JSON.stringify({
+                            detectedDate: selectedDate,
+                            workName: workName || 'Documentation',
+                            buildingCode: selectedBuilding.code,
+                            buildingName: selectedBuilding.name,
+                            buildingIndex: selectedBuilding.index,
+                            progress: progress || '0',
+                            outputPath: outputPath,
+                            showBuildingIndex: showBuildingIndex,
+                            isTimestamp: isTs,
+                          }));
+
+                          const res = await fetch('/api/process', { method: 'POST', body: formData });
+                          return await res.json();
+                        };
+
+                        // 0. Metadata logic
+                        let originalExif = await getExifData(file);
+                        const buffer = await file.arrayBuffer();
+                        const existingExif = await exifr.parse(buffer, { gps: true });
+                        const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+
+                        if (!hasGps && navigator.geolocation) {
+                          addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
+                          try {
+                            const pos = await new Promise<GeolocationPosition>((res, rej) => {
+                              navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
                             });
-                          });
-
-                          addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
-                          originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
-
-                          // ENRICH FILE: Inject the new GPS so that both Clean and Timestamp processes use it
-                          file = await injectExif(file, originalExif, file.name, file.type);
-
-                          addLog(`[SUCCESS] Metadata lokasi berhasil disuntikkan secara otomatis.`);
-                        } catch (gpsErr: any) {
-                          addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}. Foto tetap diunggah tanpa GPS.`);
+                            addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
+                            originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
+                            file = await injectExif(file, originalExif, file.name, file.type);
+                          } catch (gpsErr: any) {
+                            addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                          }
                         }
-                      } else if (!hasGps && !navigator.geolocation) {
-                        addLog(`[WARN] Metadata GPS kosong & Browser tidak mengijinkan akses lokas (non-HTTPS?).`);
-                      } else if (hasGps) {
-                        addLog(`[INFO] Metadata GPS ditemukan (${existingExif.latitude.toFixed(6)}, ${existingExif.longitude.toFixed(6)}).`);
-                      }
 
-                      // 1. Process and Upload Original (Clean)
-                      addLog(`[INFO] Compressing original...`);
-                      const compressedBlob = await imageCompression(file, options);
-
-                      let finalOriginal: File;
-                      if (originalExif) {
-                        addLog(`[INFO] Restoring original metadata...`);
-                        finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
-                      } else {
-                        finalOriginal = new File([compressedBlob], file.name, { type: file.type });
-                      }
-
-                      addLog(`[INFO] Uploading original version...`);
-                      const mainRes = await uploadToApi(finalOriginal, false);
-
-                      if (mainRes.success) {
-                        addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
-                      } else {
-                        throw new Error(`Original upload failed: ${mainRes.error}`);
-                      }
-
-                      // 2. Process and Upload Timestamp (if enabled)
-                      if (useTimestamp && file.type.startsWith('image/')) {
-                        addLog(`[INFO] Processing timestamped version...`);
-                        const timestampedFile = await processTimestampImage(file, addLog);
-                        addLog(`[INFO] Compressing timestamped version...`);
-                        const compressedTsBlob = await imageCompression(timestampedFile, options);
-
-                        let finalTs: File;
+                        // 1. Process and Upload Original (Clean)
+                        addLog(`[INFO] Compressing original...`);
+                        const compressedBlob = await imageCompression(file, options);
+                        let finalOriginal: File;
                         if (originalExif) {
-                          addLog(`[INFO] Restoring metadata to timestamped version...`);
-                          finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                          finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
                         } else {
-                          finalTs = new File([compressedTsBlob], file.name, { type: file.type });
+                          finalOriginal = new File([compressedBlob], file.name, { type: file.type });
                         }
 
-                        addLog(`[INFO] Uploading timestamped version...`);
-                        const tsRes = await uploadToApi(finalTs, true);
+                        addLog(`[INFO] Uploading original version...`);
+                        const mainRes = await uploadToApi(finalOriginal, false);
 
-                        if (tsRes.success) {
-                          addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+                        if (mainRes.success) {
+                          addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
                         } else {
-                          addLog(`[WARN] Timestamped upload failed: ${tsRes.error}`);
+                          throw new Error(`Original upload failed: ${mainRes.error}`);
+                        }
+
+                        // 2. Process and Upload Timestamp (if enabled)
+                        if (useTimestamp && file.type.startsWith('image/')) {
+                          addLog(`[INFO] Processing timestamped version...`);
+                          const timestampedFile = await processTimestampImage(file, addLog);
+                          const compressedTsBlob = await imageCompression(timestampedFile, options);
+                          let finalTs: File;
+                          if (originalExif) {
+                            finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                          } else {
+                            finalTs = new File([compressedTsBlob], file.name, { type: file.type });
+                          }
+                          const tsRes = await uploadToApi(finalTs, true);
+                          if (tsRes.success) {
+                            addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+                          }
                         }
                       }
 
-                      // Final success state
-                      setPendingPostFile(null);
-                      // Keywords and tags are now persisted until refresh as requested
-                      showToast(useTimestamp ? "Both versions uploaded!" : "Original uploaded!", "success");
+                      // Final success state: Clear files but keep tags for context
+                      setSlots(prev => prev.map(s => ({ ...s, file: null })));
+                      showToast(`${activeSlots.length} files processed successfully!`, "success");
 
                     } catch (err: any) {
                       addLog(`[ERROR] Gagal: ${err.message}`);
@@ -1233,7 +1335,7 @@ export default function Home() {
                   ) : (
                     <>
                       <UploadCloud className="w-5 h-5" />
-                      <span>Submit Documentation</span>
+                      <span>Submit {slots.filter(s => s.file).length} Documentation</span>
                     </>
                   )}
                 </motion.button>
