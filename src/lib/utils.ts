@@ -1,29 +1,34 @@
 import { format } from 'date-fns';
 import piexif from 'piexifjs';
 
-export async function copyExif(srcFile: Blob, destBlob: Blob): Promise<Blob> {
+export async function getExifData(file: Blob): Promise<string | null> {
     try {
-        const srcDataUrl = await new Promise<string>((resolve) => {
+        const dataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target?.result as string);
-            reader.readAsDataURL(srcFile);
+            reader.readAsDataURL(file);
         });
+        const exifObj = piexif.load(dataUrl);
+        return piexif.dump(exifObj);
+    } catch (e) {
+        console.warn("Failed to extract EXIF:", e);
+        return null;
+    }
+}
 
+export async function injectExif(destBlob: Blob, exifStr: string): Promise<Blob> {
+    try {
         const destDataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target?.result as string);
             reader.readAsDataURL(destBlob);
         });
 
-        const exifObj = piexif.load(srcDataUrl);
-        const exifStr = piexif.dump(exifObj);
         const inserted = piexif.insert(exifStr, destDataUrl);
-
-        // Data URL to Blob
         const res = await fetch(inserted);
         return await res.blob();
     } catch (e) {
-        console.error("EXIF copy error:", e);
+        console.error("EXIF injection error:", e);
         return destBlob;
     }
 }

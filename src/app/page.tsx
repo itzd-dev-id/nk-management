@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, copyExif } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1079,11 +1079,20 @@ export default function Home() {
                     };
 
                     try {
+                      // 0. GUARANTEE: Save original EXIF metadata before ANY processing
+                      addLog(`[INFO] Capturing original metadata before compression...`);
+                      const originalExif = await getExifData(file);
+
                       // 1. Process and Upload Original (Clean)
                       addLog(`[INFO] Compressing original...`);
                       const compressedBlob = await imageCompression(file, options);
-                      addLog(`[INFO] Restoring original metadata...`);
-                      const finalOriginal = await copyExif(file, compressedBlob);
+
+                      let finalOriginal = compressedBlob;
+                      if (originalExif) {
+                        addLog(`[INFO] Restoring original metadata...`);
+                        finalOriginal = await injectExif(compressedBlob, originalExif);
+                      }
+
                       addLog(`[INFO] Uploading original version...`);
                       const mainRes = await uploadToApi(finalOriginal, false);
 
@@ -1099,8 +1108,13 @@ export default function Home() {
                         const timestampedFile = await processTimestampImage(file, addLog);
                         addLog(`[INFO] Compressing timestamped version...`);
                         const compressedTsBlob = await imageCompression(timestampedFile, options);
-                        addLog(`[INFO] Restoring metadata to timestamped version...`);
-                        const finalTs = await copyExif(file, compressedTsBlob);
+
+                        let finalTs = compressedTsBlob;
+                        if (originalExif) {
+                          addLog(`[INFO] Restoring metadata to timestamped version...`);
+                          finalTs = await injectExif(compressedTsBlob, originalExif);
+                        }
+
                         addLog(`[INFO] Uploading timestamped version...`);
                         const tsRes = await uploadToApi(finalTs, true);
 
