@@ -190,47 +190,64 @@ export function detectWorkFromKeyword(
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    // PASS 1: Try exact match on task name
+    // PASS 1: Try compound match (Group + Task)
+    // e.g. "galian footplat" or "footplat galian"
+    for (const cat of filteredHierarchy) {
+        for (const group of cat.groups) {
+            const groupNameNormalized = group.name.toLowerCase().replace(/_/g, ' ').replace(/beton:\s*/, '').trim();
+            for (const task of group.tasks) {
+                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
+
+                // Check if both terms exist in the keyword
+                if ((normalizedWorkPart.includes(groupNameNormalized) && normalizedWorkPart.includes(taskNormalized)) ||
+                    (groupNameNormalized.split(/\s+/).some(word => word.length > 3 && normalizedWorkPart.includes(word)) && normalizedWorkPart.includes(taskNormalized))) {
+                    return `${cat.category} / ${group.name} / ${task}`;
+                }
+            }
+        }
+    }
+
+    // PASS 2: Try exact match on task name
     for (const cat of filteredHierarchy) {
         for (const group of cat.groups) {
             for (const task of group.tasks) {
                 const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
                 if (taskNormalized === normalizedWorkPart) {
-                    return task;
+                    return `${cat.category} / ${group.name} / ${task}`;
                 }
             }
         }
     }
 
-    // PASS 2: Try partial match on task name
+    // PASS 3: Try partial match on task name
     for (const cat of filteredHierarchy) {
         for (const group of cat.groups) {
             for (const task of group.tasks) {
                 const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
                 if (taskNormalized.includes(normalizedWorkPart)) {
-                    return task;
+                    return `${cat.category} / ${group.name} / ${task}`;
                 }
             }
         }
     }
 
-    // PASS 3: Try match on Group Name
+    // PASS 4: Try match on Group Name
     for (const cat of filteredHierarchy) {
         for (const group of cat.groups) {
             if (group.name.toLowerCase().includes(normalizedWorkPart)) {
-                return group.tasks[0] || '';
+                return `${cat.category} / ${group.name} / ${group.tasks[0] || ''}`;
             }
         }
     }
 
-    // PASS 4: Check if search phrase matches category
+    // PASS 5: Check if search phrase matches category
     for (const cat of filteredHierarchy) {
         if (cat.category.toLowerCase().includes(normalizedWorkPart)) {
-            return cat.groups[0]?.tasks[0] || '';
+            return `${cat.category} / ${cat.groups[0]?.name || ''} / ${cat.groups[0]?.tasks[0] || ''}`;
         }
     }
 
-    // PASS 5: Fall back to individual word matching
+    // PASS 6: Fall back to individual word matching
     const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
 
     for (const term of terms) {

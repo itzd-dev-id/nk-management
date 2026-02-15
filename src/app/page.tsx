@@ -506,21 +506,16 @@ export default function Home() {
     );
 
     if (detectedT) {
-      // Find category and group for the detected task
-      let foundCategory = '';
-      let foundGroup = '';
-
-      for (const cat of allHierarchy) {
-        const group = cat.groups.find(g => g.tasks.includes(detectedT));
-        if (group) {
-          foundCategory = cat.category;
-          foundGroup = group.name;
-          break;
+      if (detectedT.includes(' / ')) {
+        setWorkName(detectedT);
+      } else {
+        for (const cat of allHierarchy) {
+          const group = cat.groups.find(g => g.tasks.includes(detectedT));
+          if (group) {
+            setWorkName(`${cat.category} / ${group.name} / ${detectedT}`);
+            break;
+          }
         }
-      }
-
-      if (foundCategory) {
-        setWorkName(`${foundCategory} / ${foundGroup} / ${detectedT}`);
       }
     }
   }, [postTags, pendingPostFile, allBuildings, allHierarchy]);

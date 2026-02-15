@@ -11,8 +11,6 @@
                     "Mobilisasi Alat",
                     "Pagar Sementara",
                     "Papan Nama Proyek",
-                    "Pelepasan_Pagar_Sementara",
-                    "Pemasangan_Pagar_Sementara",
                     "Pematangan Lahan",
                     "Pembersihan Lahan"
                 ]
@@ -24,16 +22,13 @@
         "_description": "Sistem Manajemen Keselamatan Konstruksi",
         "groups": [
             {
-                "name": "Umum",
+                "name": "Keselamatan",
                 "tasks": [
                     "Induction",
                     "Jaring Pengaman",
                     "Rambu Safety",
-                    "Rambu_Informasi",
                     "Safety Sign",
-                    "Safety_Line",
-                    "Toolbox Meeting",
-                    "Toolbox_Talks"
+                    "Toolbox Meeting"
                 ]
             }
         ]
@@ -43,56 +38,9 @@
         "_description": "Pekerjaan Tanah, Struktur Bawah dan Struktur Atas",
         "groups": [
             {
-                "name": "Footplat",
-                "tasks": [
-                    "Galian",
-                    "Lantai kerja",
-                    "Bekisting",
-                    "Besi",
-                    "Beton"
-                ]
-            },
-            {
-                "name": "Tie Beam",
-                "tasks": [
-                    "Galian",
-                    "Lantai kerja",
-                    "Bekisting",
-                    "Besi",
-                    "Beton"
-                ]
-            },
-            {
-                "name": "Pelat",
-                "tasks": [
-                    "Galian",
-                    "Lantai kerja",
-                    "Bekisting",
-                    "Besi",
-                    "Beton"
-                ]
-            },
-            {
-                "name": "Kolom",
-                "tasks": [
-                    "Bekisting",
-                    "Besi",
-                    "Beton"
-                ]
-            },
-            {
-                "name": "Balok",
-                "tasks": [
-                    "Bekisting",
-                    "Besi",
-                    "Beton"
-                ]
-            },
-            {
                 "name": "Tanah",
                 "tasks": [
-                    "Galian Biasa",
-                    "Galian_Pancang",
+                    "Galian Tanah",
                     "Pemadatan Tanah",
                     "Mengangkut Tanah",
                     "Urugan Tanah",
@@ -101,57 +49,66 @@
                 ]
             },
             {
-                "name": "Pondasi & Pancang",
+                "name": "Footplat",
                 "tasks": [
-                    "Pancang",
-                    "Pengadaan Tiang Pancang",
-                    "Penetrasi Tiang Pancang",
-                    "Sambungan Pancang",
-                    "Pemotongan Kepala Pancang",
+                    "Galian",
+                    "Lantai Kerja",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
                     "Pile Cap",
-                    "Tambalan_Pile_Cap",
-                    "Pengecoran Pondasi",
-                    "Pembesian Pondasi",
-                    "Bekisting Pondasi",
-                    "Pondasi Batu Belah"
+                    "Bored Pile",
+                    "Pancang"
+                ]
+            },
+            {
+                "name": "Tie Beam",
+                "tasks": [
+                    "Galian",
+                    "Lantai Kerja",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran"
+                ]
+            },
+            {
+                "name": "Kolom",
+                "tasks": [
+                    "Galian",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Pedestal",
+                    "Kolom Praktis"
+                ]
+            },
+            {
+                "name": "Balok & Pelat",
+                "tasks": [
+                    "Galian",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Balok Praktis",
+                    "Wiremesh"
                 ]
             },
             {
                 "name": "Lainnya",
                 "tasks": [
-                    "Balok Praktis",
-                    "Kolom Praktis",
-                    "Kolom_Pedestal",
-                    "Pedestal",
                     "Tangga",
-                    "Trap_Tangga",
                     "Ramp",
                     "Finish Trowel",
                     "Lean_Concrete",
-                    "Pengecoran_Lantai_1",
-                    "Penyemprotan_Anti_Rayap",
-                    "Wiremesh",
-                    "Pembesian_Wiremesh",
-                    "Buis Beton 30cm",
-                    "Pagar_Panel",
-                    "Pabrikasi_Kayu",
-                    "Pabrikasi_Beton_Decking",
-                    "Pemasangan_Beton_Decking",
-                    "Pemasangan_Pile_Cap",
-                    "Pemasangan_Top_Cor",
-                    "Pelepasan_Bekisting"
+                    "Buis Beton",
+                    "Penyemprotan Anti Rayap"
                 ]
             },
             {
                 "name": "Pabrikasi",
                 "tasks": [
-                    "Pabrikasi_Bekisting",
-                    "Pabrikasi_Bekisting_Kolom",
-                    "Pabrikasi_Bekisting_Pile_Cap",
-                    "Pabrikasi_Bekisting_Tie_Beam",
-                    "Pabrikasi_Besi",
-                    "Pabrikasi_Besi_Kolom",
-                    "Pabrikasi_Besi_Pile_Cap"
+                    "Pabrikasi Bekisting",
+                    "Pabrikasi Besi"
                 ]
             }
         ]
@@ -168,8 +125,7 @@
                     "Plesteran",
                     "Acian",
                     "Dinding Rooster",
-                    "Finishing Beton Expose",
-                    "Kompon_Dinding"
+                    "Finishing Beton Expose"
                 ]
             },
             {
@@ -219,7 +175,7 @@
                 "name": "Lainnya",
                 "tasks": [
                     "Cat Eksterior",
-                    "Instalasi_Exhouse",
+                    "Cat Interior",
                     "Kanopi",
                     "Railing Tangga"
                 ]
@@ -244,9 +200,8 @@
             {
                 "name": "Air & Plumbing",
                 "tasks": [
-                    "Instalasi_Pipa_Air_Bersih",
+                    "Instalasi Pipa Air",
                     "Instalasi Pipa Limbah",
-                    "Pipa_Saluran_Air_Kotor,_Bekas,_Vent",
                     "Pompa Air",
                     "Tandon Air"
                 ]
@@ -260,7 +215,7 @@
                 ]
             },
             {
-                "name": "Fire & Security",
+                "name": "Penyelamatan",
                 "tasks": [
                     "Fire Alarm",
                     "Smoke Detector",
@@ -298,7 +253,6 @@
                     "Paving Block",
                     "Grass Block",
                     "Saluran Drainase",
-                    "Tempat_Parkir",
                     "Jaring Pengaman Lapangan",
                     "Marka Lapangan",
                     "Ring Basket",
@@ -323,8 +277,7 @@
                     "Pengiriman Beton",
                     "Pengiriman Bata",
                     "Pengiriman Keramik",
-                    "Pengiriman Pancang",
-                    "Unloading_Pancang"
+                    "Pengiriman Pancang"
                 ]
             }
         ]
@@ -386,8 +339,7 @@
             {
                 "name": "Inspeksi",
                 "tasks": [
-                    "Inspeksi Bersama",
-                    "Roughter_Crane"
+                    "Inspeksi Bersama"
                 ]
             }
         ]

@@ -55,7 +55,7 @@ export const WORK_HIERARCHY = [
         category: 'SMKK',
         groups: [
             {
-                name: 'Umum',
+                name: 'Keselamatan',
                 tasks: [
                     'Induction',
                     'Jaring Pengaman',
@@ -70,30 +70,9 @@ export const WORK_HIERARCHY = [
         category: 'Struktur',
         groups: [
             {
-                name: 'Footplat',
-                tasks: ['Galian', 'Lantai kerja', 'Bekisting', 'Besi', 'Beton']
-            },
-            {
-                name: 'Tie Beam',
-                tasks: ['Galian', 'Lantai kerja', 'Bekisting', 'Besi', 'Beton']
-            },
-            {
-                name: 'Pelat',
-                tasks: ['Galian', 'Lantai kerja', 'Bekisting', 'Besi', 'Beton']
-            },
-            {
-                name: 'Kolom',
-                tasks: ['Bekisting', 'Besi', 'Beton']
-            },
-            {
-                name: 'Balok',
-                tasks: ['Bekisting', 'Besi', 'Beton']
-            },
-            {
                 name: 'Tanah',
                 tasks: [
-                    'Galian Biasa',
-                    'Galian_Pancang',
+                    'Galian Tanah',
                     'Pemadatan Tanah',
                     'Mengangkut Tanah',
                     'Urugan Tanah',
@@ -102,33 +81,66 @@ export const WORK_HIERARCHY = [
                 ]
             },
             {
-                name: 'Pondasi & Pancang',
+                name: 'Footplat',
                 tasks: [
-                    'Pancang',
-                    'Pengadaan Tiang Pancang',
-                    'Penetrasi Tiang Pancang',
-                    'Sambungan Pancang',
-                    'Pemotongan Kepala Pancang',
+                    'Galian',
+                    'Lantai Kerja',
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran',
                     'Pile Cap',
-                    'Pengecoran Pondasi',
-                    'Pembesian Pondasi',
-                    'Bekisting Pondasi',
-                    'Pondasi Batu Belah'
+                    'Bored Pile',
+                    'Pancang'
+                ]
+            },
+            {
+                name: 'Tie Beam',
+                tasks: [
+                    'Galian',
+                    'Lantai Kerja',
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran'
+                ]
+            },
+            {
+                name: 'Kolom',
+                tasks: [
+                    'Galian',
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran',
+                    'Pedestal',
+                    'Kolom Praktis'
+                ]
+            },
+            {
+                name: 'Balok & Pelat',
+                tasks: [
+                    'Galian',
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran',
+                    'Balok Praktis',
+                    'Wiremesh'
                 ]
             },
             {
                 name: 'Lainnya',
                 tasks: [
-                    'Balok Praktis',
-                    'Kolom Praktis',
-                    'Pedestal',
                     'Tangga',
-                    'Trap_Tangga',
                     'Ramp',
                     'Finish Trowel',
                     'Lean_Concrete',
-                    'Wiremesh',
-                    'Buis Beton 30cm'
+                    'Buis Beton',
+                    'Penyemprotan Anti Rayap'
+                ]
+            },
+            {
+                name: 'Pabrikasi',
+                tasks: [
+                    'Pabrikasi Bekisting',
+                    'Pabrikasi Besi'
                 ]
             }
         ]
@@ -174,6 +186,14 @@ export const WORK_HIERARCHY = [
                 ]
             },
             {
+                name: 'Atap',
+                tasks: [
+                    'Penutup Atap',
+                    'Nok Atap',
+                    'Lisplang'
+                ]
+            },
+            {
                 name: 'Sanitasi',
                 tasks: [
                     'Sanitary',
@@ -188,9 +208,6 @@ export const WORK_HIERARCHY = [
                     'Cat Eksterior',
                     'Cat Interior',
                     'Kanopi',
-                    'Lisplang',
-                    'Nok Atap',
-                    'Penutup Atap',
                     'Railing Tangga'
                 ]
             }
@@ -204,7 +221,7 @@ export const WORK_HIERARCHY = [
                 tasks: [
                     'Instalasi Listrik',
                     'Panel Listrik',
-                    'Cubicle 20KV',
+                    "Cubicle 20KV",
                     'Titik Lampu',
                     'Stop Kontak',
                     'Grounding'
@@ -228,11 +245,16 @@ export const WORK_HIERARCHY = [
                 ]
             },
             {
-                name: 'Sistem',
+                name: 'Penyelamatan',
                 tasks: [
                     'Fire Alarm',
                     'Smoke Detector',
-                    'CCTV',
+                    'CCTV'
+                ]
+            },
+            {
+                name: 'Genset',
+                tasks: [
                     'Genset',
                     'Genset 300KVA Silent'
                 ]
@@ -255,7 +277,7 @@ export const WORK_HIERARCHY = [
                 ]
             },
             {
-                name: 'Fasilitas',
+                name: 'Fasilitas Luar',
                 tasks: [
                     'Paving Block',
                     'Grass Block',
@@ -274,16 +296,16 @@ export const WORK_HIERARCHY = [
             {
                 name: 'Pengiriman',
                 tasks: [
-                    'Pengiriman Bata',
+                    'Pengiriman Material',
+                    'Pengiriman Semen',
+                    'Pengiriman Pasir',
                     'Pengiriman Batu',
+                    'Pengiriman Tanah',
                     'Pengiriman Besi',
                     'Pengiriman Beton',
+                    'Pengiriman Bata',
                     'Pengiriman Keramik',
-                    'Pengiriman Material',
-                    'Pengiriman Pancang',
-                    'Pengiriman Pasir',
-                    'Pengiriman Semen',
-                    'Pengiriman Tanah'
+                    'Pengiriman Pancang'
                 ]
             }
         ]
@@ -297,8 +319,8 @@ export const WORK_HIERARCHY = [
                     'Meja Kelas',
                     'Meja Guru',
                     'Meja Rapat',
-                    'Kursi Guru',
                     'Kursi Kelas',
+                    'Kursi Guru',
                     'Kursi Rapat'
                 ]
             },
@@ -315,8 +337,8 @@ export const WORK_HIERARCHY = [
                 tasks: [
                     'Bed UKS',
                     'Papan Tulis',
-                    'Signage',
-                    'Sofa'
+                    'Sofa',
+                    'Signage'
                 ]
             }
         ]
@@ -337,7 +359,12 @@ export const WORK_HIERARCHY = [
                 name: 'Visual',
                 tasks: [
                     'Drone View',
-                    'Dokumentasi Material',
+                    'Dokumentasi Material'
+                ]
+            },
+            {
+                name: 'Inspeksi',
+                tasks: [
                     'Inspeksi Bersama'
                 ]
             }

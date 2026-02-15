@@ -84,7 +84,8 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                         for (const task of group.tasks) {
                             const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
                             if (taskNormalized.includes(normalizedInput) && !tags.includes(task)) {
-                                matches.push(task);
+                                // Include hierarchy for visual context
+                                matches.push(`${cat.category} / ${group.name} / ${task}`);
                                 if (matches.length >= 10) break;
                             }
                         }
@@ -140,13 +141,27 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
     }, [tags]);
 
     const addTag = (tag: string) => {
-        if (tag && !tags.includes(tag)) {
-            setTags([...tags, tag]);
-            setInputValue('');
-            setSuggestions([]);
-            setShowDropdown(false);
-            inputRef.current?.focus();
+        if (tag.includes(' / ')) {
+            const parts = tag.split(' / ');
+            const groupName = parts[1];
+            const taskName = parts[parts.length - 1];
+
+            // Add both group and task (if unique)
+            const newTags = [...tags];
+            if (!newTags.includes(groupName)) newTags.push(groupName);
+            const cleanTaskName = taskName.replace(/_/g, ' ');
+            if (!newTags.includes(cleanTaskName)) newTags.push(cleanTaskName);
+
+            setTags(newTags);
+        } else {
+            if (tag && !tags.includes(tag)) {
+                setTags([...tags, tag]);
+            }
         }
+        setInputValue('');
+        setSuggestions([]);
+        setShowDropdown(false);
+        inputRef.current?.focus();
     };
 
     const removeTag = (index: number) => {
@@ -205,9 +220,16 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                 initial={{ opacity: 0, scale: 0.8, x: -10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                className="px-2 py-0.5 bg-emerald-500 text-white rounded-lg flex items-center shadow-md border border-white/20"
+                                className="px-2 py-1 bg-emerald-500 text-white rounded-xl flex flex-col shadow-md border border-white/20 min-w-0"
                             >
-                                <span className="text-[9px] font-black tracking-tight">{slot.detectedTask.replace(/_/g, ' ')}</span>
+                                {slot.detectedTask.includes('/') && (
+                                    <span className="text-[7px] font-black uppercase tracking-tighter opacity-70 leading-none mb-0.5 truncate">
+                                        {slot.detectedTask.split(' / ')[1]}
+                                    </span>
+                                )}
+                                <span className="text-[9px] font-bold tracking-tight truncate leading-tight">
+                                    {slot.detectedTask.split(' / ').pop()?.replace(/_/g, ' ')}
+                                </span>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -327,6 +349,13 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                                 <span className="bg-slate-100 px-1.5 py-0.5 rounded text-[8px] font-black text-slate-500">{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
                                                 <span>{suggestion.split(']')[1].trim()}</span>
                                             </>
+                                        ) : suggestion.includes(' / ') ? (
+                                            <div className="flex flex-col">
+                                                <span className="text-[7px] text-slate-400 font-black uppercase tracking-tighter leading-none mb-0.5">
+                                                    {suggestion.split(' / ')[1]}
+                                                </span>
+                                                <span>{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
+                                            </div>
                                         ) : (
                                             suggestion.replace(/_/g, ' ')
                                         )}
