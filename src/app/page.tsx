@@ -25,8 +25,39 @@ import { detectWorkFromKeyword } from '@/lib/utils';
 
 
 const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> => {
+  // Tier 1: BigDataCloud (Fast, keyless, very robust)
   try {
-    // Tier 1: OpenStreetMap Nominatim
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
+    if (res.ok) {
+      const data = await res.json();
+      const area = data.locality || data.principalSubdivision || '';
+      const city = data.city || '';
+      const result = [area, city].filter(Boolean).join(', ');
+      if (result) return result;
+    }
+  } catch (e: any) {
+    console.warn("BigDataCloud failed:", e.message);
+  }
+
+  // Tier 2: Photon (by Komoot - Faster OSM search)
+  try {
+    const res = await fetch(`https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const p = data.features[0].properties;
+        const area = p.district || p.locality || p.suburb || '';
+        const city = p.city || p.county || '';
+        const result = [area, city].filter(Boolean).join(', ');
+        if (result) return result;
+      }
+    }
+  } catch (e: any) {
+    console.warn("Photon failed:", e.message);
+  }
+
+  // Tier 3: OpenStreetMap Nominatim (Standard)
+  try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=id`, {
       headers: { 'User-Agent': 'NK-Management-App/1.0' }
     });
@@ -38,22 +69,11 @@ const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> =>
         return [area, city].filter(Boolean).join(', ') || data.display_name || "Lokasi tidak ditemukan";
       }
     }
-    throw new Error("Tier 1 Failed");
   } catch (e: any) {
-    console.warn("Nominatim failed, trying BigDataCloud:", e.message);
-    try {
-      // Tier 2: BigDataCloud (Free, No Key)
-      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
-      if (!res.ok) throw new Error("Tier 2 Status: " + res.status);
-      const data = await res.json();
-      const area = data.locality || data.principalSubdivision || '';
-      const city = data.city || '';
-      return [area, city].filter(Boolean).join(', ') || "Lokasi tidak ditemukan";
-    } catch (e2: any) {
-      console.error("All geocoding sources failed:", e2);
-      return "Lokasi tidak ditemukan (API Error)";
-    }
+    console.error("All geocoding sources failed:", e);
   }
+
+  return "Lokasi tidak ditemukan (API Error)";
 };
 
 const processTimestampImage = async (
@@ -1773,61 +1793,10 @@ export default function Home() {
                             addLog("[WARN] Akses via non-HTTPS detected. GPS browser mungkin diblokir.");
                           }
 
-                          const tryIpFallback = async (reason: string) => {
-                            addLog(`[INFO] GPS Browser bermasalah: ${reason}. Mencoba fallback ke IP Geolocation...`);
-                            setTestLocation(`GPS Gagal (${reason}). Mencoba Geolocation via IP...`);
-
-                            try {
-                              // TIER 1: ipapi.co
-                              addLog("[INFO] Mencoba IP Geolocation Tier 1 (ipapi.co)...");
-                              const ipRes = await fetch('https://ipapi.co/json/');
-                              if (!ipRes.ok) throw new Error("Tier 1 failed");
-                              const ipData = await ipRes.json();
-
-                              if (ipData.latitude && ipData.longitude) {
-                                const lat = ipData.latitude;
-                                const lon = ipData.longitude;
-                                addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 1): ${lat}, ${lon}`);
-                                setTestCoords({ lat, lon });
-                                setTestLocation(`Lokasi IP (Tier 1): ${lat}, ${lon}. Mencari alamat...`);
-                                const addr = await fetchReverseGeocode(lat, lon);
-                                setTestLocation(addr);
-                                showToast("Lokasi ditemukan via IP", "success");
-                                return;
-                              }
-                              throw new Error("No coordinates in tier 1");
-                            } catch (e1: any) {
-                              addLog(`[WARN] IP Geolocation Tier 1 gagal. Mencoba Tier 2...`);
-                              try {
-                                // TIER 2: ipinfo.io (Basic)
-                                addLog("[INFO] Mencoba IP Geolocation Tier 2 (ipinfo.io)...");
-                                const ipRes2 = await fetch('https://ipinfo.io/json');
-                                if (!ipRes2.ok) throw new Error("Tier 2 failed");
-                                const ipData2 = await ipRes2.json();
-
-                                if (ipData2.loc) {
-                                  const [lat, lon] = ipData2.loc.split(',').map(Number);
-                                  addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 2): ${lat}, ${lon}`);
-                                  setTestCoords({ lat, lon });
-                                  setTestLocation(`Lokasi IP (Tier 2): ${lat}, ${lon}. Mencari alamat...`);
-                                  const addr = await fetchReverseGeocode(lat, lon);
-                                  setTestLocation(addr);
-                                  showToast("Lokasi ditemukan via IP (Backup)", "success");
-                                  return;
-                                }
-                                throw new Error("No coordinates in tier 2");
-                              } catch (e2: any) {
-                                addLog("[ERROR] Semua metode Geolocation gagal.");
-                                setTestLocation("Gagal mendapatkan lokasi via GPS maupun IP.");
-                                showToast("Akses Lokasi Gagal Total", "error");
-                              }
-                            } finally {
-                              setIsTestingLocation(false);
-                            }
-                          };
-
                           if (!navigator.geolocation) {
-                            await tryIpFallback("Browser tidak mendukung GPS");
+                            addLog("[ERROR] Browser tidak mendukung fitur GPS Geolocation.");
+                            setTestLocation("Browser tidak mendukung GPS.");
+                            setIsTestingLocation(false);
                             return;
                           }
 
@@ -1835,18 +1804,28 @@ export default function Home() {
                             async (pos) => {
                               const lat = pos.coords.latitude;
                               const lon = pos.coords.longitude;
+                              addLog(`[SUCCESS] Sensor GPS terbaca: ${lat.toFixed(6)}, ${lon.toFixed(6)}`);
                               setTestCoords({ lat, lon });
-                              setTestLocation(`Koord: ${lat.toFixed(6)}, ${lon.toFixed(6)}. Mencari alamat...`);
+                              setTestLocation(`Mencari alamat untuk koord: ${lat.toFixed(6)}, ${lon.toFixed(6)}...`);
+
                               const addr = await fetchReverseGeocode(lat, lon);
                               setTestLocation(addr);
                               showToast("GPS & API Berjalan Normal", "success");
                               setIsTestingLocation(false);
                             },
                             async (err) => {
-                              console.warn("GPS Error, falling back to IP:", err);
-                              await tryIpFallback(err.message);
+                              console.warn("GPS Error:", err);
+                              let errMsg = "Akses GPS Gagal";
+                              if (err.code === 1) errMsg = "Izin lokasi ditolak (Gunakan HTTPS)";
+                              else if (err.code === 2) errMsg = "Posisi tidak tersedia (Sensor GPS HP mati)";
+                              else if (err.code === 3) errMsg = "Waktu habis (Pindah ke area terbuka)";
+
+                              addLog(`[ERROR] GPS Error: ${errMsg} (${err.message})`);
+                              setTestLocation(`Gagal: ${errMsg}.`);
+                              showToast(errMsg, "error");
+                              setIsTestingLocation(false);
                             },
-                            { enableHighAccuracy: true, timeout: 8000 }
+                            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                           );
                         }}
                         className="bg-orange-500 hover:bg-orange-600 disabled:bg-slate-200 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
