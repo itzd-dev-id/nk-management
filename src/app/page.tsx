@@ -589,7 +589,10 @@ export default function Home() {
         }
 
         // Only update if changed
-        if (slot.detectedBuilding?.code === detectedB?.code && slot.detectedWorkName === detectedT) {
+        const currentBCode = slot.detectedBuilding ? slot.detectedBuilding.code : null;
+        const newBCode = detectedB ? detectedB.code : null;
+
+        if (currentBCode === newBCode && slot.detectedWorkName === detectedT) {
           return slot;
         }
 
