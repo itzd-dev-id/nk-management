@@ -97,6 +97,7 @@ export const WORK_HIERARCHY = [
                     "Urugan Split",
                     "Urugan Tanah Biasa",
                     "Lantai Kerja",
+                    "Pengecoran Lantai Kerja",
                     "Buis Beton 30cm"
                 ]
             },
@@ -108,6 +109,10 @@ export const WORK_HIERARCHY = [
                     "Bekisting",
                     "Pembesian",
                     "Pengecoran",
+                    "Pengecoran Pondasi",
+                    "Pengecoran Pile Cap",
+                    "Pengecoran Bored Pile",
+                    "Pengecoran Pile Head",
                     "Pile Cap",
                     "Bored Pile",
                     "Pancang",
@@ -125,7 +130,9 @@ export const WORK_HIERARCHY = [
                     "Lantai Kerja",
                     "Bekisting",
                     "Pembesian",
-                    "Pengecoran"
+                    "Pengecoran",
+                    "Pengecoran Tie Beam",
+                    "Pengecoran Sloof"
                 ]
             },
             {
@@ -138,6 +145,8 @@ export const WORK_HIERARCHY = [
                     "Pembesian Kolom",
                     "Pengecoran",
                     "Pengecoran Kolom",
+                    "Pengecoran Pedestal",
+                    "Pengecoran Kolom Praktis",
                     "Pedestal",
                     "Kolom Praktis"
                 ]
@@ -151,6 +160,7 @@ export const WORK_HIERARCHY = [
                     "Pembesian Balok",
                     "Pengecoran",
                     "Pengecoran Balok",
+                    "Pengecoran Balok Praktis",
                     "Balok Praktis"
                 ]
             },
@@ -163,6 +173,8 @@ export const WORK_HIERARCHY = [
                     "Pembesian Plat",
                     "Pengecoran",
                     "Pengecoran Plat",
+                    "Pengecoran Pelat",
+                    "Pengecoran Plat Lantai",
                     "Wiremesh",
                     "Plat Lantai",
                     "Plat t=120"
@@ -173,7 +185,8 @@ export const WORK_HIERARCHY = [
                 tasks: [
                     "Bekisting",
                     "Pembesian",
-                    "Pengecoran"
+                    "Pengecoran",
+                    "Pengecoran Ring Balok"
                 ]
             },
             {
@@ -188,6 +201,8 @@ export const WORK_HIERARCHY = [
                     "Bekisting Tangga",
                     "Pembesian Tangga",
                     "Pengecoran Tangga",
+                    "Pengecoran Ramp",
+                    "Pengecoran Lift Shaft",
                     "Lift Shaft"
                 ]
             },
