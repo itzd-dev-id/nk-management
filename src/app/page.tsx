@@ -554,47 +554,57 @@ export default function Home() {
 
   // Per-Slot Detection Effect
   useEffect(() => {
-    setSlots(prev => prev.map(slot => {
-      const slotKeywords: string[] = [];
-      if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
-      slotKeywords.push(...slot.tags);
+    setSlots(prev => {
+      const next = prev.map(slot => {
+        const slotKeywords: string[] = [];
+        if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
+        slotKeywords.push(...slot.tags);
 
-      if (slotKeywords.length === 0) return { ...slot, detectedBuilding: null, detectedWorkName: '' };
+        if (slotKeywords.length === 0) {
+          if (slot.detectedBuilding === null && slot.detectedWorkName === '') return slot;
+          return { ...slot, detectedBuilding: null, detectedWorkName: '' };
+        }
 
-      const fullKeyword = slotKeywords.join(', ');
+        const fullKeyword = slotKeywords.join(', ');
+        const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
+        const detectedTRaw = detectWorkFromKeyword(
+          fullKeyword,
+          allHierarchy,
+          (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
+        );
 
-      // Detect Building
-      const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
-
-      // Detect Task
-      const detectedTRaw = detectWorkFromKeyword(
-        fullKeyword,
-        allHierarchy,
-        (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
-      );
-
-      let detectedT = '';
-      if (detectedTRaw) {
-        if (detectedTRaw.includes(' / ')) {
-          detectedT = detectedTRaw;
-        } else {
-          for (const cat of allHierarchy) {
-            const group = cat.groups.find(g => g.tasks.includes(detectedTRaw));
-            if (group) {
-              detectedT = `${cat.category} / ${group.name} / ${detectedTRaw}`;
-              break;
+        let detectedT = '';
+        if (detectedTRaw) {
+          if (detectedTRaw.includes(' / ')) {
+            detectedT = detectedTRaw;
+          } else {
+            for (const cat of allHierarchy) {
+              const group = cat.groups.find(g => g.tasks.includes(detectedTRaw));
+              if (group) {
+                detectedT = `${cat.category} / ${group.name} / ${detectedTRaw}`;
+                break;
+              }
             }
           }
         }
-      }
 
-      return {
-        ...slot,
-        detectedBuilding: detectedB,
-        detectedWorkName: detectedT
-      };
-    }));
-  }, [allBuildings, allHierarchy]); // We only re-run detection if buildings or hierarchy change, or when tags are added manually via setSlots calls in handlers
+        // Only update if changed
+        if (slot.detectedBuilding?.code === detectedB?.code && slot.detectedWorkName === detectedT) {
+          return slot;
+        }
+
+        return {
+          ...slot,
+          detectedBuilding: detectedB,
+          detectedWorkName: detectedT
+        };
+      });
+
+      const hasChanged = next.some((s, i) => s !== prev[i]);
+      if (!hasChanged) return prev;
+      return next;
+    });
+  }, [allBuildings, allHierarchy, slots]);
 
   // Sync Config from Vercel KV
   const fetchConfig = useCallback(async (filename: string) => {
@@ -1248,18 +1258,18 @@ export default function Home() {
                             exit={{ opacity: 0, y: -10 }}
                             className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-[1.5rem] shadow-2xl overflow-hidden z-[100] max-h-[200px] overflow-y-auto"
                           >
-                            <div className="p-2 space-y-1">
+                            <div className="p-2 flex flex-wrap gap-2">
                               {suggestions.map((suggestion, index) => {
                                 const isBuildingSug = suggestion.startsWith('[') && suggestion.includes(']');
                                 return (
                                   <button
                                     key={suggestion}
                                     onClick={() => addTag(suggestion, sIdx)}
-                                    className={`w-full px-4 py-2.5 text-left text-xs font-bold transition-all flex items-center gap-3 rounded-xl ${index === selectedIndex ? 'bg-orange-500 text-white' : 'text-slate-700 hover:bg-slate-50'}`}
+                                    className={`px-3 py-2 text-left text-[10px] font-bold transition-all flex items-center gap-2 rounded-lg border ${index === selectedIndex ? 'bg-orange-600 text-white border-orange-400 shadow-md scale-105' : 'text-slate-600 bg-white border-slate-200 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700'}`}
                                   >
                                     {isBuildingSug ? (
                                       <>
-                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-black ${index === selectedIndex ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
+                                        <span className={`px-1 rounded text-[8px] font-black ${index === selectedIndex ? 'bg-white/20' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
                                         <span>{suggestion.split(']')[1].trim()}</span>
                                       </>
                                     ) : (
