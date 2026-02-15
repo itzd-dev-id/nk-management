@@ -16,7 +16,7 @@ export async function getExifData(file: Blob): Promise<string | null> {
     }
 }
 
-export async function injectExif(destBlob: Blob, exifStr: string): Promise<Blob> {
+export async function injectExif(destBlob: Blob, exifStr: string, fileName: string, mimeType: string): Promise<File> {
     try {
         const destDataUrl = await new Promise<string>((resolve) => {
             const reader = new FileReader();
@@ -26,10 +26,13 @@ export async function injectExif(destBlob: Blob, exifStr: string): Promise<Blob>
 
         const inserted = piexif.insert(exifStr, destDataUrl);
         const res = await fetch(inserted);
-        return await res.blob();
+        const blob = await res.blob();
+
+        return new File([blob], fileName, { type: mimeType, lastModified: Date.now() });
     } catch (e) {
         console.error("EXIF injection error:", e);
-        return destBlob;
+        // Fallback to converting Blob to File
+        return new File([destBlob], fileName, { type: mimeType, lastModified: Date.now() });
     }
 }
 

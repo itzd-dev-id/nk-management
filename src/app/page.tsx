@@ -1087,10 +1087,12 @@ export default function Home() {
                       addLog(`[INFO] Compressing original...`);
                       const compressedBlob = await imageCompression(file, options);
 
-                      let finalOriginal = compressedBlob;
+                      let finalOriginal: File;
                       if (originalExif) {
                         addLog(`[INFO] Restoring original metadata...`);
-                        finalOriginal = await injectExif(compressedBlob, originalExif);
+                        finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
+                      } else {
+                        finalOriginal = new File([compressedBlob], file.name, { type: file.type });
                       }
 
                       addLog(`[INFO] Uploading original version...`);
@@ -1109,10 +1111,12 @@ export default function Home() {
                         addLog(`[INFO] Compressing timestamped version...`);
                         const compressedTsBlob = await imageCompression(timestampedFile, options);
 
-                        let finalTs = compressedTsBlob;
+                        let finalTs: File;
                         if (originalExif) {
                           addLog(`[INFO] Restoring metadata to timestamped version...`);
-                          finalTs = await injectExif(compressedTsBlob, originalExif);
+                          finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                        } else {
+                          finalTs = new File([compressedTsBlob], file.name, { type: file.type });
                         }
 
                         addLog(`[INFO] Uploading timestamped version...`);
