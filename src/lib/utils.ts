@@ -64,13 +64,19 @@ export function generateNewName(
     const safeGroup = groupPart ? groupPart.replace(/\s+/g, '_') : '';
     const safeTask = taskPart.replace(/\s+/g, '_').replace(/\//g, '-');
 
-    const fileWork = [safeCategory, safeGroup, safeTask].filter(Boolean).join('_');
+    // Fix: Remove redundant Group Name if Task Name already contains it
+    // e.g. Group="Kolom", Task="Bekisting Kolom" -> Result="Struktur_Bekisting-Kolom" (instead of "Struktur_Kolom_Bekisting-Kolom")
+    const isGroupRedundant = safeGroup && safeTask.toLowerCase().includes(safeGroup.toLowerCase());
+    const finalGroup = isGroupRedundant ? '' : safeGroup;
+
+    const fileWork = [safeCategory, finalGroup, safeTask].filter(Boolean).join('_');
     const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');
 
     const progressPart = progress ? `${progress}%_` : '';
-    return `${dateStr}_${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
+    // Fix: Remove dateStr from start of filename as requested
+    return `${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
 }
 
 export function getFileExtension(filename: string): string {
@@ -166,48 +172,51 @@ export function detectWorkFromKeyword(
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    // Helper to find match in hierarchy
-    const findMatch = (predicate: (taskName: string, groupName: string) => boolean): string | null => {
-        for (const cat of filteredHierarchy) {
-            for (const group of cat.groups) {
-                const groupName = group.name.toLowerCase().replace(/_/g, ' ');
-                for (const task of group.tasks) {
-                    const taskName = task.toLowerCase().replace(/_/g, ' ');
-                    if (predicate(taskName, groupName)) {
-                        return `${cat.category} / ${group.name} / ${task}`;
-                    }
-                }
-            }
-        }
-        return null;
-    };
+    // Flatten hierarchy into a list of { cat, group, task } objects
+    // This allows us to sort by task name length to prioritize specific matches (e.g. "Bekisting Kolom") over generic ones (e.g. "Bekisting")
+    const allTasks: { cat: string; group: string; task: string; priority: number }[] = [];
 
-    // PASS 1: Exact Match on Task Name (Full Phrase Check)
-    // Check if any part of the input exactly matches a task name
-    // We iterate through all known tasks and check if they exist in the input string
     for (const cat of filteredHierarchy) {
         for (const group of cat.groups) {
             for (const task of group.tasks) {
-                const taskName = task.toLowerCase().replace(/_/g, ' ');
-                // Use word boundaries to avoid partial matches inside other words
-                // But handle multi-word tasks correctly
-                if (normalizedInput.includes(taskName)) {
-                    return `${cat.category} / ${group.name} / ${task}`;
-                }
+                // Priority Score: longer task name = higher priority
+                // Also give slight boost to exact phrase match potential
+                allTasks.push({
+                    cat: cat.category,
+                    group: group.name,
+                    task: task,
+                    priority: task.length
+                });
             }
         }
     }
 
+    // Sort by length of task name (descending)
+    allTasks.sort((a, b) => b.priority - a.priority);
+
+    // PASS 1: Exact Task Name Match (Full Phrase Check)
+    for (const item of allTasks) {
+        const taskName = item.task.toLowerCase().replace(/_/g, ' ');
+        // Use includes but prioritize longer matches because of the sort order
+        if (normalizedInput.includes(taskName)) {
+            return `${item.cat} / ${item.group} / ${item.task}`;
+        }
+    }
+
     // PASS 2: Token-based Matching
+    // We still use tokens for fuzzy matching if full phrase fails, but check sorted tasks first
     const tokens = normalizedInput.split(/[,;\s]+/).filter(t => t.length > 2 && !['work', 'name', 'select', 'building', 'date'].includes(t)); // Ignore common placeholders
 
     for (const token of tokens) {
         const escapedToken = escapeRegExp(token);
         const regex = new RegExp(`\\b${escapedToken}\\b`, 'i');
 
-        // Check Task Names
-        const taskMatch = findMatch((t, g) => regex.test(t));
-        if (taskMatch) return taskMatch;
+        // Check Task Names (Sorted)
+        for (const item of allTasks) {
+            if (regex.test(item.task.toLowerCase())) {
+                return `${item.cat} / ${item.group} / ${item.task}`;
+            }
+        }
 
         // Check Group Names
         for (const cat of filteredHierarchy) {
