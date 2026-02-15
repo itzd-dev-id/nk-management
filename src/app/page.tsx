@@ -84,14 +84,55 @@ const processTimestampImage = async (
 
   try {
     // 1. Extract GPS & Date
-    let exif = await exifr.parse(file, true);
+    const buffer = await file.arrayBuffer();
+    // Explicitly scan all possible metadata segments
+    let exif = await exifr.parse(buffer, {
+      gps: true,
+      exif: true,
+      tiff: true,
+      xmp: true,
+      jfif: true,
+      iptc: true,
+      mergeOutput: true
+    });
+
     let lat = exif?.latitude;
     let lon = exif?.longitude;
 
-    // TIER 2 GPS Extraction Fallback (Specific GPS Helper)
+    // TIER 2 GPS Extraction Fallback (Manual Key Check for raw arrays/strings)
+    if (!lat || !lon) {
+      const rawLat = exif?.GPSLatitude || exif?.['0x0002'];
+      const rawLon = exif?.GPSLongitude || exif?.['0x0004'];
+
+      if (rawLat && rawLon) {
+        const parseCoord = (c: any) => {
+          if (typeof c === 'number') return c;
+          if (Array.isArray(c)) {
+            // standard format: [degrees, minutes, seconds]
+            return (c[0] || 0) + (c[1] || 0) / 60 + (c[2] || 0) / 3600;
+          }
+          return parseFloat(c);
+        };
+
+        lat = parseCoord(rawLat);
+        lon = parseCoord(rawLon);
+
+        const latRef = exif?.GPSLatitudeRef || exif?.['0x0001'];
+        const lonRef = exif?.GPSLongitudeRef || exif?.['0x0003'];
+
+        if (latRef === 'S' || latRef === 's') lat = -lat;
+        if (lonRef === 'W' || lonRef === 'w') lon = -lon;
+
+        if (lat && lon) {
+          addLog(`[SUCCESS] Metadata lokasi ditemukan via Manual Key parsing!`);
+        }
+      }
+    }
+
+    // TIER 3 GPS Extraction Fallback (Specific GPS Helper)
     if (!lat || !lon) {
       try {
-        const gpsOnly = await exifr.gps(file);
+        const gpsOnly = await exifr.gps(buffer);
         if (gpsOnly?.latitude) {
           lat = gpsOnly.latitude;
           lon = gpsOnly.longitude;
@@ -102,15 +143,15 @@ const processTimestampImage = async (
       }
     }
 
-    const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
+    const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal.toString().replace(/:/g, '-')) : new Date();
 
     if (!lat || !lon) {
-      const foundTags = Object.keys(exif || {}).filter(t => typeof exif[t] !== 'object').slice(0, 10).join(', ');
+      const allKeys = Object.keys(exif || {}).join(', ');
       addLog(`[WARN] Data GPS tidak ditemukan di metadata ${file.name}.`);
-      if (foundTags) {
-        addLog(`[DEBUG] Tags ditemukan: ${foundTags}... (Pastikan "Location Tags" aktif di Kamera HP)`);
+      if (allKeys) {
+        addLog(`[DEBUG] Keys ditemukan: ${allKeys.slice(0, 150)}...`);
       } else {
-        addLog(`[DEBUG] Tidak ada metadata terdeteksi. (WhatsApp/sosmed sering menghapus metadata)`);
+        addLog(`[DEBUG] Segment metadata terbaca kosong (Coba ambil foto ulang dengan GPS ON).`);
       }
     }
 
