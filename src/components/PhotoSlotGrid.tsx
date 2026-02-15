@@ -350,11 +350,11 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                                 <span>{suggestion.split(']')[1].trim()}</span>
                                             </>
                                         ) : suggestion.includes(' / ') ? (
-                                            <div className="flex flex-col">
-                                                <span className="text-[7px] text-slate-400 font-black uppercase tracking-tighter leading-none mb-0.5">
+                                            <div className="flex items-center gap-2">
+                                                <span className="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tighter shrink-0 border border-orange-200">
                                                     {suggestion.split(' / ')[1]}
                                                 </span>
-                                                <span>{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
+                                                <span className="truncate">{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
                                             </div>
                                         ) : (
                                             suggestion.replace(/_/g, ' ')
