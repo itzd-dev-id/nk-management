@@ -115,14 +115,29 @@ export const WORK_HIERARCHY = [
                 ]
             },
             {
-                name: 'Balok & Pelat',
+                name: 'Balok',
                 tasks: [
-                    'Galian',
                     'Bekisting',
                     'Pembesian',
                     'Pengecoran',
-                    'Balok Praktis',
+                    'Balok Praktis'
+                ]
+            },
+            {
+                name: 'Pelat',
+                tasks: [
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran',
                     'Wiremesh'
+                ]
+            },
+            {
+                name: 'Ring Balok',
+                tasks: [
+                    'Bekisting',
+                    'Pembesian',
+                    'Pengecoran'
                 ]
             },
             {

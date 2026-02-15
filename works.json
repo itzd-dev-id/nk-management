@@ -63,6 +63,7 @@
             },
             {
                 "name": "Tie Beam",
+                "_description": "Sloof / Balok Struktur di Lantai 1",
                 "tasks": [
                     "Galian",
                     "Lantai Kerja",
@@ -83,14 +84,32 @@
                 ]
             },
             {
-                "name": "Balok & Pelat",
+                "name": "Balok",
+                "_description": "Balok Struktur di Lantai 2 dan seterusnya",
                 "tasks": [
-                    "Galian",
                     "Bekisting",
                     "Pembesian",
                     "Pengecoran",
-                    "Balok Praktis",
+                    "Balok Praktis"
+                ]
+            },
+            {
+                "name": "Pelat",
+                "_description": "Pelat Lantai Beton",
+                "tasks": [
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
                     "Wiremesh"
+                ]
+            },
+            {
+                "name": "Ring Balok",
+                "_description": "Balok Struktur di level paling atas (Atap)",
+                "tasks": [
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran"
                 ]
             },
             {
