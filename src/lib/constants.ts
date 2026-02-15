@@ -257,6 +257,8 @@ export const WORK_HIERARCHY = [
             {
                 name: "Pintu & Jendela",
                 tasks: [
+                    "Pintu",
+                    "Jendela",
                     "Kusen",
                     "Kusen Pintu",
                     "Kusen Jendela",
