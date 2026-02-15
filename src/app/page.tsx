@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1056,12 +1056,13 @@ export default function Home() {
                     setProcessLogs([]);
                     addLog(`[INFO] Submitting documentation...`);
 
-                    const file = pendingPostFile;
+                    const fileToProcess = pendingPostFile;
+                    let file = fileToProcess;
                     const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
 
                     const uploadToApi = async (f: File | Blob, isTs: boolean) => {
                       const formData = new FormData();
-                      formData.append('file', f, file.name);
+                      formData.append('file', f, fileToProcess.name);
                       formData.append('metadata', JSON.stringify({
                         detectedDate: selectedDate,
                         workName: workName || 'Documentation',
@@ -1081,7 +1082,25 @@ export default function Home() {
                     try {
                       // 0. GUARANTEE: Save original EXIF metadata before ANY processing
                       addLog(`[INFO] Capturing original metadata before compression...`);
-                      const originalExif = await getExifData(file);
+                      let originalExif = await getExifData(file);
+
+                      // LIVE INJECTION: If photo is from camera (empty EXIF), try to get browser GPS
+                      if (!originalExif && navigator.geolocation) {
+                        addLog(`[INFO] Metadata tidak ditemukan (Camera photo). Mengambil GPS HP...`);
+                        try {
+                          const pos = await new Promise<GeolocationPosition>((res, rej) => {
+                            navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 5000 });
+                          });
+                          originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
+
+                          // ENRICH FILE: Inject the new GPS so that both Clean and Timestamp processes use it
+                          file = await injectExif(file, originalExif, file.name, file.type);
+
+                          addLog(`[SUCCESS] Lokasi HP berhasil disuntikkan ke metadata (Live Injection).`);
+                        } catch (gpsErr: any) {
+                          addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}. Foto tetap diunggah tanpa GPS.`);
+                        }
+                      }
 
                       // 1. Process and Upload Original (Clean)
                       addLog(`[INFO] Compressing original...`);

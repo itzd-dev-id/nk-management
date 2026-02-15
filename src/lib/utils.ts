@@ -262,3 +262,23 @@ export function detectWorkFromKeyword(
 
     return '';
 }
+
+export function createGpsExif(lat: number, lon: number): string {
+    const latDeg = Math.floor(Math.abs(lat));
+    const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+    const latSec = ((Math.abs(lat) - latDeg) * 60 - latMin) * 60;
+
+    const lonDeg = Math.floor(Math.abs(lon));
+    const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+    const lonSec = ((Math.abs(lon) - lonDeg) * 60 - lonMin) * 60;
+
+    const gpsIfd: any = {};
+    gpsIfd[piexif.GPSIFD.GPSVersionID] = [2, 2, 0, 0];
+    gpsIfd[piexif.GPSIFD.GPSLatitudeRef] = lat >= 0 ? "N" : "S";
+    gpsIfd[piexif.GPSIFD.GPSLatitude] = [[latDeg, 1], [latMin, 1], [Math.round(latSec * 100), 100]];
+    gpsIfd[piexif.GPSIFD.GPSLongitudeRef] = lon >= 0 ? "E" : "W";
+    gpsIfd[piexif.GPSIFD.GPSLongitude] = [[lonDeg, 1], [lonMin, 1], [Math.round(lonSec * 100), 100]];
+
+    const exifObj = { "GPS": gpsIfd };
+    return piexif.dump(exifObj);
+}
