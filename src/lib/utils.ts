@@ -106,66 +106,45 @@ export function extractGDriveId(idOrUrl: string): string {
 export function detectBuildingFromKeyword(keyword: string, buildings: any[]): any | null {
     if (!keyword) return null;
 
-    let buildingPart = keyword;
-    const separator = keyword.includes(',') ? ',' : (keyword.includes(';') ? ';' : null);
+    // Split by comma or semicolon first to get phrases
+    const rawParts = keyword.split(/[,;]/).map(p => p.trim()).filter(Boolean);
+    if (rawParts.length === 0) return null;
 
-    if (separator) {
-        buildingPart = keyword.split(separator)[0].trim();
-    }
-
-    // NEW PASS: Handle [Code] Name format from UI tags
-    const badgeMatch = buildingPart.match(/^\[(.*?)\]\s*(.*)$/i);
-    if (badgeMatch) {
-        const codePart = badgeMatch[1].toLowerCase().trim();
-        const namePart = badgeMatch[2].toLowerCase().trim();
-
-        // Try code match first
-        const b = buildings.find(b => b.code.toLowerCase() === codePart);
-        if (b) return b;
-
-        // Then name match
-        const b2 = buildings.find(b => b.name.toLowerCase() === namePart);
-        if (b2) return b2;
-    }
-
-    const normalizedInput = buildingPart.toLowerCase().trim();
-    if (!normalizedInput) return null;
-
-    // PASS 1: Try exact code match on full phrase
-    const byExactCode = buildings.find(b => b.code.toLowerCase() === normalizedInput);
-    if (byExactCode) return byExactCode;
-
-    // PASS 2: Try exact name match on full phrase
-    const byExactName = buildings.find(b => b.name.toLowerCase() === normalizedInput);
-    if (byExactName) return byExactName;
-
-    // PASS 3: Try partial name match on full phrase
-    const byPartialName = buildings.find(b => b.name.toLowerCase().includes(normalizedInput));
-    if (byPartialName) return byPartialName;
-
-    // PASS 4: Fall back to individual word matching
-    const terms = normalizedInput.replace(/[\[\]]/g, ' ').split(/\s+/).filter(Boolean);
-    if (terms.length === 0) return null;
-
-    for (const term of terms) {
-        // For very short terms (1-3 chars), ONLY use exact match to avoid false positives
-        const isShortTerm = term.length <= 3;
-
-        // Try exact code match
-        const byCode = buildings.find(b => b.code.toLowerCase() === term);
-        if (byCode) return byCode;
-
-        // Try exact name match
-        const byName = buildings.find(b => b.name.toLowerCase() === term);
-        if (byName) return byName;
-
-        // For longer terms, try partial match with word boundary
-        if (!isShortTerm) {
-            const escapedTerm = escapeRegExp(term);
-            const wordBoundaryRegex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
-            const byPartial = buildings.find(b => wordBoundaryRegex.test(b.name));
-            if (byPartial) return byPartial;
+    // PASS 0: Check each part for [Code] Name format (highest priority)
+    for (const part of rawParts) {
+        const badgeMatch = part.match(/^\[(.*?)\]\s*(.*)$/i);
+        if (badgeMatch) {
+            const codePart = badgeMatch[1].toLowerCase().trim();
+            const b = buildings.find(b => b.code.toLowerCase() === codePart);
+            if (b) return b;
         }
+    }
+
+    // Prepare all tokens for scanning
+    // We treat the whole string as a bag of words/phrases
+    const allTokens = keyword.toLowerCase().replace(/_/g, ' ').replace(/[\[\]]/g, ' ').split(/[,;\s]+/).filter(Boolean);
+
+    // PASS 1: Exact Code Match
+    for (const token of allTokens) {
+        const b = buildings.find(b => b.code.toLowerCase() === token);
+        if (b) return b;
+    }
+
+    // PASS 2: Exact Name Match
+    // We need to check phrases for names with spaces, so we check rawParts again
+    for (const part of rawParts) {
+        const normalizedPart = part.toLowerCase().replace(/_/g, ' ').trim();
+        const b = buildings.find(b => b.name.toLowerCase() === normalizedPart);
+        if (b) return b;
+    }
+
+    // PASS 3: Partial Name Match (Word Boundary)
+    for (const token of allTokens) {
+        if (token.length <= 2) continue; // Skip very short tokens
+        const escapedTerm = escapeRegExp(token);
+        const regex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
+        const b = buildings.find(b => regex.test(b.name));
+        if (b) return b;
     }
 
     return null;
@@ -178,97 +157,71 @@ export function detectWorkFromKeyword(
 ): string {
     if (!keyword) return '';
 
-    let workPart = keyword;
-    const separator = keyword.includes(',') ? ',' : (keyword.includes(';') ? ';' : null);
-
-    if (separator) {
-        const parts = keyword.split(separator);
-        if (parts.length < 2) return ''; // No second part for work
-        workPart = parts[1].trim();
-    }
-
-    const normalizedWorkPart = workPart.toLowerCase().replace(/_/g, ' ').trim();
-    if (!normalizedWorkPart) return '';
+    // Normalize entire keyword string, splitting by common separators to get tokens
+    // We do NOT stop at the first comma anymore
+    const normalizedInput = keyword.toLowerCase().replace(/_/g, ' ').replace(/[\[\]]/g, ' ');
 
     // Filter hierarchy if filter provided
     const filteredHierarchy = categoryFilter
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    // PASS 1: Try compound match (Group + Task)
-    // e.g. "galian footplat" or "footplat galian"
-    for (const cat of filteredHierarchy) {
-        for (const group of cat.groups) {
-            const groupNameNormalized = group.name.toLowerCase().replace(/_/g, ' ').replace(/beton:\s*/, '').trim();
-            for (const task of group.tasks) {
-                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-
-                // Check if both terms exist in the keyword
-                if ((normalizedWorkPart.includes(groupNameNormalized) && normalizedWorkPart.includes(taskNormalized)) ||
-                    (groupNameNormalized.split(/\s+/).some(word => word.length > 3 && normalizedWorkPart.includes(word)) && normalizedWorkPart.includes(taskNormalized))) {
-                    return `${cat.category} / ${group.name} / ${task}`;
-                }
-            }
-        }
-    }
-
-    // PASS 2: Try exact match on task name
-    for (const cat of filteredHierarchy) {
-        for (const group of cat.groups) {
-            for (const task of group.tasks) {
-                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                if (taskNormalized === normalizedWorkPart) {
-                    return `${cat.category} / ${group.name} / ${task}`;
-                }
-            }
-        }
-    }
-
-    // PASS 3: Try partial match on task name
-    for (const cat of filteredHierarchy) {
-        for (const group of cat.groups) {
-            for (const task of group.tasks) {
-                const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                if (taskNormalized.includes(normalizedWorkPart)) {
-                    return `${cat.category} / ${group.name} / ${task}`;
-                }
-            }
-        }
-    }
-
-    // PASS 4: Try match on Group Name
-    for (const cat of filteredHierarchy) {
-        for (const group of cat.groups) {
-            if (group.name.toLowerCase().includes(normalizedWorkPart)) {
-                return `${cat.category} / ${group.name} / ${group.tasks[0] || ''}`;
-            }
-        }
-    }
-
-    // PASS 5: Check if search phrase matches category
-    for (const cat of filteredHierarchy) {
-        if (cat.category.toLowerCase().includes(normalizedWorkPart)) {
-            return `${cat.category} / ${cat.groups[0]?.name || ''} / ${cat.groups[0]?.tasks[0] || ''}`;
-        }
-    }
-
-    // PASS 6: Fall back to individual word matching
-    const terms = normalizedWorkPart.split(/\s+/).filter(Boolean);
-
-    for (const term of terms) {
-        const isShortTerm = term.length <= 3;
-        if (isShortTerm) continue;
-
+    // Helper to find match in hierarchy
+    const findMatch = (predicate: (taskName: string, groupName: string) => boolean): string | null => {
         for (const cat of filteredHierarchy) {
             for (const group of cat.groups) {
+                const groupName = group.name.toLowerCase().replace(/_/g, ' ');
                 for (const task of group.tasks) {
-                    const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                    const escapedTerm = escapeRegExp(term);
-                    const wordBoundaryRegex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
-                    if (wordBoundaryRegex.test(taskNormalized)) {
-                        return task;
+                    const taskName = task.toLowerCase().replace(/_/g, ' ');
+                    if (predicate(taskName, groupName)) {
+                        return `${cat.category} / ${group.name} / ${task}`;
                     }
                 }
+            }
+        }
+        return null;
+    };
+
+    // PASS 1: Exact Match on Task Name (Full Phrase Check)
+    // Check if any part of the input exactly matches a task name
+    // We iterate through all known tasks and check if they exist in the input string
+    for (const cat of filteredHierarchy) {
+        for (const group of cat.groups) {
+            for (const task of group.tasks) {
+                const taskName = task.toLowerCase().replace(/_/g, ' ');
+                // Use word boundaries to avoid partial matches inside other words
+                // But handle multi-word tasks correctly
+                if (normalizedInput.includes(taskName)) {
+                    return `${cat.category} / ${group.name} / ${task}`;
+                }
+            }
+        }
+    }
+
+    // PASS 2: Token-based Matching
+    const tokens = normalizedInput.split(/[,;\s]+/).filter(t => t.length > 2 && !['work', 'name', 'select', 'building', 'date'].includes(t)); // Ignore common placeholders
+
+    for (const token of tokens) {
+        const escapedToken = escapeRegExp(token);
+        const regex = new RegExp(`\\b${escapedToken}\\b`, 'i');
+
+        // Check Task Names
+        const taskMatch = findMatch((t, g) => regex.test(t));
+        if (taskMatch) return taskMatch;
+
+        // Check Group Names
+        for (const cat of filteredHierarchy) {
+            for (const group of cat.groups) {
+                if (regex.test(group.name.toLowerCase())) {
+                    return `${cat.category} / ${group.name} / ${group.tasks[0] || ''}`; // Default to first task if group matches
+                }
+            }
+        }
+
+        // Check Category Names
+        for (const cat of filteredHierarchy) {
+            if (regex.test(cat.category.toLowerCase())) {
+                return `${cat.category} / ${cat.groups[0]?.name || ''} / ${cat.groups[0]?.tasks[0] || ''}`;
             }
         }
     }

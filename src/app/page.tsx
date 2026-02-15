@@ -485,8 +485,14 @@ export default function Home() {
 
         // RE-DETECT for this slot
         const slotKeywords: string[] = [];
-        if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
         slotKeywords.push(...slot.tags);
+        if (slot.file) {
+          const fileName = slot.file.name.split('.')[0];
+          // Only add filename if not already covered by a tag (simple check)
+          if (!slot.tags.some(t => fileName.includes(t))) {
+            slotKeywords.push(fileName);
+          }
+        }
         const fullKeyword = slotKeywords.join(', ');
 
         slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
@@ -557,8 +563,16 @@ export default function Home() {
     setSlots(prev => {
       const next = prev.map(slot => {
         const slotKeywords: string[] = [];
-        if (slot.file) slotKeywords.push(slot.file.name.split('.')[0]);
+        // Prioritize tags over filename for detection
         slotKeywords.push(...slot.tags);
+
+        if (slot.file) {
+          const fileName = slot.file.name.split('.')[0];
+          // Only add filename if not already covered by a tag
+          if (!slot.tags.some(t => fileName.includes(t))) {
+            slotKeywords.push(fileName);
+          }
+        }
 
         if (slotKeywords.length === 0) {
           if (slot.detectedBuilding === null && slot.detectedWorkName === '') return slot;
