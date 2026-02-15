@@ -1164,8 +1164,7 @@ export default function Home() {
 
                       // Final success state
                       setPendingPostFile(null);
-                      setPostTags([]);
-                      setPostKeyword('');
+                      // Keywords and tags are now persisted until refresh as requested
                       showToast(useTimestamp ? "Both versions uploaded!" : "Original uploaded!", "success");
 
                     } catch (err: any) {
