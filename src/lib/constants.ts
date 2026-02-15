@@ -342,7 +342,9 @@ export const WORK_HIERARCHY = [
                 tasks: [
                     "Instalasi AC",
                     "Split AC",
-                    "VRV AC"
+                    "VRV AC",
+                    "Exhaust Fan",
+                    "Instalasi Exhaust Fan"
                 ]
             },
             {
