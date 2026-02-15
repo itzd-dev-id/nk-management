@@ -84,9 +84,24 @@ const processTimestampImage = async (
 
   try {
     // 1. Extract GPS & Date
-    const exif = await exifr.parse(file, true); // Get all tags for debugging
-    const lat = exif?.latitude;
-    const lon = exif?.longitude;
+    let exif = await exifr.parse(file, true);
+    let lat = exif?.latitude;
+    let lon = exif?.longitude;
+
+    // TIER 2 GPS Extraction Fallback (Specific GPS Helper)
+    if (!lat || !lon) {
+      try {
+        const gpsOnly = await exifr.gps(file);
+        if (gpsOnly?.latitude) {
+          lat = gpsOnly.latitude;
+          lon = gpsOnly.longitude;
+          addLog(`[SUCCESS] Metadata lokasi ditemukan via GPS-Specific helper!`);
+        }
+      } catch (ge: any) {
+        console.warn("GPS-Specific helper failed", ge);
+      }
+    }
+
     const dateObj = exif?.DateTimeOriginal ? new Date(exif.DateTimeOriginal) : new Date();
 
     if (!lat || !lon) {
@@ -153,7 +168,7 @@ const processTimestampImage = async (
       });
 
       if (logo.complete && logo.naturalWidth > 0) {
-        const logoHeight = 48 * scale; // Smaller logo
+        const logoHeight = 85 * scale; // Increased for better visibility on 4:3
         const logoWidth = (logo.naturalWidth / logo.naturalHeight) * logoHeight;
         const cornerRadius = 10 * scale;
 
