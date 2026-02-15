@@ -92,23 +92,12 @@ export async function POST(req: NextRequest) {
         // Fix: Remove redundant Group Name if Task Name already contains it (match utils.ts logic)
         // e.g. Group="Kolom", Task="Bekisting Kolom" -> Result="Struktur_Bekisting-Kolom" (instead of "Struktur_Kolom_Bekisting-Kolom")
         if (safeGroup && safeTask.toLowerCase().includes(safeGroup.toLowerCase())) {
-            // If task already has group name, we don't need to add it again if the category logic was adding it. 
-            // However, current logic constructs it as: Category_Task. 
-            // In utils.ts, we had Category, Group, Task. Here we seem to have splitted differently.
-            // Let's rely on the requested output: "Struktur_Bekisting-Kolom_..."
-            // Category="Struktur", Task="Bekisting-Kolom".
-            // If Category was "Struktur / Kolom", then safeCategory would be "Struktur", and we might want to avoid adding "Kolom" if it's in task.
-            // But existing code uses `safeCategory` + `safeTask`. 
-            // Let's stick to simple date removal first as that's the main request.
-            // Wait, the user example: "Struktur_Bekisting_Kantin_SMP_F.1_0%_001"
-            // "Struktur" is category. "Bekisting" is task/group? 
-            // logic in utils.ts: 
-            // const fileWork = [safeCategory, finalGroup, safeTask].filter(Boolean).join('_');
-            // logic here: 
-            // const prefix = `${detectedDate}_${safeCategory ? safeCategory + '_' : ''}${safeTask}_${safeBuilding}_${safeCode}_${progressPart}`;
-
-            // I will align the redundancy check with utils.ts if possible, but primarily remove the date.
+            // If task already has group name, we don't need to add it again.
         }
+
+        const safeBuilding = sanitizedBuildingName.replace(/\s+/g, '_');
+        const safeCode = sanitizedBuildingCode.replace(/\s+/g, '_');
+        const progressPart = progress ? `${progress}%_` : '';
 
         // Remove detectedDate from prefix
         const prefix = `${safeCategory ? safeCategory + '_' : ''}${safeTask}_${safeBuilding}_${safeCode}_${progressPart}`;
@@ -118,24 +107,16 @@ export async function POST(req: NextRequest) {
         const finalName = `${prefix}${sequence}.${extension}`;
 
         console.log('API: Uploading file as:', finalName);
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        const uploadResult = await gdrive.uploadFile(buffer, finalName, file.type, targetFolderId);
-        console.log('API: Upload complete, File ID:', uploadResult.id);
+        const uploadRes = await gdrive.uploadFile(file, finalName, targetFolderId, file.type);
 
-        return NextResponse.json({
-            success: true,
-            finalName,
-            path: `https://drive.google.com/open?id=${uploadResult.id}`,
-            isGDrive: true
-        });
+        if (uploadRes) {
+            return NextResponse.json({ success: true, fileId: uploadRes.id, finalName });
+        } else {
+            return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });
+        }
 
     } catch (error: any) {
-        console.error('Processing error:', error);
-        return NextResponse.json({
-            success: false,
-            error: error.message || 'Internal server error',
-            details: error.response?.data || null
-        }, { status: 500 });
+        console.error('API: Process Error:', error);
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }
