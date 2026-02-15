@@ -390,10 +390,6 @@ export default function Home() {
   const [taskSearch, setTaskSearch] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
   const [showBuildingIndex, setShowBuildingIndex] = useState(true);
-  const [testLocation, setTestLocation] = useState<string | null>(null);
-  const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
-  const [testLocation, setTestLocation] = useState<string | null>(null);
-  const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [isTestingLocation, setIsTestingLocation] = useState(false);
 
   // Single Location Optimization
