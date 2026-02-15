@@ -209,7 +209,7 @@ const processTimestampImage = async (
       });
 
       if (logo.complete && logo.naturalWidth > 0) {
-        const logoHeight = 85 * scale; // Increased for better visibility on 4:3
+        const logoHeight = 65 * scale; // Balanced visibility
         const logoWidth = (logo.naturalWidth / logo.naturalHeight) * logoHeight;
         const cornerRadius = 10 * scale;
 
