@@ -1,4 +1,32 @@
 import { format } from 'date-fns';
+import piexif from 'piexifjs';
+
+export async function copyExif(srcFile: Blob, destBlob: Blob): Promise<Blob> {
+    try {
+        const srcDataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(srcFile);
+        });
+
+        const destDataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(destBlob);
+        });
+
+        const exifObj = piexif.load(srcDataUrl);
+        const exifStr = piexif.dump(exifObj);
+        const inserted = piexif.insert(exifStr, destDataUrl);
+
+        // Data URL to Blob
+        const res = await fetch(inserted);
+        return await res.blob();
+    } catch (e) {
+        console.error("EXIF copy error:", e);
+        return destBlob;
+    }
+}
 
 export function sanitizePath(path: string): string {
     // Only replace illegal characters, keep spaces and forward slashes (for subfolders) as requested

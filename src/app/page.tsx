@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, copyExif } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,7 @@ const MapComponent = dynamic(() => import('@/components/MapComponent'), {
   loading: () => <div className="h-[200px] w-full bg-slate-100 animate-pulse rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-400 mt-3">Loading Map...</div>
 });
 
-import { detectWorkFromKeyword } from '@/lib/utils';
+
 
 
 const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> => {
@@ -1040,9 +1040,11 @@ export default function Home() {
                     try {
                       // 1. Process and Upload Original (Clean)
                       addLog(`[INFO] Compressing original...`);
-                      const compressedOriginal = await imageCompression(file, options);
+                      const compressedBlob = await imageCompression(file, options);
+                      addLog(`[INFO] Restoring original metadata...`);
+                      const finalOriginal = await copyExif(file, compressedBlob);
                       addLog(`[INFO] Uploading original version...`);
-                      const mainRes = await uploadToApi(compressedOriginal, false);
+                      const mainRes = await uploadToApi(finalOriginal, false);
 
                       if (mainRes.success) {
                         addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
@@ -1055,9 +1057,11 @@ export default function Home() {
                         addLog(`[INFO] Processing timestamped version...`);
                         const timestampedFile = await processTimestampImage(file, addLog);
                         addLog(`[INFO] Compressing timestamped version...`);
-                        const compressedTs = await imageCompression(timestampedFile, options);
+                        const compressedTsBlob = await imageCompression(timestampedFile, options);
+                        addLog(`[INFO] Restoring metadata to timestamped version...`);
+                        const finalTs = await copyExif(file, compressedTsBlob);
                         addLog(`[INFO] Uploading timestamped version...`);
-                        const tsRes = await uploadToApi(compressedTs, true);
+                        const tsRes = await uploadToApi(finalTs, true);
 
                         if (tsRes.success) {
                           addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
