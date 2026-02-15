@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Image as ImageIcon, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getBadgeColor } from '@/lib/utils';
 
 interface SlotData {
     id: number;
@@ -351,7 +352,7 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                             </>
                                         ) : suggestion.includes(' / ') ? (
                                             <div className="flex items-center gap-2">
-                                                <span className="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tighter shrink-0 border border-orange-200">
+                                                <span className={`px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-tighter shrink-0 border ${getBadgeColor(suggestion.split(' / ')[1], index === selectedIndex)}`}>
                                                     {suggestion.split(' / ')[1]}
                                                 </span>
                                                 <span className="truncate">{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>

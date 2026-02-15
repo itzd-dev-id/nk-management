@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -1056,10 +1056,7 @@ export default function Home() {
                                   </>
                                 ) : suggestion.includes(' / ') ? (
                                   <div className="flex items-center gap-2 overflow-hidden">
-                                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter shrink-0 border ${index === selectedIndex
-                                      ? 'bg-white/20 border-white/20 text-white'
-                                      : 'bg-orange-100 border-orange-200 text-orange-600'
-                                      }`}>
+                                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter shrink-0 border ${getBadgeColor(suggestion.split(' / ')[1], index === selectedIndex)}`}>
                                       {suggestion.split(' / ')[1]}
                                     </span>
                                     <span className="truncate">{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
