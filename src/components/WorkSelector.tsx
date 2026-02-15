@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { WORK_HIERARCHY } from '@/lib/constants';
 import { Search, ChevronDown, Check, FolderOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getBadgeColor } from '@/lib/utils';
 
 interface WorkSelectorProps {
     value: string;
@@ -51,12 +52,25 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                     className="w-full md:w-48 flex items-center justify-between px-5 py-4 text-left border-b md:border-b-0 md:border-r border-slate-200 transition-colors hover:bg-slate-100/50 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl"
                 >
                     <div className="flex flex-col truncate">
-                        <span className={`text-[9px] font-black uppercase tracking-tight ${value ? 'text-orange-500' : 'text-slate-400'}`}>
-                            {value ? value.split(' / ').slice(0, -1).join(' / ') : 'Category'}
-                        </span>
-                        <span className={`font-bold truncate ${value ? 'text-slate-800' : 'text-slate-400'}`}>
-                            {value ? (value.split(' / ').pop() || '').replace(/_/g, ' ') : 'Select Work...'}
-                        </span>
+                        {value ? (
+                            <div className="flex flex-col">
+                                <span className="text-[7px] text-slate-400 font-black uppercase tracking-widest leading-none mb-1">
+                                    {value.split(' / ')[0]}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    {value.split(' / ').length > 2 && (
+                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter border ${getBadgeColor(value.split(' / ')[1])}`}>
+                                            {value.split(' / ')[1]}
+                                        </span>
+                                    )}
+                                    <span className="font-bold text-slate-800 truncate">
+                                        {(value.split(' / ').pop() || '').replace(/_/g, ' ')}
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <span className="font-bold text-slate-400">Select Work...</span>
+                        )}
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -117,8 +131,10 @@ export function WorkSelector({ value, onChange, hierarchy = WORK_HIERARCHY }: Wo
                                         <div className="py-2">
                                             {cat.groups.map((group: any) => (
                                                 <div key={group.name} className="mb-2 last:mb-0">
-                                                    <div className="px-8 py-1">
-                                                        <span className="text-[9px] font-bold text-orange-400 uppercase tracking-wider">{group.name}</span>
+                                                    <div className="px-5 py-1">
+                                                        <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider border ${getBadgeColor(group.name)}`}>
+                                                            {group.name}
+                                                        </span>
                                                     </div>
                                                     <div className="space-y-0.5">
                                                         {group.tasks.map((task: string) => {

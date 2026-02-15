@@ -221,14 +221,14 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                 initial={{ opacity: 0, scale: 0.8, x: -10 }}
                                 animate={{ opacity: 1, scale: 1, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                                className="px-2 py-1 bg-emerald-500 text-white rounded-xl flex flex-col shadow-md border border-white/20 min-w-0"
+                                className={`px-2 py-1 rounded-xl flex flex-col shadow-md border border-white/20 min-w-0 ${slot.detectedTask.includes(' / ') ? getBadgeColor(slot.detectedTask.split(' / ')[1]) : 'bg-emerald-500 text-white'}`}
                             >
-                                {slot.detectedTask.includes('/') && (
+                                {slot.detectedTask.includes(' / ') && (
                                     <span className="text-[7px] font-black uppercase tracking-tighter opacity-70 leading-none mb-0.5 truncate">
                                         {slot.detectedTask.split(' / ')[1]}
                                     </span>
                                 )}
-                                <span className="text-[9px] font-bold tracking-tight truncate leading-tight">
+                                <span className={`text-[9px] font-bold tracking-tight truncate leading-tight ${!slot.detectedTask.includes(' / ') ? 'text-white' : ''}`}>
                                     {slot.detectedTask.split(' / ').pop()?.replace(/_/g, ' ')}
                                 </span>
                             </motion.div>
@@ -279,6 +279,9 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                     )
                                 );
 
+                                // Check if tag is a group name
+                                const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
+
                                 // Check if this tag is a building [Code] Name format
                                 const isBuilding = tag.startsWith('[') && tag.includes(']');
 
@@ -288,7 +291,11 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.8 }}
-                                        className={`inline-flex items-center gap-1 text-white rounded-lg px-2 py-0.5 whitespace-nowrap ${isWorkTask ? 'bg-emerald-500' : 'bg-orange-500'
+                                        className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 whitespace-nowrap border ${matchedGroup
+                                            ? getBadgeColor(matchedGroup.name)
+                                            : isWorkTask
+                                                ? 'bg-emerald-500 border-emerald-600 text-white'
+                                                : 'bg-orange-500 border-orange-600 text-white'
                                             }`}
                                     >
                                         {isBuilding ? (
@@ -296,12 +303,14 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
                                                 <span className="bg-white/20 px-1 rounded text-[8px] font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
                                                 <span className="text-[9px] font-bold">{tag.split(']')[1].trim()}</span>
                                             </>
+                                        ) : matchedGroup ? (
+                                            <span className="text-[8px] font-black uppercase tracking-tighter">{matchedGroup.name}</span>
                                         ) : (
                                             <span className="text-[9px] font-bold">{tag.replace(/_/g, ' ')}</span>
                                         )}
                                         <button
                                             onClick={() => removeTag(index)}
-                                            className="hover:bg-white/20 rounded transition-colors"
+                                            className={`${matchedGroup ? 'hover:bg-black/5' : 'hover:bg-white/20'} rounded p-0.5 transition-colors`}
                                         >
                                             <X className="w-2.5 h-2.5" />
                                         </button>

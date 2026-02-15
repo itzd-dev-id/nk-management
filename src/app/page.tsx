@@ -991,7 +991,10 @@ export default function Home() {
                     {/* Tags */}
                     <AnimatePresence mode="popLayout">
                       {postTags.map((tag, index) => {
+                        // Check if tag is a task
                         const isWorkTask = allHierarchy.some(cat => cat.groups.some(group => group.tasks.some(task => task.toLowerCase() === tag.toLowerCase())));
+                        // Check if tag is a group name
+                        const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
                         const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
 
                         return (
@@ -1000,17 +1003,24 @@ export default function Home() {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.8 }}
-                            className={`inline-flex items-center gap-1.5 text-white rounded-xl px-3 py-1.5 whitespace-nowrap shadow-sm ${isWorkTask ? 'bg-emerald-500' : 'bg-orange-500'}`}
+                            className={`inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 whitespace-nowrap shadow-sm border ${matchedGroup
+                              ? getBadgeColor(matchedGroup.name)
+                              : isWorkTask
+                                ? 'bg-emerald-500 border-emerald-600 text-white'
+                                : 'bg-orange-500 border-orange-600 text-white'
+                              }`}
                           >
                             {isBuildingMatch ? (
                               <div className="flex items-center gap-1.5">
                                 <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] font-black">{tag.match(/\[(.*?)\]/)?.[1]}</span>
                                 <span className="text-xs font-bold">{tag.split(']')[1].trim()}</span>
                               </div>
+                            ) : matchedGroup ? (
+                              <span className="text-[10px] font-black uppercase tracking-tighter">{matchedGroup.name}</span>
                             ) : (
                               <span className="text-xs font-bold">{tag.replace(/_/g, ' ')}</span>
                             )}
-                            <button onClick={() => removeTag(index)} className="hover:bg-white/20 rounded-full p-0.5 transition-colors">
+                            <button onClick={() => removeTag(index)} className={`${matchedGroup ? 'hover:bg-black/5' : 'hover:bg-white/20'} rounded-full p-0.5 transition-colors`}>
                               <XCircle className="w-3.5 h-3.5" />
                             </button>
                           </motion.div>
