@@ -14,6 +14,13 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
 import { BottomNav, TabId } from '@/components/BottomNav';
 import { ProcessLog } from '@/components/ProcessLog';
+import dynamic from 'next/dynamic';
+
+const MapComponent = dynamic(() => import('@/components/MapComponent'), {
+  ssr: false,
+  loading: () => <div className="h-[200px] w-full bg-slate-100 animate-pulse rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-400 mt-3">Loading Map...</div>
+});
+
 import { detectWorkFromKeyword } from '@/lib/utils';
 
 
@@ -278,6 +285,7 @@ export default function Home() {
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
   const [showBuildingIndex, setShowBuildingIndex] = useState(true);
   const [testLocation, setTestLocation] = useState<string | null>(null);
+  const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [isTestingLocation, setIsTestingLocation] = useState(false);
 
   // Toast Helper
@@ -1780,6 +1788,7 @@ export default function Home() {
                                 const lat = ipData.latitude;
                                 const lon = ipData.longitude;
                                 addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 1): ${lat}, ${lon}`);
+                                setTestCoords({ lat, lon });
                                 setTestLocation(`Lokasi IP (Tier 1): ${lat}, ${lon}. Mencari alamat...`);
                                 const addr = await fetchReverseGeocode(lat, lon);
                                 setTestLocation(addr);
@@ -1799,6 +1808,7 @@ export default function Home() {
                                 if (ipData2.loc) {
                                   const [lat, lon] = ipData2.loc.split(',').map(Number);
                                   addLog(`[SUCCESS] Lokasi ditemukan via IP (Tier 2): ${lat}, ${lon}`);
+                                  setTestCoords({ lat, lon });
                                   setTestLocation(`Lokasi IP (Tier 2): ${lat}, ${lon}. Mencari alamat...`);
                                   const addr = await fetchReverseGeocode(lat, lon);
                                   setTestLocation(addr);
@@ -1825,6 +1835,7 @@ export default function Home() {
                             async (pos) => {
                               const lat = pos.coords.latitude;
                               const lon = pos.coords.longitude;
+                              setTestCoords({ lat, lon });
                               setTestLocation(`Koord: ${lat.toFixed(6)}, ${lon.toFixed(6)}. Mencari alamat...`);
                               const addr = await fetchReverseGeocode(lat, lon);
                               setTestLocation(addr);
@@ -1850,6 +1861,9 @@ export default function Home() {
                         <p className="text-[11px] font-bold text-slate-600 break-words leading-relaxed">
                           {testLocation}
                         </p>
+                        {testCoords && (
+                          <MapComponent lat={testCoords.lat} lon={testCoords.lon} address={testLocation} />
+                        )}
                       </div>
                     )}
                   </div>
