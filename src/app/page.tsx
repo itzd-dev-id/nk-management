@@ -25,14 +25,26 @@ const MapComponent = dynamic(() => import('@/components/MapComponent'), {
 
 
 const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> => {
+  // Helper to format: "District, Kab. City"
+  const formatLoc = (district: string, city: string) => {
+    let finalCity = city;
+    // Heuristic: If city doesn't start with "Kota" or "Kab", and it's likely a regency (common in projects), add "Kab."
+    // But safe check: usually we just want "District, City".
+    // User requested "Plosoklaten, Kab.Kediri".
+    if (finalCity && !finalCity.toLowerCase().startsWith('kota') && !finalCity.toLowerCase().startsWith('kab')) {
+      finalCity = `Kab. ${finalCity}`;
+    }
+    return [district, finalCity].filter(Boolean).join(', ');
+  };
+
   // Tier 1: BigDataCloud (Fast, keyless, very robust)
   try {
     const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=id`);
     if (res.ok) {
       const data = await res.json();
-      const area = data.locality || data.principalSubdivision || '';
-      const city = data.city || '';
-      const result = [area, city].filter(Boolean).join(', ');
+      const district = data.locality || '';
+      const city = data.city || data.principalSubdivision || '';
+      const result = formatLoc(district, city);
       if (result) return result;
     }
   } catch (e: any) {
@@ -46,9 +58,9 @@ const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> =>
       const data = await res.json();
       if (data.features && data.features.length > 0) {
         const p = data.features[0].properties;
-        const area = p.district || p.locality || p.suburb || '';
+        const district = p.district || p.locality || p.suburb || '';
         const city = p.city || p.county || '';
-        const result = [area, city].filter(Boolean).join(', ');
+        const result = formatLoc(district, city);
         if (result) return result;
       }
     }
@@ -64,9 +76,9 @@ const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> =>
     if (res.ok) {
       const data = await res.json();
       if (data.address) {
-        const area = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
+        const district = data.address.suburb || data.address.village || data.address.hamlet || data.address.neighbourhood || '';
         const city = data.address.city || data.address.town || data.address.city_district || data.address.county || '';
-        return [area, city].filter(Boolean).join(', ') || data.display_name || "Lokasi tidak ditemukan";
+        return formatLoc(district, city) || data.display_name || "Lokasi tidak ditemukan";
       }
     }
   } catch (e: any) {
@@ -78,7 +90,9 @@ const fetchReverseGeocode = async (lat: number, lon: number): Promise<string> =>
 
 const processTimestampImage = async (
   file: File,
-  addLog: (msg: string) => void
+  addLog: (msg: string) => void,
+  overrideLocation?: string | null,
+  onLocationFound?: (loc: string) => void
 ): Promise<File> => {
   addLog(`[INFO] Processing Timestamp for ${file.name}...`);
 
@@ -155,15 +169,23 @@ const processTimestampImage = async (
       }
     }
 
-    // 2. Fetch Location (Nominatim)
+    // 2. Fetch Location (Nominatim or Override)
     let address = "Lokasi tidak ditemukan";
-    if (lat && lon) {
+
+    if (overrideLocation) {
+      address = overrideLocation;
+      // addLog(`[INFO] Menggunakan lokasi project cached: ${address}`);
+    } else if (lat && lon) {
       addLog(`[INFO] Koordinat ditemukan: ${lat}, ${lon}. Mengambil nama lokasi...`);
       address = await fetchReverseGeocode(lat, lon);
       if (address.includes("API Error")) {
         addLog(`[ERROR] Gagal menghubungi OpenStreetMap.`);
       } else {
         addLog(`[SUCCESS] Lokasi ditemukan: ${address}`);
+        // Save for future use in this batch
+        if (onLocationFound && !address.includes("tidak ditemukan") && !address.includes("Error")) {
+          onLocationFound(address);
+        }
       }
     }
 
@@ -370,7 +392,12 @@ export default function Home() {
   const [showBuildingIndex, setShowBuildingIndex] = useState(true);
   const [testLocation, setTestLocation] = useState<string | null>(null);
   const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [testLocation, setTestLocation] = useState<string | null>(null);
+  const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [isTestingLocation, setIsTestingLocation] = useState(false);
+
+  // Single Location Optimization
+  const [projectLocation, setProjectLocation] = useState<string | null>(null);
 
   // Toast Helper
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -1399,7 +1426,19 @@ export default function Home() {
                         // 2. Process and Upload Timestamp (if enabled)
                         if (useTimestamp && file.type.startsWith('image/')) {
                           addLog(`[INFO] Processing timestamped version...`);
-                          const timestampedFile = await processTimestampImage(file, addLog);
+
+                          // Use projectLocation if available, otherwise pass callback to set it
+                          const timestampedFile = await processTimestampImage(
+                            file,
+                            addLog,
+                            projectLocation,
+                            (loc: string) => {
+                              if (!projectLocation) {
+                                setProjectLocation(loc);
+                                addLog(`[INFO] Lokasi project disimpan: ${loc}`);
+                              }
+                            }
+                          );
                           const compressedTsBlob = await imageCompression(timestampedFile, options);
                           let finalTs: File;
                           if (originalExif) {
