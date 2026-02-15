@@ -131,8 +131,7 @@ export const WORK_HIERARCHY = [
                     "Bekisting",
                     "Pembesian",
                     "Pengecoran",
-                    "Pengecoran Tie Beam",
-                    "Pengecoran Sloof"
+                    "Pengecoran Tie Beam"
                 ]
             },
             {
