@@ -1,6 +1,10 @@
 import { format } from 'date-fns';
 import piexif from 'piexifjs';
 
+export function escapeRegExp(string: string): string {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function getExifData(file: Blob): Promise<string | null> {
     try {
         const dataUrl = await new Promise<string>((resolve) => {
@@ -157,7 +161,8 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
 
         // For longer terms, try partial match with word boundary
         if (!isShortTerm) {
-            const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+            const escapedTerm = escapeRegExp(term);
+            const wordBoundaryRegex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
             const byPartial = buildings.find(b => wordBoundaryRegex.test(b.name));
             if (byPartial) return byPartial;
         }
@@ -258,7 +263,8 @@ export function detectWorkFromKeyword(
             for (const group of cat.groups) {
                 for (const task of group.tasks) {
                     const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
-                    const wordBoundaryRegex = new RegExp(`\\b${term}\\b`, 'i');
+                    const escapedTerm = escapeRegExp(term);
+                    const wordBoundaryRegex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
                     if (wordBoundaryRegex.test(taskNormalized)) {
                         return task;
                     }
