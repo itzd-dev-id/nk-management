@@ -431,7 +431,7 @@ export default function Home() {
             for (const task of group.tasks) {
               const taskNormalized = task.toLowerCase().replace(/_/g, ' ');
               if (taskNormalized.includes(normalizedInput) && !postTags.includes(task)) {
-                matches.push(task);
+                matches.push(`${cat.category} / ${group.name} / ${task}`);
                 if (matches.length >= 10) break;
               }
             }
@@ -451,13 +451,28 @@ export default function Home() {
   }, [postKeyword, allHierarchy, allBuildings, postTags]);
 
   const addTag = useCallback((tag: string) => {
-    if (tag && !postTags.includes(tag)) {
-      setPostTags([...postTags, tag]);
-      setPostKeyword('');
-      setSuggestions([]);
-      setShowDropdown(false);
-      keywordInputRef.current?.focus();
+    if (tag.includes(' / ')) {
+      const parts = tag.split(' / ');
+      const groupName = parts[1];
+      const taskName = parts[parts.length - 1];
+
+      // Add both group and task (if unique)
+      setPostTags(prev => {
+        const newTags = [...prev];
+        if (!newTags.includes(groupName)) newTags.push(groupName);
+        const cleanTaskName = taskName.replace(/_/g, ' ');
+        if (!newTags.includes(cleanTaskName)) newTags.push(cleanTaskName);
+        return newTags;
+      });
+    } else {
+      if (tag && !postTags.includes(tag)) {
+        setPostTags(prev => [...prev, tag]);
+      }
     }
+    setPostKeyword('');
+    setSuggestions([]);
+    setShowDropdown(false);
+    keywordInputRef.current?.focus();
   }, [postTags]);
 
   const removeTag = useCallback((index: number) => {
@@ -1039,6 +1054,16 @@ export default function Home() {
                                     <span className={`px-2 py-0.5 rounded text-[10px] font-black ${index === selectedIndex ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>{suggestion.match(/\[(.*?)\]/)?.[1]}</span>
                                     <span>{suggestion.split(']')[1].trim()}</span>
                                   </>
+                                ) : suggestion.includes(' / ') ? (
+                                  <div className="flex items-center gap-2 overflow-hidden">
+                                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-tighter shrink-0 border ${index === selectedIndex
+                                      ? 'bg-white/20 border-white/20 text-white'
+                                      : 'bg-orange-100 border-orange-200 text-orange-600'
+                                      }`}>
+                                      {suggestion.split(' / ')[1]}
+                                    </span>
+                                    <span className="truncate">{suggestion.split(' / ').pop()?.replace(/_/g, ' ')}</span>
+                                  </div>
                                 ) : (
                                   suggestion.replace(/_/g, ' ')
                                 )}
