@@ -188,6 +188,8 @@ const processTimestampImage = async (
     }
 
     let dateObj = new Date();
+    let hasExifDate = false;
+
     if (exif?.DateTimeOriginal) {
       try {
         const original = exif.DateTimeOriginal.toString();
@@ -200,6 +202,7 @@ const processTimestampImage = async (
           const parsed = new Date(dateString);
           if (!isNaN(parsed.getTime())) {
             dateObj = parsed;
+            hasExifDate = true;
           }
         }
       } catch (e) {
@@ -210,7 +213,7 @@ const processTimestampImage = async (
     // Explicit override from slot metadata (User Request: "deteksi tanggal harus dari metadata")
     // If forcedDate is provided (which comes from detectFileDate usually), we prioritize it for the Date part.
     // However, if we have EXIF time, we want to keep it.
-    if (forcedDate) {
+    if (forcedDate && !hasExifDate) {
       // forcedDate is YYYY-MM-DD
       const [y, m, d] = forcedDate.split('-').map(Number);
       if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
@@ -218,7 +221,7 @@ const processTimestampImage = async (
         dateObj.setFullYear(y);
         dateObj.setMonth(m - 1);
         dateObj.setDate(d);
-        addLog(`[INFO] Menggunakan tanggal dari metadata/slot: ${forcedDate}`);
+        addLog(`[INFO] Menggunakan tanggal dari metadata/slot (Fallback): ${forcedDate}`);
       }
     }
 
