@@ -20,6 +20,32 @@ export async function getExifData(file: Blob): Promise<string | null> {
     }
 }
 
+export async function detectFileDate(file: File): Promise<string> {
+    try {
+        // 1. Try to read EXIF DateTimeOriginal
+        const dataUrl = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target?.result as string);
+            reader.readAsDataURL(file);
+        });
+
+        const exifObj = piexif.load(dataUrl);
+        // 0x9003 is DateTimeOriginal, 0x9004 is DateTimeDigitized
+        const dateTimeOriginal = exifObj?.["Exif"]?.[0x9003] || exifObj?.["Exif"]?.[0x9004];
+
+        if (dateTimeOriginal) {
+            // Format is "YYYY:MM:DD HH:MM:SS"
+            const [datePart] = dateTimeOriginal.split(' ');
+            return datePart.replace(/:/g, '-');
+        }
+    } catch (e) {
+        console.warn("Failed to extract EXIF date:", e);
+    }
+
+    // 2. Fallback to Last Modified
+    return format(new Date(file.lastModified), 'yyyy-MM-dd');
+}
+
 export async function injectExif(destBlob: Blob, exifStr: string, fileName: string, mimeType: string): Promise<File> {
     try {
         const destDataUrl = await new Promise<string>((resolve) => {

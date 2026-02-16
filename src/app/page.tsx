@@ -350,6 +350,7 @@ interface PostSlot {
   tags: string[];
   detectedBuilding: Building | null;
   detectedWorkName: string;
+  detectedDate: string | null;
 }
 
 export default function Home() {
@@ -369,7 +370,14 @@ export default function Home() {
   const [terminSaveStatus, setTerminSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [slots, setSlots] = useState<PostSlot[]>(
-    Array(5).fill(null).map(() => ({ file: null, keyword: '', tags: [], detectedBuilding: null, detectedWorkName: '' }))
+    Array(5).fill(null).map(() => ({
+      file: null,
+      keyword: '',
+      tags: [],
+      detectedBuilding: null,
+      detectedWorkName: '',
+      detectedDate: null
+    }))
   );
   const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -901,9 +909,10 @@ export default function Home() {
       // Use detected values or fallbacks
       const b = slot.detectedBuilding || selectedBuilding || { code: '?-?', name: 'Select Building' };
       const w = slot.detectedWorkName || workName || 'Work Name';
+      const d = slot.detectedDate || selectedDate;
 
       const newName = generateNewName(
-        selectedDate,
+        d,
         w,
         b.name,
         b.code,
@@ -917,7 +926,7 @@ export default function Home() {
         file,
         originalName: file.name,
         newName,
-        detectedDate: selectedDate,
+        detectedDate: d,
         workName: w,
         building: b,
         progress: progress || '0',
@@ -1064,9 +1073,10 @@ export default function Home() {
                       onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
+                        const date = await detectFileDate(file);
                         setSlots(prev => {
                           const next = [...prev];
-                          const slot = { ...next[0], file };
+                          const slot = { ...next[0], file, detectedDate: date };
 
                           // RE-DETECT
                           const slotKeywords = [file.name.split('.')[0], ...slot.tags];
@@ -1149,9 +1159,10 @@ export default function Home() {
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
+                            const date = await detectFileDate(file);
                             setSlots(prev => {
                               const next = [...prev];
-                              const slot = { ...next[idx], file };
+                              const slot = { ...next[idx], file, detectedDate: date };
 
                               // RE-DETECT
                               const slotKeywords = [file.name.split('.')[0], ...slot.tags];
@@ -1357,8 +1368,9 @@ export default function Home() {
                         const fileToProcess = slot.file!;
                         const b = slot.detectedBuilding || selectedBuilding!;
                         const w = slot.detectedWorkName || workName || 'Documentation';
+                        const d = slot.detectedDate || selectedDate;
 
-                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w})`);
+                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w} - ${d})`);
 
                         let file = fileToProcess;
                         const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
@@ -1367,7 +1379,7 @@ export default function Home() {
                           const formData = new FormData();
                           formData.append('file', f, fileToProcess.name);
                           formData.append('metadata', JSON.stringify({
-                            detectedDate: selectedDate,
+                            detectedDate: d,
                             workName: w,
                             buildingCode: b.code,
                             buildingName: b.name,
