@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor, detectFileDate } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
