@@ -187,22 +187,28 @@ const processTimestampImage = async (
       }
     }
 
-    let dateObj = new Date();
+    // Default to file.lastModified if available, else current time
+    let dateObj = new Date(file.lastModified || Date.now());
     let hasExifDate = false;
 
     if (exif?.DateTimeOriginal) {
       try {
-        const original = exif.DateTimeOriginal.toString();
-        // Format is "YYYY:MM:DD HH:MM:SS"
-        const [datePart, timePart] = original.split(' ');
-        if (datePart) {
-          const cleanDate = datePart.replace(/:/g, '-');
-          // If timePart exists, use it. If not, default to 00:00:00
-          const dateString = timePart ? `${cleanDate}T${timePart}` : cleanDate;
-          const parsed = new Date(dateString);
-          if (!isNaN(parsed.getTime())) {
-            dateObj = parsed;
-            hasExifDate = true;
+        if (exif.DateTimeOriginal instanceof Date) {
+          dateObj = exif.DateTimeOriginal;
+          hasExifDate = true;
+        } else {
+          const original = String(exif.DateTimeOriginal);
+          // Format is "YYYY:MM:DD HH:MM:SS"
+          const [datePart, timePart] = original.split(' ');
+          if (datePart) {
+            const cleanDate = datePart.replace(/:/g, '-');
+            // If timePart exists, use it. If not, default to 00:00:00
+            const dateString = timePart ? `${cleanDate}T${timePart}` : cleanDate;
+            const parsed = new Date(dateString);
+            if (!isNaN(parsed.getTime())) {
+              dateObj = parsed;
+              hasExifDate = true;
+            }
           }
         }
       } catch (e) {
