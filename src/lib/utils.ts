@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import piexif from 'piexifjs';
+import exifr from 'exifr';
 
 export function escapeRegExp(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -20,26 +21,36 @@ export async function getExifData(file: Blob): Promise<string | null> {
     }
 }
 
+
 export async function detectFileDate(file: File): Promise<string> {
     try {
-        // 1. Try to read EXIF DateTimeOriginal
-        const dataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
-            reader.readAsDataURL(file);
-        });
-
-        const exifObj = piexif.load(dataUrl);
-        // 0x9003 is DateTimeOriginal, 0x9004 is DateTimeDigitized
-        const dateTimeOriginal = exifObj?.["Exif"]?.[0x9003] || exifObj?.["Exif"]?.[0x9004];
+        // 1. Try to read EXIF DateTimeOriginal using exifr (Robust, supports HEIC/JPG)
+        const output = await exifr.parse(file, { tiff: true, exif: true });
+        const dateTimeOriginal = output?.DateTimeOriginal;
 
         if (dateTimeOriginal) {
-            // Format is "YYYY:MM:DD HH:MM:SS"
-            const [datePart] = dateTimeOriginal.split(' ');
-            return datePart.replace(/:/g, '-');
+            // Robust Parsing for "YYYY:MM:DD HH:MM:SS" or Date object
+            let dateObj: Date | null = null;
+
+            if (dateTimeOriginal instanceof Date) {
+                dateObj = dateTimeOriginal;
+            } else if (typeof dateTimeOriginal === 'string') {
+                // Handle "YYYY:MM:DD HH:MM:SS"
+                const [datePart, timePart] = dateTimeOriginal.split(' ');
+                const cleanDate = datePart.replace(/:/g, '-');
+                const dateString = timePart ? `${cleanDate}T${timePart}` : cleanDate;
+                const parsed = new Date(dateString);
+                if (!isNaN(parsed.getTime())) {
+                    dateObj = parsed;
+                }
+            }
+
+            if (dateObj) {
+                return format(dateObj, 'yyyy-MM-dd');
+            }
         }
     } catch (e) {
-        console.warn("Failed to extract EXIF date:", e);
+        console.warn("Failed to extract EXIF date via exifr:", e);
     }
 
     // 2. Fallback to Last Modified

@@ -121,7 +121,8 @@ const processTimestampImage = async (
   file: File,
   addLog: (msg: string) => void,
   overrideLocation?: string | null,
-  onLocationFound?: (loc: string) => void
+  onLocationFound?: (loc: string) => void,
+  forcedDate?: string
 ): Promise<File> => {
   addLog(`[INFO] Processing Timestamp for ${file.name}...`);
 
@@ -203,6 +204,21 @@ const processTimestampImage = async (
         }
       } catch (e) {
         console.warn("Date parsing failed", e);
+      }
+    }
+
+    // Explicit override from slot metadata (User Request: "deteksi tanggal harus dari metadata")
+    // If forcedDate is provided (which comes from detectFileDate usually), we prioritize it for the Date part.
+    // However, if we have EXIF time, we want to keep it.
+    if (forcedDate) {
+      // forcedDate is YYYY-MM-DD
+      const [y, m, d] = forcedDate.split('-').map(Number);
+      if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+        // Keep existing time (from EXIF or current) but swap date
+        dateObj.setFullYear(y);
+        dateObj.setMonth(m - 1);
+        dateObj.setDate(d);
+        addLog(`[INFO] Menggunakan tanggal dari metadata/slot: ${forcedDate}`);
       }
     }
 
@@ -1512,7 +1528,8 @@ export default function Home() {
                                 setProjectLocation(loc);
                                 addLog(`[INFO] Lokasi project disimpan: ${loc}`);
                               }
-                            }
+                            },
+                            d
                           );
                           const compressedTsBlob = await imageCompression(timestampedFile, options);
                           let finalTs: File;
