@@ -1453,9 +1453,11 @@ export default function Home() {
                         const b = slot.detectedBuilding || selectedBuilding!;
                         const w = slot.detectedWorkName || workName || 'Documentation';
                         const folderDate = selectedDate;
-                        const timestampDate = slot.detectedDate || selectedDate;
+                        // Strict separation: timestampDate must come from file metadata only (EXIF or Last Modified)
+                        // Never fallback to selectedDate (Work Date) for timestamp.
+                        const timestampDate = slot.detectedDate || getDefaultDate();
 
-                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w} - ${folderDate})`);
+                        addLog(`[INFO] Processing: ${fileToProcess.name} (Folder: ${folderDate}, TS: ${timestampDate})`);
 
                         let file = fileToProcess;
                         const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
