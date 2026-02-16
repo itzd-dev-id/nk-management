@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const uploadRes = await gdrive.uploadFile(buffer, finalName, targetFolderId, file.type);
+        const uploadRes = await gdrive.uploadFile(buffer, finalName, file.type, targetFolderId);
 
         if (uploadRes) {
             return NextResponse.json({ success: true, fileId: uploadRes.id, finalName });
