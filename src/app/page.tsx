@@ -360,7 +360,7 @@ const processTimestampImage = async (
         // 1. Time (HH:mm)
         const timeStr = format(validDate, 'HH:mm');
         ctx.fillStyle = '#fbbf24'; // Yellow
-        ctx.font = `black ${40 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(timeStr, currentX, textY);
         currentX += ctx.measureText(timeStr).width + gap;
 
@@ -369,7 +369,7 @@ const processTimestampImage = async (
 
         // 2. Date
         ctx.fillStyle = 'white';
-        ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(dayDateStr, currentX, textY);
         currentX += ctx.measureText(dayDateStr).width + gap;
 
@@ -378,7 +378,7 @@ const processTimestampImage = async (
 
         // 3. Location (Simplified)
         ctx.fillStyle = 'white';
-        ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(address, currentX, textY); // Fixed: Changed dayDateStr to address
         currentX += ctx.measureText(address).width + gap; // Fixed: Changed dayDateStr to address width
 
@@ -390,7 +390,7 @@ const processTimestampImage = async (
           ? `${formatDecimalMinutes(lat, true)} ${formatDecimalMinutes(lon, false)}`
           : 'GPS tidak tersedia';
         ctx.fillStyle = '#fbbf24'; // Yellow
-        ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(gpsStr, currentX, textY);
         currentX += ctx.measureText(gpsStr).width + gap;
 
@@ -399,7 +399,7 @@ const processTimestampImage = async (
 
         // 5. Weather
         ctx.fillStyle = 'white';
-        ctx.font = `bold ${20 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `bold ${22 * scale}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillText(weather, currentX, textY);
 
         // Convert back to File
@@ -1449,9 +1449,10 @@ export default function Home() {
                         const fileToProcess = slot.file!;
                         const b = slot.detectedBuilding || selectedBuilding!;
                         const w = slot.detectedWorkName || workName || 'Documentation';
-                        const d = slot.detectedDate || selectedDate;
+                        const folderDate = selectedDate;
+                        const timestampDate = slot.detectedDate || selectedDate;
 
-                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w} - ${d})`);
+                        addLog(`[INFO] Processing: ${fileToProcess.name} (${b.code} - ${w} - ${folderDate})`);
 
                         let file = fileToProcess;
                         const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
@@ -1460,7 +1461,7 @@ export default function Home() {
                           const formData = new FormData();
                           formData.append('file', f, fileToProcess.name);
                           formData.append('metadata', JSON.stringify({
-                            detectedDate: d,
+                            detectedDate: folderDate,
                             workName: w,
                             buildingCode: b.code,
                             buildingName: b.name,
@@ -1529,7 +1530,7 @@ export default function Home() {
                                 addLog(`[INFO] Lokasi project disimpan: ${loc}`);
                               }
                             },
-                            d
+                            timestampDate
                           );
                           const compressedTsBlob = await imageCompression(timestampedFile, options);
                           let finalTs: File;
