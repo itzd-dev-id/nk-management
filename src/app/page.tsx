@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor, detectFileDate } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin, Layers } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin, Layers, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -656,10 +656,59 @@ export default function Home() {
       const next = [...prev];
       const slot = { ...next[slotIndex] };
       slot.tags = slot.tags.filter((_, i) => i !== tagIndex);
+
+      // RE-DETECT after removal
+      const slotKeywords: string[] = [];
+      slotKeywords.push(...slot.tags);
+      if (slot.file) {
+        const fileName = slot.file.name.split('.')[0];
+        if (!slot.tags.some(t => fileName.includes(t))) {
+          slotKeywords.push(fileName);
+        }
+      }
+      const fullKeyword = slotKeywords.join(', ');
+
+      slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+      const rawT = detectWorkFromKeyword(
+        fullKeyword,
+        allHierarchy,
+        (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
+      );
+
+      if (rawT) {
+        if (rawT.includes(' / ')) {
+          slot.detectedWorkName = rawT;
+        } else {
+          let found = false;
+          for (const cat of allHierarchy) {
+            const group = cat.groups.find(g => g.tasks.includes(rawT));
+            if (group) {
+              slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+              found = true;
+              break;
+            }
+          }
+          if (!found) slot.detectedWorkName = '';
+        }
+      } else {
+        slot.detectedWorkName = '';
+      }
+
       next[slotIndex] = slot;
       return next;
     });
-  }, []);
+  }, [allBuildings, allHierarchy]);
+
+  const resetKeywords = useCallback(() => {
+    setSlots(prev => prev.map(slot => ({
+      ...slot,
+      tags: [],
+      keyword: '',
+      detectedWorkName: '',
+      detectedBuilding: null
+    })));
+    showToast("Keywords reset for all slots", "info");
+  }, [showToast]);
 
   const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, slotIndex: number) => {
     const slot = slots[slotIndex];
@@ -1183,7 +1232,7 @@ export default function Home() {
                             };
 
                             // RE-DETECT based on first file (or we could combine names, but first file is standard)
-                            const slotKeywords = [mainFile.name.split('.')[0], ...slot.tags];
+                            const slotKeywords = [...slot.tags, mainFile.name.split('.')[0]];
                             const fullKeyword = slotKeywords.join(', ');
 
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
@@ -1220,7 +1269,7 @@ export default function Home() {
                             const slot = { ...next[0], file, detectedDate: date };
 
                             // RE-DETECT
-                            const slotKeywords = [file.name.split('.')[0], ...slot.tags];
+                            const slotKeywords = [...slot.tags, file.name.split('.')[0]];
                             const fullKeyword = slotKeywords.join(', ');
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
                             const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
@@ -1313,7 +1362,7 @@ export default function Home() {
                               const slot = { ...next[idx], file, detectedDate: date };
 
                               // RE-DETECT
-                              const slotKeywords = [file.name.split('.')[0], ...slot.tags];
+                              const slotKeywords = [...slot.tags, file.name.split('.')[0]];
                               const fullKeyword = slotKeywords.join(', ');
                               slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
                               const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
@@ -1377,7 +1426,18 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Quick Detect Keywords / Hints</label>
+                  <div className="flex items-center justify-between px-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Quick Detect Keywords / Hints
+                    </label>
+                    <button
+                      onClick={resetKeywords}
+                      className="text-[10px] font-black text-orange-500 hover:text-orange-600 flex items-center gap-1.5 uppercase tracking-wider transition-all duration-200 active:scale-95 group"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-[-45deg] transition-transform" />
+                      <span>Reset All</span>
+                    </button>
+                  </div>
 
                   {slots.map((slot, sIdx) => (
                     <div key={sIdx} className="relative space-y-2">
