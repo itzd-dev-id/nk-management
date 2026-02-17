@@ -97,6 +97,7 @@
                 "_description": "Sloof / Balok Struktur di Lantai 1",
                 "tasks": [
                     "Galian",
+                    "Tie Beam",
                     "Lantai Kerja",
                     "Bekisting",
                     "Pembesian",
@@ -124,6 +125,7 @@
                 "name": "Balok",
                 "_description": "Balok Struktur di Lantai 2 dan seterusnya",
                 "tasks": [
+                    "Balok",
                     "Bekisting",
                     "Bekisting Balok",
                     "Pembesian",
