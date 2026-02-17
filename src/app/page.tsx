@@ -1381,106 +1381,111 @@ export default function Home() {
 
                   {slots.map((slot, sIdx) => (
                     <div key={sIdx} className="relative space-y-2">
-                      <div className={`min-h-[56px] transition-all duration-300 rounded-[1.5rem] px-4 py-3 flex flex-col gap-3 border ${activeSlotIndex === sIdx ? 'bg-white border-orange-500 ring-4 ring-orange-500/5 shadow-lg' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
-                        <div className="flex items-center gap-1 shrink-0">
+                      <div className={`min-h-[56px] transition-all duration-300 rounded-[1.5rem] px-4 py-3 flex items-start gap-3 border ${activeSlotIndex === sIdx ? 'bg-white border-orange-500 ring-4 ring-orange-500/5 shadow-lg' : 'bg-slate-50 border-slate-200 shadow-sm'}`}>
+                        {/* LEFT: Indicator (Number + Icon) */}
+                        <div className="flex flex-col items-center gap-1 shrink-0 pt-1.5 w-6">
                           <span className={`text-[10px] font-black ${activeSlotIndex === sIdx ? 'text-orange-500' : 'text-slate-400'}`}>{sIdx + 1}</span>
-                          <span className="text-slate-200 font-light mx-0.5">|</span>
                           <Zap className={`w-3.5 h-3.5 ${(slot.tags.length > 0 || slot.keyword) ? 'text-orange-500' : 'text-slate-300'}`} />
                         </div>
 
-                        {/* Tags List (Vertical) */}
-                        <div className="flex flex-col gap-2 w-full">
-                          <AnimatePresence mode="popLayout">
-                            {slot.tags.map((tag, tIdx) => {
-                              const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
-                              const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
+                        {/* RIGHT: Content (Tags + Input) */}
+                        <div className="flex-1 flex flex-col gap-2 min-w-0 w-full">
 
-                              return (
-                                <motion.div
-                                  key={tag}
-                                  initial={{ opacity: 0, y: -10, height: 0 }}
-                                  animate={{ opacity: 1, y: 0, height: 'auto' }}
-                                  exit={{ opacity: 0, scale: 0.9, height: 0 }}
-                                  className={`flex items-center justify-between gap-3 rounded-xl pl-3 pr-2 py-2 w-full border shadow-sm ${matchedGroup
-                                    ? getBadgeColor(matchedGroup.name)
-                                    : isBuildingMatch
-                                      ? 'bg-orange-50 border-orange-200 text-orange-700'
-                                      : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                                    }`}
-                                >
-                                  {isBuildingMatch ? (
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="bg-white/50 px-1.5 py-0.5 rounded-md font-black shadow-sm mb-0.5">{tag.match(/\[(.*?)\]/)?.[1]}</span>
-                                      <span className="font-bold truncate">{tag.split(']')[1].trim()}</span>
-                                    </div>
-                                  ) : matchedGroup ? (
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-2 h-2 rounded-full ${matchedGroup.name.includes('Smkk') ? 'bg-red-400' : 'bg-current opacity-50'}`} />
-                                      <span className="text-[10px] font-black uppercase tracking-wider">{matchedGroup.name}</span>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40" />
-                                      <span className="text-[11px] font-bold">{tag.replace(/_/g, ' ')}</span>
-                                    </div>
-                                  )}
 
-                                  <button
-                                    onClick={() => removeTag(tIdx, sIdx)}
-                                    className="hover:bg-black/10 rounded-full p-1 transition-colors shrink-0"
-                                    title="Remove keyword"
+                          {/* Tags List (Vertical & Compact) */}
+                          <div className="flex flex-col gap-1 w-full">
+                            <AnimatePresence mode="popLayout">
+                              {slot.tags.map((tag, tIdx) => {
+                                const matchedGroup = allHierarchy.flatMap(cat => cat.groups).find(g => g.name.toLowerCase() === tag.toLowerCase());
+                                const isBuildingMatch = tag.startsWith('[') && tag.includes(']');
+
+                                return (
+                                  <motion.div
+                                    key={tag}
+                                    initial={{ opacity: 0, x: -10, height: 0 }}
+                                    animate={{ opacity: 1, x: 0, height: 'auto' }}
+                                    exit={{ opacity: 0, scale: 0.9, height: 0 }}
+                                    className={`flex items-center justify-between gap-2 rounded-lg pl-2 pr-1 py-1 w-full border border-b-2 shadow-sm ${matchedGroup
+                                      ? getBadgeColor(matchedGroup.name)
+                                      : isBuildingMatch
+                                        ? 'bg-orange-50 border-orange-200 border-b-orange-200/50 text-orange-700'
+                                        : 'bg-emerald-50 border-emerald-200 border-b-emerald-200/50 text-emerald-700'
+                                      }`}
                                   >
-                                    <XCircle className="w-4 h-4 opacity-60 hover:opacity-100" />
-                                  </button>
-                                </motion.div>
-                              );
-                            })}
-                          </AnimatePresence>
-                        </div>
+                                    {isBuildingMatch ? (
+                                      <div className="flex items-center gap-2 text-[10px] overflow-hidden">
+                                        <span className="bg-white/50 px-1 py-0.5 rounded font-black shadow-sm shrink-0">{tag.match(/\[(.*?)\]/)?.[1]}</span>
+                                        <span className="font-bold truncate">{tag.split(']')[1].trim()}</span>
+                                      </div>
+                                    ) : matchedGroup ? (
+                                      <div className="flex items-center gap-2 overflow-hidden">
+                                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${matchedGroup.name.includes('Smkk') ? 'bg-red-400' : 'bg-current opacity-50'}`} />
+                                        <span className="text-[10px] font-black uppercase tracking-wider truncate">{matchedGroup.name}</span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center gap-2 overflow-hidden">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-current opacity-40 shrink-0" />
+                                        <span className="text-[10px] font-bold truncate">{tag.replace(/_/g, ' ')}</span>
+                                      </div>
+                                    )}
 
-                        <div className="w-full flex items-center gap-3">
-                          <input
-                            ref={(el) => { keywordInputRefs.current[sIdx] = el; }}
-                            type="text"
-                            value={slot.keyword}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setSlots(prev => {
-                                const next = [...prev];
-                                next[sIdx] = { ...next[sIdx], keyword: val };
-                                return next;
-                              });
-                            }}
-                            onKeyDown={(e) => handleKeywordKeyDown(e, sIdx)}
-                            onFocus={() => {
-                              setActiveSlotIndex(sIdx);
-                              if (slot.keyword && suggestions.length > 0) setShowDropdown(true);
-                            }}
-                            onBlur={() => setTimeout(() => {
-                              if (activeSlotIndex === sIdx) setShowDropdown(false);
-                            }, 200)}
-                            placeholder={slot.tags.length === 0 ? `Tags file ${sIdx + 1}...` : "Add more tags..."}
-                            className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs font-bold text-slate-900 placeholder:text-slate-300 h-8"
-                          />
+                                    <button
+                                      onClick={() => removeTag(tIdx, sIdx)}
+                                      className="hover:bg-black/10 rounded-full p-0.5 transition-colors shrink-0"
+                                      title="Remove keyword"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5 opacity-60 hover:opacity-100" />
+                                    </button>
+                                  </motion.div>
+                                );
+                              })}
+                            </AnimatePresence>
+                          </div>
 
-                          {/* Batch Mode Toggle (Slot 1 Only) */}
-                          {sIdx === 0 && (
-                            <div className="flex items-center pl-2 border-l border-slate-200">
-                              <button
-                                onClick={() => setIsBatchMode(!isBatchMode)}
-                                className={`relative flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${isBatchMode
+                          <div className="w-full flex items-center gap-3">
+                            <input
+                              ref={(el) => { keywordInputRefs.current[sIdx] = el; }}
+                              type="text"
+                              value={slot.keyword}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setSlots(prev => {
+                                  const next = [...prev];
+                                  next[sIdx] = { ...next[sIdx], keyword: val };
+                                  return next;
+                                });
+                              }}
+                              onKeyDown={(e) => handleKeywordKeyDown(e, sIdx)}
+                              onFocus={() => {
+                                setActiveSlotIndex(sIdx);
+                                if (slot.keyword && suggestions.length > 0) setShowDropdown(true);
+                              }}
+                              onBlur={() => setTimeout(() => {
+                                if (activeSlotIndex === sIdx) setShowDropdown(false);
+                              }, 200)}
+                              placeholder={slot.tags.length === 0 ? `Tags file ${sIdx + 1}...` : "Add more tags..."}
+                              className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs font-bold text-slate-900 placeholder:text-slate-300 h-8"
+                            />
+
+                            {/* Batch Mode Toggle (Slot 1 Only) */}
+                            {sIdx === 0 && (
+                              <div className="flex items-center pl-2 border-l border-slate-200">
+                                <button
+                                  onClick={() => setIsBatchMode(!isBatchMode)}
+                                  className={`relative flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${isBatchMode
                                     ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 ring-2 ring-orange-500/20'
                                     : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
-                                  }`}
-                                title="Toggle Batch Stack Mode"
-                              >
-                                <Layers className="w-3.5 h-3.5" />
-                                <span className={isBatchMode ? 'inline-block' : 'hidden md:inline-block'}>Batch</span>
-                                {/* Simple Toggle Dot */}
-                                <div className={`w-1.5 h-1.5 rounded-full transition-colors ${isBatchMode ? 'bg-white' : 'bg-slate-300'}`} />
-                              </button>
-                            </div>
-                          )}
+                                    }`}
+                                  title="Toggle Batch Stack Mode"
+                                >
+                                  <Layers className="w-3.5 h-3.5" />
+                                  <span className={isBatchMode ? 'inline-block' : 'hidden md:inline-block'}>Batch</span>
+                                  {/* Simple Toggle Dot */}
+                                  <div className={`w-1.5 h-1.5 rounded-full transition-colors ${isBatchMode ? 'bg-white' : 'bg-slate-300'}`} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
