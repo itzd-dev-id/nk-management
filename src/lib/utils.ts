@@ -101,12 +101,19 @@ export function generateNewName(
     const safeGroup = groupPart ? groupPart.replace(/\s+/g, '_') : '';
     const safeTask = taskPart.replace(/\s+/g, '_').replace(/\//g, '-');
 
-    // Fix: Remove redundant Group Name if Task Name already contains it
-    // e.g. Group="Kolom", Task="Bekisting Kolom" -> Result="Struktur_Bekisting-Kolom" (instead of "Struktur_Kolom_Bekisting-Kolom")
-    const isGroupRedundant = safeGroup && safeTask.toLowerCase().includes(safeGroup.toLowerCase());
-    const finalGroup = isGroupRedundant ? '' : safeGroup;
+    // Fix: Token-based deduplication to prevent "K3_K3"
+    // 1. Combine all parts
+    const rawParts = [safeCategory, safeGroup, safeTask].filter(Boolean).join('_');
 
-    const fileWork = [safeCategory, finalGroup, safeTask].filter(Boolean).join('_');
+    // 2. Split into tokens, remove duplicates, and rejoin
+    const tokens = rawParts.split(/[_-]/).filter(Boolean);
+    const uniqueTokens = tokens.filter((t, index) => {
+        const lowerT = t.toLowerCase();
+        // Keep first occurrence of each word/token only
+        return tokens.findIndex(x => x.toLowerCase() === lowerT) === index;
+    });
+
+    const fileWork = uniqueTokens.join('_');
     const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
     const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
     const seqStr = sequence.toString().padStart(3, '0');
