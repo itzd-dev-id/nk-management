@@ -491,6 +491,7 @@ export default function Home() {
   const [testLocation, setTestLocation] = useState<string | null>(null);
   const [testCoords, setTestCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [isTestingLocation, setIsTestingLocation] = useState(false);
+  const [isBatchMode, setIsBatchMode] = useState(false);
 
   // Single Location Optimization
   const [projectLocation, setProjectLocation] = useState<string | null>(null);
@@ -1159,37 +1160,91 @@ export default function Home() {
                   <div className="relative group">
                     <input
                       type="file"
+                      multiple={isBatchMode}
                       className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
                       onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        const date = await detectFileDate(file);
-                        setSlots(prev => {
-                          const next = [...prev];
-                          const slot = { ...next[0], file, detectedDate: date };
+                        const fileList = e.target.files;
+                        if (!fileList || fileList.length === 0) return;
 
-                          // RE-DETECT
-                          const slotKeywords = [file.name.split('.')[0], ...slot.tags];
-                          const fullKeyword = slotKeywords.join(', ');
-                          slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                          const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
-                          if (rawT) {
-                            if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
-                            else {
-                              for (const cat of allHierarchy) {
-                                const group = cat.groups.find(g => g.tasks.includes(rawT));
-                                if (group) {
-                                  slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
-                                  break;
+                        if (isBatchMode) {
+                          const filesToProcess = Array.from(fileList).slice(0, 5); // Max 5 slots
+
+                          // Process all files in parallel
+                          const results = await Promise.all(filesToProcess.map(async (f) => {
+                            const date = await detectFileDate(f);
+                            return { file: f, date };
+                          }));
+
+                          setSlots(prev => {
+                            const next = [...prev];
+
+                            results.forEach((res, i) => {
+                              if (i >= 5) return; // Safety check
+
+                              const slot = { ...next[i], file: res.file, detectedDate: res.date, tags: [] }; // Reset tags for new file
+
+                              // RE-DETECT logic
+                              const slotKeywords = [res.file.name.split('.')[0]];
+                              const fullKeyword = slotKeywords.join(', ');
+
+                              slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                              const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+
+                              if (rawT) {
+                                if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
+                                else {
+                                  for (const cat of allHierarchy) {
+                                    const group = cat.groups.find(g => g.tasks.includes(rawT));
+                                    if (group) {
+                                      slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                                      break;
+                                    }
+                                  }
+                                }
+                              } else {
+                                slot.detectedWorkName = '';
+                              }
+
+                              next[i] = slot;
+                              addLog(`[BATCH] Slot ${i + 1}: ${res.file.name}`);
+                            });
+
+                            return next;
+                          });
+
+                          showToast(`Batch load ${filesToProcess.length} files`, 'success');
+
+                        } else {
+                          // Single file logic (Original)
+                          const file = fileList[0];
+                          const date = await detectFileDate(file);
+                          setSlots(prev => {
+                            const next = [...prev];
+                            const slot = { ...next[0], file, detectedDate: date };
+
+                            // RE-DETECT
+                            const slotKeywords = [file.name.split('.')[0], ...slot.tags];
+                            const fullKeyword = slotKeywords.join(', ');
+                            slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                            if (rawT) {
+                              if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
+                              else {
+                                for (const cat of allHierarchy) {
+                                  const group = cat.groups.find(g => g.tasks.includes(rawT));
+                                  if (group) {
+                                    slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                                    break;
+                                  }
                                 }
                               }
                             }
-                          }
 
-                          next[0] = slot;
-                          return next;
-                        });
-                        addLog(`[FILE] Slot 1: ${file.name}`);
+                            next[0] = slot;
+                            return next;
+                          });
+                          addLog(`[FILE] Slot 1: ${file.name}`);
+                        }
                       }}
                     />
                     {slots[0].file ? (
@@ -1390,6 +1445,18 @@ export default function Home() {
                           placeholder={slot.tags.length === 0 ? `Tags file ${sIdx + 1}...` : ""}
                           className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs font-bold text-slate-900 placeholder:text-slate-300"
                         />
+
+                        {/* Batch Mode Checkbox (Slot 1 Only) */}
+                        {sIdx === 0 && (
+                          <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200" title="Enable Batch Drop (Multipopulate Slots)">
+                            <input
+                              type="checkbox"
+                              checked={isBatchMode}
+                              onChange={(e) => setIsBatchMode(e.target.checked)}
+                              className="w-4 h-4 accent-orange-500 rounded cursor-pointer"
+                            />
+                          </div>
+                        )}
                       </div>
 
                       {/* Autocomplete Dropdown - Only for the active slot */}
