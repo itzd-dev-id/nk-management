@@ -8,7 +8,7 @@ import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
 import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor, detectFileDate } from '@/lib/utils';
 import exifr from 'exifr';
-import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin } from 'lucide-react';
+import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signIn, signOut } from "next-auth/react";
 import imageCompression from 'browser-image-compression';
@@ -441,6 +441,7 @@ interface PostSlot {
   detectedBuilding: Building | null;
   detectedWorkName: string;
   detectedDate: string | null;
+  files?: File[]; // For batch/stack mode
 }
 
 export default function Home() {
@@ -1167,52 +1168,48 @@ export default function Home() {
                         if (!fileList || fileList.length === 0) return;
 
                         if (isBatchMode) {
-                          const filesToProcess = Array.from(fileList).slice(0, 5); // Max 5 slots
-
-                          // Process all files in parallel
-                          const results = await Promise.all(filesToProcess.map(async (f) => {
-                            const date = await detectFileDate(f);
-                            return { file: f, date };
-                          }));
+                          const filesToProcess = Array.from(fileList); // No limit for stack mode (or reasonable limit like 50)
+                          const mainFile = filesToProcess[0];
+                          const date = await detectFileDate(mainFile);
 
                           setSlots(prev => {
                             const next = [...prev];
+                            // Store ALL files in Slot 1, use first as preview
+                            const slot = {
+                              ...next[0],
+                              file: mainFile,
+                              files: filesToProcess,
+                              detectedDate: date
+                            };
 
-                            results.forEach((res, i) => {
-                              if (i >= 5) return; // Safety check
+                            // RE-DETECT based on first file (or we could combine names, but first file is standard)
+                            const slotKeywords = [mainFile.name.split('.')[0], ...slot.tags];
+                            const fullKeyword = slotKeywords.join(', ');
 
-                              const slot = { ...next[i], file: res.file, detectedDate: res.date, tags: [] }; // Reset tags for new file
+                            slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
+                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
 
-                              // RE-DETECT logic
-                              const slotKeywords = [res.file.name.split('.')[0]];
-                              const fullKeyword = slotKeywords.join(', ');
-
-                              slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                              const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
-
-                              if (rawT) {
-                                if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
-                                else {
-                                  for (const cat of allHierarchy) {
-                                    const group = cat.groups.find(g => g.tasks.includes(rawT));
-                                    if (group) {
-                                      slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
-                                      break;
-                                    }
+                            if (rawT) {
+                              if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
+                              else {
+                                for (const cat of allHierarchy) {
+                                  const group = cat.groups.find(g => g.tasks.includes(rawT));
+                                  if (group) {
+                                    slot.detectedWorkName = `${cat.category} / ${group.name} / ${rawT}`;
+                                    break;
                                   }
                                 }
-                              } else {
-                                slot.detectedWorkName = '';
                               }
+                            } else {
+                              slot.detectedWorkName = '';
+                            }
 
-                              next[i] = slot;
-                              addLog(`[BATCH] Slot ${i + 1}: ${res.file.name}`);
-                            });
-
+                            next[0] = slot;
                             return next;
                           });
 
-                          showToast(`Batch load ${filesToProcess.length} files`, 'success');
+                          addLog(`[BATCH] Slot 1 Stacked: ${filesToProcess.length} files`);
+                          showToast(`Stacked ${filesToProcess.length} files in Slot 1`, 'success');
 
                         } else {
                           // Single file logic (Original)
@@ -1279,6 +1276,12 @@ export default function Home() {
                         <div className="flex-1 min-w-0 pr-8">
                           <span className="text-[10px] font-black text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full uppercase mb-1 inline-block">Slot 1</span>
                           <p className="text-xs font-black text-slate-900 truncate uppercase mt-1">{slots[0].file.name}</p>
+                          {/* Stack Badge */}
+                          {slots[0].files && slots[0].files.length > 1 && (
+                            <div className="absolute top-2 right-12 bg-slate-900/80 backdrop-blur text-white px-2 py-0.5 rounded-full text-[10px] font-black shadow-sm z-10">
+                              +{slots[0].files.length - 1} Files
+                            </div>
+                          )}
                         </div>
                       </div>
                     ) : (
@@ -1446,15 +1449,22 @@ export default function Home() {
                           className="flex-1 min-w-[80px] bg-transparent border-none outline-none text-xs font-bold text-slate-900 placeholder:text-slate-300"
                         />
 
-                        {/* Batch Mode Checkbox (Slot 1 Only) */}
+                        {/* Batch Mode Toggle (Slot 1 Only) */}
                         {sIdx === 0 && (
-                          <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200" title="Enable Batch Drop (Multipopulate Slots)">
-                            <input
-                              type="checkbox"
-                              checked={isBatchMode}
-                              onChange={(e) => setIsBatchMode(e.target.checked)}
-                              className="w-4 h-4 accent-orange-500 rounded cursor-pointer"
-                            />
+                          <div className="flex items-center pl-2 border-l border-slate-200">
+                            <button
+                              onClick={() => setIsBatchMode(!isBatchMode)}
+                              className={`relative flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-300 ${isBatchMode
+                                  ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30 ring-2 ring-orange-500/20'
+                                  : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                                }`}
+                              title="Toggle Batch Stack Mode"
+                            >
+                              <Layers className="w-3.5 h-3.5" />
+                              <span className={isBatchMode ? 'inline-block' : 'hidden md:inline-block'}>Batch</span>
+                              {/* Simple Toggle Dot */}
+                              <div className={`w-1.5 h-1.5 rounded-full transition-colors ${isBatchMode ? 'bg-white' : 'bg-slate-300'}`} />
+                            </button>
                           </div>
                         )}
                       </div>
@@ -1522,107 +1532,125 @@ export default function Home() {
 
                     try {
                       for (const slot of activeSlots) {
-                        const fileToProcess = slot.file!;
-                        const b = slot.detectedBuilding || selectedBuilding!;
-                        const w = slot.detectedWorkName || workName || 'Documentation';
-                        const folderDate = selectedDate;
-                        // Strict separation: timestampDate must come from file metadata only (EXIF or Last Modified)
-                        // Never fallback to selectedDate (Work Date) for timestamp.
-                        const timestampDate = slot.detectedDate || getDefaultDate();
+                        // Handle Stacked Batch Mode for Slot 1
+                        const filesToProcess = (isBatchMode && slot === slots[0] && slot.files && slot.files.length > 0)
+                          ? slot.files
+                          : [slot.file!];
 
-                        addLog(`[INFO] Processing: ${fileToProcess.name} (Folder: ${folderDate}, TS: ${timestampDate})`);
+                        for (const fileToProcess of filesToProcess) {
+                          const b = slot.detectedBuilding || selectedBuilding!;
+                          const w = slot.detectedWorkName || workName || 'Documentation';
+                          const folderDate = selectedDate;
 
-                        let file = fileToProcess;
-                        const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
+                          // For stacked batch, we might want to detect date for EACH file, 
+                          // or use the slot's detected date (which comes from the first file).
+                          // Plan says: "Use individual file's EXIF date if available (safer)"
+                          // So we detect on the fly if it's a stack, or reuse slot date if single.
 
-                        const uploadToApi = async (f: File | Blob, isTs: boolean) => {
-                          const formData = new FormData();
-                          formData.append('file', f, fileToProcess.name);
-                          formData.append('metadata', JSON.stringify({
-                            detectedDate: folderDate,
-                            workName: w,
-                            buildingCode: b.code,
-                            buildingName: b.name,
-                            buildingIndex: b.index,
-                            progress: progress || '0',
-                            outputPath: outputPath,
-                            showBuildingIndex: showBuildingIndex,
-                            isTimestamp: isTs,
-                          }));
+                          let timestampDate = slot.detectedDate || getDefaultDate();
 
-                          const res = await fetch('/api/process', { method: 'POST', body: formData });
-                          return await res.json();
-                        };
-
-                        // 0. Metadata logic
-                        let originalExif = await getExifData(file);
-                        const buffer = await file.arrayBuffer();
-                        const existingExif = await exifr.parse(buffer, { gps: true });
-                        const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
-
-                        if (!hasGps && navigator.geolocation) {
-                          addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
-                          try {
-                            const pos = await new Promise<GeolocationPosition>((res, rej) => {
-                              navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
-                            });
-                            addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
-                            originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
-                            file = await injectExif(file, originalExif, file.name, file.type);
-                          } catch (gpsErr: any) {
-                            addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                          // If it's a stack member (not the primary preview), re-detect date to be safe
+                          if (filesToProcess.length > 1 && fileToProcess !== slot.file) {
+                            const d = await detectFileDate(fileToProcess);
+                            if (d) timestampDate = d;
                           }
-                        }
 
-                        // 1. Process and Upload Original (Clean)
-                        addLog(`[INFO] Compressing original...`);
-                        const compressedBlob = await imageCompression(file, options);
-                        let finalOriginal: File;
-                        if (originalExif) {
-                          finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
-                        } else {
-                          finalOriginal = new File([compressedBlob], file.name, { type: file.type });
-                        }
+                          addLog(`[INFO] Processing: ${fileToProcess.name} (Folder: ${folderDate}, TS: ${timestampDate})`);
 
-                        addLog(`[INFO] Uploading original version...`);
-                        const mainRes = await uploadToApi(finalOriginal, false);
+                          let file = fileToProcess;
+                          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
 
-                        if (mainRes.success) {
-                          addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
-                        } else {
-                          throw new Error(`Original upload failed: ${mainRes.error}`);
-                        }
+                          const uploadToApi = async (f: File | Blob, isTs: boolean) => {
+                            const formData = new FormData();
+                            formData.append('file', f, fileToProcess.name);
+                            formData.append('metadata', JSON.stringify({
+                              detectedDate: folderDate,
+                              workName: w,
+                              buildingCode: b.code,
+                              buildingName: b.name,
+                              buildingIndex: b.index,
+                              progress: progress || '0',
+                              outputPath: outputPath,
+                              showBuildingIndex: showBuildingIndex,
+                              isTimestamp: isTs,
+                            }));
 
-                        // 2. Process and Upload Timestamp (if enabled)
-                        if (useTimestamp && file.type.startsWith('image/')) {
-                          addLog(`[INFO] Processing timestamped version...`);
+                            const res = await fetch('/api/process', { method: 'POST', body: formData });
+                            return await res.json();
+                          };
 
-                          // Use projectLocation if available, otherwise pass callback to set it
-                          const timestampedFile = await processTimestampImage(
-                            file,
-                            addLog,
-                            projectLocation,
-                            (loc: string) => {
-                              if (!projectLocation) {
-                                setProjectLocation(loc);
-                                addLog(`[INFO] Lokasi project disimpan: ${loc}`);
-                              }
-                            },
-                            timestampDate
-                          );
-                          const compressedTsBlob = await imageCompression(timestampedFile, options);
-                          let finalTs: File;
+                          // 0. Metadata logic
+                          let originalExif = await getExifData(file);
+                          const buffer = await file.arrayBuffer();
+                          const existingExif = await exifr.parse(buffer, { gps: true });
+                          const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+
+                          if (!hasGps && navigator.geolocation) {
+                            addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
+                            try {
+                              const pos = await new Promise<GeolocationPosition>((res, rej) => {
+                                navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
+                              });
+                              addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
+                              originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
+                              file = await injectExif(file, originalExif, file.name, file.type);
+                            } catch (gpsErr: any) {
+                              addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                            }
+                          }
+
+                          // 1. Process and Upload Original (Clean)
+                          addLog(`[INFO] Compressing original...`);
+                          const compressedBlob = await imageCompression(file, options);
+                          let finalOriginal: File;
                           if (originalExif) {
-                            finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                            finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
                           } else {
-                            finalTs = new File([compressedTsBlob], file.name, { type: file.type });
+                            finalOriginal = new File([compressedBlob], file.name, { type: file.type });
                           }
-                          const tsRes = await uploadToApi(finalTs, true);
-                          if (tsRes.success) {
-                            addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+
+                          addLog(`[INFO] Uploading original version...`);
+                          const mainRes = await uploadToApi(finalOriginal, false);
+
+                          if (mainRes.success) {
+                            addLog(`[SUCCESS] Original: ${mainRes.finalName}`);
+                          } else {
+                            throw new Error(`Original upload failed: ${mainRes.error}`);
+                          }
+
+                          // 2. Process and Upload Timestamp (if enabled)
+                          if (useTimestamp && file.type.startsWith('image/')) {
+                            addLog(`[INFO] Processing timestamped version...`);
+
+                            // Use projectLocation if available, otherwise pass callback to set it
+                            const timestampedFile = await processTimestampImage(
+                              file,
+                              addLog,
+                              projectLocation,
+                              (loc: string) => {
+                                if (!projectLocation) {
+                                  setProjectLocation(loc);
+                                  addLog(`[INFO] Lokasi project disimpan: ${loc}`);
+                                }
+                              },
+                              timestampDate
+                            );
+                            const compressedTsBlob = await imageCompression(timestampedFile, options);
+                            let finalTs: File;
+                            if (originalExif) {
+                              finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                            } else {
+                              finalTs = new File([compressedTsBlob], file.name, { type: file.type });
+                            }
+                            const tsRes = await uploadToApi(finalTs, true);
+                            if (tsRes.success) {
+                              addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+                            }
                           }
                         }
-                      }
+
+
+                      } // End activeSlots loop
 
                       // Final success state: Clear files but keep tags for context
                       setSlots(prev => prev.map(s => ({ ...s, file: null })));
@@ -1638,17 +1666,18 @@ export default function Home() {
                   disabled={isProcessing}
                   className="w-full bg-slate-900 text-white rounded-[2rem] py-4 text-sm font-black uppercase tracking-widest shadow-xl shadow-slate-200 flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
                 >
-                  {isProcessing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Uploading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-5 h-5" />
-                      <span>Submit {slots.filter(s => s.file).length} Documentation</span>
-                    </>
-                  )}
+                  {
+                    isProcessing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-5 h-5" />
+                        <span>Submit {slots.filter(s => s.file).length} Documentation</span>
+                      </>
+                    )}
                 </motion.button>
               )}
 
@@ -2569,7 +2598,7 @@ export default function Home() {
           )}
 
         </AnimatePresence>
-      </div>
+      </div >
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
