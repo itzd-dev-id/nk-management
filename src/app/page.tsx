@@ -2322,7 +2322,7 @@ export default function Home() {
                                     value={editingCategory.name}
                                     onChange={(e) => setEditingCategory({ ...editingCategory, name: e.target.value })}
                                     autoFocus
-                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-[9px] font-black uppercase text-slate-900 focus:outline-none"
+                                    className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-xs font-black uppercase text-slate-900 focus:outline-none"
                                     onKeyDown={(e) => {
                                       if (e.key === 'Enter') {
                                         const next = [...allHierarchy];
@@ -2347,12 +2347,15 @@ export default function Home() {
                                     }}
                                     className="text-emerald-500"
                                   >
-                                    <Check className="w-3 h-3" />
+                                    <Check className="w-3.5 h-3.5" />
                                   </button>
                                 </div>
                               ) : (
                                 <>
-                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{w!.category}</span>
+                                  <div className="flex items-center gap-2">
+                                    <Layers className="w-3.5 h-3.5 text-slate-400" />
+                                    <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{w!.category}</span>
+                                  </div>
                                   <div className="flex items-center">
                                     <button
                                       onClick={() => {
@@ -2362,7 +2365,7 @@ export default function Home() {
                                       }}
                                       className="text-slate-300 hover:text-orange-500 px-1"
                                     >
-                                      <Edit3 className="w-2.5 h-2.5" />
+                                      <Edit3 className="w-3.5 h-3.5" />
                                     </button>
                                     <button
                                       onClick={() => {
@@ -2376,22 +2379,88 @@ export default function Home() {
                                       }}
                                       className="text-red-400 active:scale-90 px-1 opacity-30 hover:opacity-100 transition-opacity"
                                     >
-                                      <Trash2 className="w-2.5 h-2.5" />
+                                      <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                   </div>
                                 </>
                               )}
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-4">
                               {w!.groups.map((g, gi) => (
                                 <div key={gi} className="space-y-1">
-                                  <div className="px-4 py-1">
-                                    <span className="text-[8px] font-bold text-orange-400 uppercase tracking-wider">{g.name}</span>
+                                  {/* Group Header */}
+                                  <div className="pl-4 flex items-center justify-between group-hover:bg-slate-50 rounded-lg pr-2 transition-colors">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <ChevronRight className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                                      {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === -1 ? (
+                                        <div className="flex items-center gap-1 flex-1">
+                                          <input
+                                            type="text"
+                                            value={editingTask.name}
+                                            onChange={(e) => setEditingTask({ ...editingTask, name: e.target.value })}
+                                            autoFocus
+                                            className="flex-1 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-xs font-bold text-slate-900 focus:outline-none"
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') {
+                                                const realCatIndex = w!.originalIndex;
+                                                const next = [...allHierarchy];
+                                                next[realCatIndex].groups[gi].name = editingTask.name.trim();
+                                                setAllHierarchy(next);
+                                                setHasUnsavedChanges(true);
+                                                setEditingTask(null);
+                                                showToast(`Grup diperbarui`, 'success');
+                                              }
+                                            }}
+                                          />
+                                          <button
+                                            onClick={() => {
+                                              const realCatIndex = w!.originalIndex;
+                                              const next = [...allHierarchy];
+                                              next[realCatIndex].groups[gi].name = editingTask.name.trim();
+                                              setAllHierarchy(next);
+                                              setHasUnsavedChanges(true);
+                                              setEditingTask(null);
+                                              showToast(`Grup diperbarui`, 'success');
+                                            }}
+                                            className="text-emerald-500"
+                                          >
+                                            <Check className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">{g.name}</span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: -1, name: g.name })}
+                                        className="text-slate-300 hover:text-orange-500 p-1.5"
+                                      >
+                                        <Edit3 className="w-3 h-3" />
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          if (window.confirm(`Apakah Anda yakin ingin menghapus grup "${g.name}"? Semua tugas di dalamnya akan ikut terhapus.`)) {
+                                            const realCatIndex = w!.originalIndex;
+                                            const next = [...allHierarchy];
+                                            next[realCatIndex].groups.splice(gi, 1);
+                                            setAllHierarchy(next);
+                                            setHasUnsavedChanges(true);
+                                            showToast(`Grup ${g.name} dihapus`, 'info');
+                                          }
+                                        }}
+                                        className="text-red-400 p-1.5"
+                                      >
+                                        <Trash2 className="w-3 h-3" />
+                                      </button>
+                                    </div>
                                   </div>
-                                  <div className="space-y-1">
+
+                                  <div className="space-y-1 ml-8">
                                     {g.tasks.map((t, ti) => (
-                                      <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
-                                        <div className="flex-1 min-w-0">
+                                      <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0 group/task">
+                                        <div className="flex-1 min-w-0 flex items-center gap-2">
+                                          <span className="text-slate-300 font-black text-[10px]">L</span>
                                           {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
                                             <input
                                               type="text"
@@ -2401,17 +2470,10 @@ export default function Home() {
                                               className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
                                               onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
-                                                  // Find real group index in main hierarchy?
-                                                  // The 'gi' loop index here is from the FILTERED groups.
-                                                  // We need the ACTUAL group index in 'allHierarchy'.
-                                                  // 'w.groups' here is filtered. 
-                                                  // Risk: If we filter, 'gi' is not the original index.
-                                                  // Solution: Map original indices or look up by name.
-                                                  // Better: Use Name lookup for safety.
                                                   const realCatIndex = w!.originalIndex;
                                                   const realGroup = allHierarchy[realCatIndex].groups.find(Gx => Gx.name === g.name);
                                                   if (realGroup) {
-                                                    const realTaskIndex = realGroup.tasks.findIndex(Tx => Tx === t); // 't' is current task name
+                                                    const realTaskIndex = realGroup.tasks.findIndex(Tx => Tx === t);
                                                     const next = [...allHierarchy];
                                                     next[realCatIndex].groups[next[realCatIndex].groups.indexOf(realGroup)].tasks[realTaskIndex] = editingTask.name.replace(/\s+/g, '_');
                                                     setAllHierarchy(next);
@@ -2445,16 +2507,16 @@ export default function Home() {
                                                 }}
                                                 className="text-emerald-500 p-2"
                                               >
-                                                <Save className="w-3.5 h-3.5" />
+                                                <Save className="w-4 h-4" />
                                               </button>
                                               <button onClick={() => setEditingTask(null)} className="text-slate-400 p-2">
-                                                <XCircle className="w-3.5 h-3.5" />
+                                                <XCircle className="w-4 h-4" />
                                               </button>
                                             </>
                                           ) : (
                                             <>
                                               <button onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
-                                                <Edit3 className="w-3.5 h-3.5" />
+                                                <Edit3 className="w-4 h-4" />
                                               </button>
                                               <button
                                                 onClick={() => {
@@ -2481,7 +2543,7 @@ export default function Home() {
                                                 }}
                                                 className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
                                               >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="w-4 h-4" />
                                               </button>
                                             </>
                                           )}
@@ -2492,6 +2554,7 @@ export default function Home() {
                                 </div>
                               ))}
                             </div>
+
                           </div>
                         ))}
                     </div>
