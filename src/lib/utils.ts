@@ -239,21 +239,28 @@ export function detectWorkFromKeyword(
     allTasks.sort((a, b) => b.priority - a.priority);
 
     // PASS 1: Exact Task Name Match (Full Phrase Check)
-    const matches: { cat: string; group: string; task: string; priority: number; index: number }[] = [];
+    const matches: { cat: string; group: string; task: string; priority: number; index: number; contextScore: number }[] = [];
 
     for (const item of allTasks) {
         const taskName = item.task.toLowerCase().replace(/_/g, ' ');
         // Use indexOf to find position
         const idx = normalizedInput.indexOf(taskName);
         if (idx !== -1) {
-            matches.push({ ...item, index: idx });
+            // TIE BREAKING: Give bonus if category or group name exists in input
+            const catMatch = normalizedInput.includes(item.cat.toLowerCase()) ? 1 : 0;
+            const groupMatch = normalizedInput.includes(item.group.toLowerCase()) ? 1 : 0;
+            matches.push({ ...item, index: idx, contextScore: catMatch + groupMatch });
         }
     }
 
     if (matches.length > 0) {
-        // Sort matches: Earlier index first (prioritize tags at start), then longer length
+        // Sort matches: 
+        // 1. Earlier index first (prioritize tags at start)
+        // 2. Higher context score (matches group/cat name in input)
+        // 3. Longer length (more specific task name)
         matches.sort((a, b) => {
             if (a.index !== b.index) return a.index - b.index;
+            if (b.contextScore !== a.contextScore) return b.contextScore - a.contextScore;
             return b.priority - a.priority;
         });
 

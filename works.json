@@ -70,6 +70,19 @@
                 ]
             },
             {
+                "name": "Tie Beam",
+                "_description": "Tie Beam Lantai 1",
+                "tasks": [
+                    "Galian",
+                    "Tie Beam",
+                    "Lantai Kerja",
+                    "Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Pengecoran Tie Beam"
+                ]
+            },
+            {
                 "name": "Footplat",
                 "_description": "Pekerjaan Pondasi dan Struktur Bawah",
                 "tasks": [
@@ -90,19 +103,6 @@
                     "Sambungan Pancang",
                     "Pemotongan Kepala Pancang",
                     "Besi Tulangan Ulir"
-                ]
-            },
-            {
-                "name": "Tie Beam",
-                "_description": "Sloof / Balok Struktur di Lantai 1",
-                "tasks": [
-                    "Galian",
-                    "Tie Beam",
-                    "Lantai Kerja",
-                    "Bekisting",
-                    "Pembesian",
-                    "Pengecoran",
-                    "Pengecoran Tie Beam"
                 ]
             },
             {
