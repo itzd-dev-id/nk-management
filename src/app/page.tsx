@@ -2389,7 +2389,7 @@ export default function Home() {
                               {w!.groups.map((g, gi) => (
                                 <div key={gi} className="space-y-1">
                                   {/* Group Header */}
-                                  <div className="pl-4 flex items-center justify-between group-hover:bg-slate-50 rounded-lg pr-2 transition-colors">
+                                  <div className="pl-4 flex items-center justify-between group rounded-lg pr-2 transition-colors hover:bg-slate-50">
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                       <ChevronRight className="w-3.5 h-3.5 text-orange-400 shrink-0" />
                                       {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === -1 ? (
@@ -2431,7 +2431,7 @@ export default function Home() {
                                         <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">{g.name}</span>
                                       )}
                                     </div>
-                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center opacity-30 group-hover:opacity-100 transition-opacity">
                                       <button
                                         onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: -1, name: g.name })}
                                         className="text-slate-300 hover:text-orange-500 p-1.5"
