@@ -1167,11 +1167,11 @@ export default function Home() {
                   <WorkSelector value={workName} onChange={setWorkName} hierarchy={allHierarchy} />
                 </div>
 
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Progress (%)</label>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-                    <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl px-6 py-3 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
+                <div className="flex items-start gap-4">
+                  {/* Progress Input */}
+                  <div className="flex-1 space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Progress</label>
+                    <div className="flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
                       <input
                         type="text"
                         inputMode="numeric"
@@ -1180,29 +1180,23 @@ export default function Home() {
                           const val = e.target.value.replace(/\D/g, '');
                           if (val.length <= 3) setProgress(val);
                         }}
-                        className="bg-transparent text-right text-2xl font-black text-slate-900 outline-none p-0 m-0 w-auto"
-                        style={{ width: `${Math.max(progress.length, 1)}ch`, minWidth: '1ch' }}
+                        className="bg-transparent text-right text-lg font-black text-slate-900 outline-none p-0 m-0 w-[4ch]"
                         placeholder="0"
                       />
-                      <span className="text-lg font-black text-slate-400 mt-1">%</span>
+                      <span className="text-sm font-black text-slate-400">%</span>
                     </div>
-                    <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-slate-200 to-transparent" />
                   </div>
 
-                  {/* Date Picker */}
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Work Date</label>
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-                      <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-2 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
-                        <input
-                          type="date"
-                          value={selectedDate}
-                          onChange={(e) => setSelectedDate(e.target.value)}
-                          className="bg-transparent text-center text-lg font-bold text-slate-900 outline-none p-0 m-0 w-auto"
-                        />
-                      </div>
-                      <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent via-slate-200 to-transparent" />
+                  {/* Date Input */}
+                  <div className="flex-[1.5] space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Date</label>
+                    <div className="flex items-center justify-center gap-2 bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
+                      <input
+                        type="date"
+                        value={selectedDate}
+                        onChange={(e) => setSelectedDate(e.target.value)}
+                        className="bg-transparent text-center text-sm font-bold text-slate-900 outline-none p-0 m-0 w-full"
+                      />
                     </div>
                   </div>
                 </div>
