@@ -2352,18 +2352,18 @@ export default function Home() {
                                 </div>
                               ) : (
                                 <>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex-1 min-w-0 flex items-center gap-2">
                                     <Layers className="w-4 h-4 text-slate-400" />
                                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{w!.category}</span>
                                   </div>
-                                  <div className="flex items-center">
+                                  <div className="flex items-center gap-1 shrink-0">
                                     <button
                                       onClick={() => {
                                         if (window.confirm(`PERINGATAN: Mengubah nama kategori akan berdampak pada semua tag yang terkait. Apakah Anda yakin?`)) {
                                           setEditingCategory({ index: w!.originalIndex, name: w!.category });
                                         }
                                       }}
-                                      className="text-slate-300 hover:text-orange-500 px-1"
+                                      className="text-slate-300 hover:text-orange-500 p-2"
                                     >
                                       <Edit3 className="w-4 h-4" />
                                     </button>
@@ -2377,7 +2377,7 @@ export default function Home() {
                                           showToast(`Kategori ${w!.category} dihapus`, 'info');
                                         }
                                       }}
-                                      className="text-red-400 active:scale-90 px-1 opacity-30 hover:opacity-100 transition-opacity"
+                                      className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </button>
@@ -2431,10 +2431,10 @@ export default function Home() {
                                         <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">{g.name}</span>
                                       )}
                                     </div>
-                                    <div className="flex items-center opacity-30 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-1 shrink-0 opacity-30 group-hover:opacity-100 transition-opacity">
                                       <button
                                         onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: -1, name: g.name })}
-                                        className="text-slate-300 hover:text-orange-500 p-1.5"
+                                        className="text-slate-300 hover:text-orange-500 p-2"
                                       >
                                         <Edit3 className="w-4 h-4" />
                                       </button>
@@ -2449,7 +2449,7 @@ export default function Home() {
                                             showToast(`Grup ${g.name} dihapus`, 'info');
                                           }
                                         }}
-                                        className="text-red-400 p-1.5"
+                                        className="text-red-400 p-2"
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </button>
