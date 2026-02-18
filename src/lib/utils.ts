@@ -254,8 +254,13 @@ export function detectWorkFromKeyword(
             let posBonus = 0;
             if (groupMatch) {
                 const groupIdx = normalizedInput.indexOf(item.group.toLowerCase());
-                // Bonus = 1 - (index / 10000). Max bonus ~1.0 for index 0.
-                posBonus = 1 - (groupIdx / 10000);
+                // NUCLEAR FIX: If the group is at index 0 (Tag), give it massive priority
+                if (groupIdx === 0) {
+                    posBonus = 10;
+                } else {
+                    // Regular decay for later positions
+                    posBonus = 1 - (groupIdx / 10000);
+                }
             }
 
             matches.push({ ...item, index: idx, contextScore: catMatch + groupMatch + posBonus });
