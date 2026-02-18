@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BuildingSelector } from '@/components/BuildingSelector';
 import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
@@ -1185,7 +1185,7 @@ export default function Home() {
                             const val = e.target.value.replace(/\D/g, '');
                             if (val.length <= 3) setProgress(val);
                           }}
-                          className="bg-transparent text-center text-2xl font-black text-slate-900 outline-none p-0 m-0 w-[4ch]"
+                          className="bg-transparent text-center text-2xl font-black text-slate-900 outline-none p-0 m-0 w-[5ch]"
                           placeholder="0"
                         />
                         <span className="text-sm font-black text-slate-400 -translate-y-1">%</span>
@@ -1201,6 +1201,13 @@ export default function Home() {
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
+                        onClick={(e) => {
+                          try {
+                            (e.target as any).showPicker();
+                          } catch (err) {
+                            console.error('showPicker failed:', err);
+                          }
+                        }}
                         className="bg-transparent text-center text-base font-black text-slate-900 outline-none p-0 m-0 w-full uppercase cursor-pointer"
                         style={{
                           WebkitAppearance: 'none',
