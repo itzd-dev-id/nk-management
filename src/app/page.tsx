@@ -1175,9 +1175,8 @@ export default function Home() {
                   <div className="flex items-center bg-white border border-slate-200 rounded-2xl shadow-sm shadow-slate-100 group transition-all focus-within:ring-2 focus-within:ring-orange-500/10 focus-within:border-orange-500">
 
                     {/* Progress Section */}
-                    <div className="flex flex-col items-center justify-center px-5 py-2 w-32 relative">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Progress</label>
-                      <div className="flex items-baseline gap-0.5">
+                    <div className="flex items-center justify-center px-6 py-4 relative">
+                      <div className="flex items-baseline gap-1">
                         <input
                           type="text"
                           inputMode="numeric"
@@ -1186,25 +1185,35 @@ export default function Home() {
                             const val = e.target.value.replace(/\D/g, '');
                             if (val.length <= 3) setProgress(val);
                           }}
-                          className="bg-transparent text-center text-base font-black text-slate-900 outline-none p-0 m-0 w-[3ch]"
+                          className="bg-transparent text-center text-2xl font-black text-slate-900 outline-none p-0 m-0 w-[4ch]"
                           placeholder="0"
                         />
-                        <span className="text-xs font-black text-slate-400">%</span>
+                        <span className="text-sm font-black text-slate-400 -translate-y-1">%</span>
                       </div>
                     </div>
 
                     {/* Vertical Divider */}
-                    <div className="w-[1px] h-8 bg-slate-100" />
+                    <div className="w-[1px] h-10 bg-slate-100" />
 
                     {/* Date Section */}
-                    <div className="flex flex-col items-center justify-center px-5 py-2 w-36 relative">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Date</label>
+                    <div className="flex items-center justify-center px-6 py-4 relative">
                       <input
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        className="bg-transparent text-center text-xs font-bold text-slate-900 outline-none p-0 m-0 w-full uppercase"
+                        className="bg-transparent text-center text-base font-black text-slate-900 outline-none p-0 m-0 w-full uppercase cursor-pointer"
+                        style={{
+                          WebkitAppearance: 'none',
+                          appearance: 'none'
+                        }}
                       />
+                      <style jsx>{`
+                        input[type="date"]::-webkit-inner-spin-button,
+                        input[type="date"]::-webkit-calendar-picker-indicator {
+                            display: none;
+                            -webkit-appearance: none;
+                        }
+                      `}</style>
                     </div>
 
                   </div>
