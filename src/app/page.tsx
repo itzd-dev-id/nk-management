@@ -2353,12 +2353,32 @@ export default function Home() {
                               ) : (
                                 <>
                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{w!.category}</span>
-                                  <button
-                                    onClick={() => setEditingCategory({ index: w!.originalIndex, name: w!.category })}
-                                    className="text-slate-300 hover:text-orange-500 px-1"
-                                  >
-                                    <Edit3 className="w-2.5 h-2.5" />
-                                  </button>
+                                  <div className="flex items-center">
+                                    <button
+                                      onClick={() => {
+                                        if (window.confirm(`PERINGATAN: Mengubah nama kategori akan berdampak pada semua tag yang terkait. Apakah Anda yakin?`)) {
+                                          setEditingCategory({ index: w!.originalIndex, name: w!.category });
+                                        }
+                                      }}
+                                      className="text-slate-300 hover:text-orange-500 px-1"
+                                    >
+                                      <Edit3 className="w-2.5 h-2.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        if (window.confirm(`Apakah Anda yakin ingin menghapus seluruh kategori "${w!.category}"? Semua grup dan tugas di dalamnya akan ikut terhapus.`)) {
+                                          const next = [...allHierarchy];
+                                          next.splice(w!.originalIndex, 1);
+                                          setAllHierarchy(next);
+                                          setHasUnsavedChanges(true);
+                                          showToast(`Kategori ${w!.category} dihapus`, 'info');
+                                        }
+                                      }}
+                                      className="text-red-400 active:scale-90 px-1 opacity-30 hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="w-2.5 h-2.5" />
+                                    </button>
+                                  </div>
                                 </>
                               )}
                             </div>
