@@ -1444,7 +1444,7 @@ export default function Home() {
                       className="text-[10px] font-black text-orange-500 hover:text-orange-600 flex items-center gap-1.5 uppercase tracking-wider transition-all duration-200 active:scale-95 group"
                     >
                       <RotateCcw className="w-3.5 h-3.5 group-hover:rotate-[-45deg] transition-transform" />
-                      <span>Reset All</span>
+                      <span>Reset</span>
                     </button>
                   </div>
 
