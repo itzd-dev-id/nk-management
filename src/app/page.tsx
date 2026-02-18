@@ -487,6 +487,9 @@ export default function Home() {
   const [editingCategory, setEditingCategory] = useState<{ index?: number, name: string } | null>(null);
   const [buildingSearch, setBuildingSearch] = useState('');
   const [taskSearch, setTaskSearch] = useState('');
+  const [newWorkCat, setNewWorkCat] = useState('');
+  const [newWorkGroup, setNewWorkGroup] = useState('');
+  const [newWorkTask, setNewWorkTask] = useState('');
   const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
   const [showBuildingIndex, setShowBuildingIndex] = useState(true);
   const [testLocation, setTestLocation] = useState<string | null>(null);
@@ -2111,11 +2114,15 @@ export default function Home() {
 
                   <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 space-y-4">
                     <div className="space-y-2">
+                      {/* Category Select */}
                       <div className="relative">
                         <select
-                          id="new-work-cat"
+                          value={newWorkCat}
+                          onChange={(e) => {
+                            setNewWorkCat(e.target.value);
+                            setNewWorkGroup(''); // Reset group when cat changes
+                          }}
                           className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-orange-500 appearance-none"
-                          defaultValue=""
                         >
                           <option value="" disabled>Select Category...</option>
                           {allHierarchy.map((h, i) => (
@@ -2126,45 +2133,75 @@ export default function Home() {
                           <ChevronDown className="w-4 h-4" />
                         </div>
                       </div>
+
+                      {/* Group Select (Dynamic) */}
+                      <div className="relative">
+                        <select
+                          value={newWorkGroup}
+                          onChange={(e) => setNewWorkGroup(e.target.value)}
+                          disabled={!newWorkCat}
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-orange-500 appearance-none disabled:opacity-50 disabled:bg-slate-100"
+                        >
+                          <option value="" disabled>Select Group...</option>
+                          {newWorkCat && allHierarchy.find(h => h.category === newWorkCat)?.groups.map((g, i) => (
+                            <option key={i} value={g.name}>{g.name}</option>
+                          ))}
+                          <option value="new_group_custom">+ Create New Group</option>
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
+                      </div>
+
+                      {/* Manual Group Input (if needed) - For now enforcing existing groups or custom if selected */}
+                      {newWorkGroup === 'new_group_custom' && (
+                        <input
+                          type="text"
+                          placeholder="Enter New Group Name"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                          onBlur={(e) => setNewWorkGroup(e.target.value)}
+                          autoFocus
+                        />
+                      )}
+
                       <input
-                        id="new-work-group"
-                        type="text"
-                        placeholder="Group Name (ex: Balok)"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
-                      />
-                      <input
-                        id="new-work-task"
+                        value={newWorkTask}
+                        onChange={(e) => setNewWorkTask(e.target.value)}
                         type="text"
                         placeholder="Task Name (ex: Bekisting)"
                         className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
                       />
                     </div>
                     <button
-                      disabled={isSavingCloud}
+                      disabled={isSavingCloud || !newWorkCat || !newWorkGroup || !newWorkTask || newWorkGroup === 'new_group_custom'}
                       onClick={() => {
-                        const catInput = document.getElementById('new-work-cat') as HTMLSelectElement;
-                        const groupInput = document.getElementById('new-work-group') as HTMLInputElement;
-                        const taskInput = document.getElementById('new-work-task') as HTMLInputElement;
-                        if (catInput.value && groupInput.value && taskInput.value) {
+                        if (newWorkCat && newWorkGroup && newWorkTask) {
                           const next = [...allHierarchy];
-                          const catName = catInput.value.trim();
-                          const groupName = groupInput.value.trim();
-                          const taskName = taskInput.value.trim().replace(/\s+/g, '_');
+                          const catName = newWorkCat.trim();
+                          const groupName = newWorkGroup.trim();
+                          const taskName = newWorkTask.trim().replace(/\s+/g, '_');
 
-                          const existingCat = next.find(w => w.category.toLowerCase() === catName.toLowerCase());
-                          if (existingCat) {
-                            const existingGroup = existingCat.groups.find(g => g.name.toLowerCase() === groupName.toLowerCase());
-                            if (existingGroup) {
-                              if (existingGroup.tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
-                                showToast(`Pekerjaan "${taskInput.value}" sudah ada di grup ini!`, 'error');
+                          const existingCatIndex = next.findIndex(w => w.category.toLowerCase() === catName.toLowerCase());
+
+                          if (existingCatIndex !== -1) {
+                            const existingCat = next[existingCatIndex];
+                            const existingGroupIndex = existingCat.groups.findIndex(g => g.name.toLowerCase() === groupName.toLowerCase());
+
+                            if (existingGroupIndex !== -1) {
+                              // Add to existing group
+                              if (existingCat.groups[existingGroupIndex].tasks.some(t => t.toLowerCase() === taskName.toLowerCase())) {
+                                showToast(`Pekerjaan "${newWorkTask}" sudah ada di grup ini!`, 'error');
                                 return;
                               }
-                              existingGroup.tasks = [...existingGroup.tasks, taskName].sort((a, b) => a.localeCompare(b));
+                              existingCat.groups[existingGroupIndex].tasks.push(taskName);
+                              existingCat.groups[existingGroupIndex].tasks.sort((a, b) => a.localeCompare(b));
                             } else {
+                              // Create new group
                               existingCat.groups.push({ name: groupName, tasks: [taskName] });
                               existingCat.groups.sort((a, b) => a.name.localeCompare(b.name));
                             }
                           } else {
+                            // Create new Category (Should not happen via select, but safety fallback)
                             next.push({
                               category: catName,
                               groups: [{ name: groupName, tasks: [taskName] }]
@@ -2173,12 +2210,11 @@ export default function Home() {
                           }
                           setAllHierarchy(next);
                           setHasUnsavedChanges(true);
-                          showToast(`Pekerjaan "${taskInput.value}" ditambahkan ke ${catName} / ${groupName}`, 'success');
-                          catInput.value = '';
-                          groupInput.value = '';
-                          taskInput.value = '';
+                          showToast(`Pekerjaan "${newWorkTask}" ditambahkan ke ${catName} / ${groupName}`, 'success');
+                          setNewWorkTask('');
+                          // Keep Category and Group selected for rapid entry
                         } else {
-                          showToast('Mohon isi semua bidang (Kategori, Grup, dan Tugas)', 'error');
+                          showToast('Mohon isi semua bidang', 'error');
                         }
                       }}
                       className="w-full bg-slate-200 text-slate-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
@@ -2189,17 +2225,38 @@ export default function Home() {
 
                     <div className="pt-4 border-t border-slate-200 space-y-3 max-h-[400px] overflow-y-auto overflow-x-hidden pr-1">
                       {allHierarchy
-                        .filter(w =>
-                          w.category.toLowerCase().includes(taskSearch.toLowerCase()) ||
-                          w.groups.some(g =>
-                            g.name.toLowerCase().includes(taskSearch.toLowerCase()) ||
-                            g.tasks.some(t => t.toLowerCase().includes(taskSearch.toLowerCase()))
-                          )
-                        )
+                        .map((w, i) => {
+                          // DEEP SEARCH FILTERING
+                          const search = taskSearch.toLowerCase();
+                          if (!search) return { ...w, originalIndex: i }; // Return all if no search
+
+                          // Check if Category matches
+                          const catMatch = w.category.toLowerCase().includes(search);
+
+                          // Filter Groups
+                          const matchingGroups = w.groups.filter(g => {
+                            const groupNameMatch = g.name.toLowerCase().includes(search);
+                            const hasMatchingTask = g.tasks.some(t => t.toLowerCase().includes(search));
+                            return groupNameMatch || hasMatchingTask || catMatch; // Keep group if cat matches? Optional. Let's say yes for context.
+                          }).map(g => {
+                            // Filter Tasks within Group
+                            if (catMatch || g.name.toLowerCase().includes(search)) return g; // Show all tasks if cat or group matches
+                            return {
+                              ...g,
+                              tasks: g.tasks.filter(t => t.toLowerCase().includes(search))
+                            };
+                          });
+
+                          if (catMatch || matchingGroups.length > 0) {
+                            return { ...w, groups: matchingGroups, originalIndex: i };
+                          }
+                          return null;
+                        })
+                        .filter(Boolean) // Remove nulls
                         .map((w, i) => (
-                          <div key={i} className="space-y-1">
+                          <div key={w!.originalIndex} className="space-y-1">
                             <div className="flex items-center justify-between px-2">
-                              {editingCategory?.index === i ? (
+                              {editingCategory?.index === w!.originalIndex ? (
                                 <div className="flex items-center gap-1 flex-1 min-w-0">
                                   <input
                                     type="text"
@@ -2210,7 +2267,7 @@ export default function Home() {
                                     onKeyDown={(e) => {
                                       if (e.key === 'Enter') {
                                         const next = [...allHierarchy];
-                                        next[i].category = (editingCategory?.name || '').trim();
+                                        next[w!.originalIndex].category = (editingCategory?.name || '').trim();
                                         next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                                         setAllHierarchy(next);
                                         setHasUnsavedChanges(true);
@@ -2222,7 +2279,7 @@ export default function Home() {
                                   <button
                                     onClick={() => {
                                       const next = [...allHierarchy];
-                                      next[i].category = editingCategory.name.trim();
+                                      next[w!.originalIndex].category = editingCategory.name.trim();
                                       next.sort((a, b) => a.category.localeCompare(b.category, undefined, { numeric: true, sensitivity: 'base' }));
                                       setAllHierarchy(next);
                                       setHasUnsavedChanges(true);
@@ -2236,9 +2293,9 @@ export default function Home() {
                                 </div>
                               ) : (
                                 <>
-                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{w.category}</span>
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{w!.category}</span>
                                   <button
-                                    onClick={() => setEditingCategory({ index: i, name: w.category })}
+                                    onClick={() => setEditingCategory({ index: w!.originalIndex, name: w!.category })}
                                     className="text-slate-300 hover:text-orange-500 px-1"
                                   >
                                     <Edit3 className="w-2.5 h-2.5" />
@@ -2247,7 +2304,7 @@ export default function Home() {
                               )}
                             </div>
                             <div className="space-y-3">
-                              {w.groups.map((g, gi) => (
+                              {w!.groups.map((g, gi) => (
                                 <div key={gi} className="space-y-1">
                                   <div className="px-4 py-1">
                                     <span className="text-[8px] font-bold text-orange-400 uppercase tracking-wider">{g.name}</span>
@@ -2256,7 +2313,7 @@ export default function Home() {
                                     {g.tasks.map((t, ti) => (
                                       <div key={ti} className="flex items-center gap-3 bg-white px-3 py-2.5 rounded-xl border border-slate-100 min-w-0">
                                         <div className="flex-1 min-w-0">
-                                          {editingTask?.catIndex === i && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
+                                          {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
                                             <input
                                               type="text"
                                               value={editingTask.name.replace(/_/g, ' ')}
@@ -2265,12 +2322,24 @@ export default function Home() {
                                               className="w-full bg-slate-50 border-none px-2 py-1 text-xs font-bold text-slate-900 focus:outline-none rounded-lg"
                                               onKeyDown={(e) => {
                                                 if (e.key === 'Enter') {
-                                                  const next = [...allHierarchy];
-                                                  next[i].groups[gi].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                                  setAllHierarchy(next);
-                                                  setHasUnsavedChanges(true);
-                                                  setEditingTask(null);
-                                                  showToast(`Pekerjaan diperbarui`, 'success');
+                                                  // Find real group index in main hierarchy?
+                                                  // The 'gi' loop index here is from the FILTERED groups.
+                                                  // We need the ACTUAL group index in 'allHierarchy'.
+                                                  // 'w.groups' here is filtered. 
+                                                  // Risk: If we filter, 'gi' is not the original index.
+                                                  // Solution: Map original indices or look up by name.
+                                                  // Better: Use Name lookup for safety.
+                                                  const realCatIndex = w!.originalIndex;
+                                                  const realGroup = allHierarchy[realCatIndex].groups.find(Gx => Gx.name === g.name);
+                                                  if (realGroup) {
+                                                    const realTaskIndex = realGroup.tasks.findIndex(Tx => Tx === t); // 't' is current task name
+                                                    const next = [...allHierarchy];
+                                                    next[realCatIndex].groups[next[realCatIndex].groups.indexOf(realGroup)].tasks[realTaskIndex] = editingTask.name.replace(/\s+/g, '_');
+                                                    setAllHierarchy(next);
+                                                    setHasUnsavedChanges(true);
+                                                    setEditingTask(null);
+                                                    showToast(`Pekerjaan diperbarui`, 'success');
+                                                  }
                                                 }
                                               }}
                                             />
@@ -2279,16 +2348,21 @@ export default function Home() {
                                           )}
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0">
-                                          {editingTask?.catIndex === i && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
+                                          {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === ti ? (
                                             <>
                                               <button
                                                 onClick={() => {
-                                                  const next = [...allHierarchy];
-                                                  next[i].groups[gi].tasks[ti] = editingTask.name.replace(/\s+/g, '_');
-                                                  setAllHierarchy(next);
-                                                  setHasUnsavedChanges(true);
-                                                  setEditingTask(null);
-                                                  showToast(`Pekerjaan diperbarui`, 'success');
+                                                  const realCatIndex = w!.originalIndex;
+                                                  const realGroup = allHierarchy[realCatIndex].groups.find(Gx => Gx.name === g.name);
+                                                  if (realGroup) {
+                                                    const realTaskIndex = realGroup.tasks.findIndex(Tx => Tx === t);
+                                                    const next = [...allHierarchy];
+                                                    next[realCatIndex].groups[next[realCatIndex].groups.indexOf(realGroup)].tasks[realTaskIndex] = editingTask.name.replace(/\s+/g, '_');
+                                                    setAllHierarchy(next);
+                                                    setHasUnsavedChanges(true);
+                                                    setEditingTask(null);
+                                                    showToast(`Pekerjaan diperbarui`, 'success');
+                                                  }
                                                 }}
                                                 className="text-emerald-500 p-2"
                                               >
@@ -2300,26 +2374,30 @@ export default function Home() {
                                             </>
                                           ) : (
                                             <>
-                                              <button onClick={() => setEditingTask({ catIndex: i, groupIndex: gi, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
+                                              <button onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: ti, name: t })} className="text-slate-300 hover:text-orange-500 p-2 transition-colors">
                                                 <Edit3 className="w-3.5 h-3.5" />
                                               </button>
                                               <button
                                                 onClick={() => {
                                                   if (window.confirm(`Apakah Anda yakin ingin menghapus tugas "${t}"?`)) {
+                                                    const realCatIndex = w!.originalIndex;
                                                     const next = [...allHierarchy];
-                                                    next[i].groups[gi].tasks = next[i].groups[gi].tasks.filter((_, idx) => idx !== ti);
-                                                    if (next[i].groups[gi].tasks.length === 0) {
-                                                      next[i].groups = next[i].groups.filter((_, idx) => idx !== gi);
-                                                      if (next[i].groups.length === 0) {
-                                                        setAllHierarchy(next.filter((_, idx) => idx !== i));
-                                                      } else {
-                                                        setAllHierarchy(next);
+                                                    const realGroup = next[realCatIndex].groups.find(Gx => Gx.name === g.name);
+
+                                                    if (realGroup) {
+                                                      const realTaskIndex = realGroup.tasks.findIndex(Tx => Tx === t);
+                                                      realGroup.tasks.splice(realTaskIndex, 1);
+
+                                                      // Cleanup if empty?
+                                                      if (realGroup.tasks.length === 0) {
+                                                        const gIndex = next[realCatIndex].groups.indexOf(realGroup);
+                                                        next[realCatIndex].groups.splice(gIndex, 1);
                                                       }
-                                                    } else {
+
                                                       setAllHierarchy(next);
+                                                      setHasUnsavedChanges(true);
+                                                      showToast(`Tugas ${t} dihapus`, 'info');
                                                     }
-                                                    setHasUnsavedChanges(true);
-                                                    showToast(`Tugas ${t} dihapus`, 'info');
                                                   }
                                                 }}
                                                 className="text-red-400 active:scale-90 p-2 opacity-30 hover:opacity-100 transition-opacity"
