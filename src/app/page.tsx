@@ -2314,7 +2314,7 @@ export default function Home() {
                         .filter(Boolean) // Remove nulls
                         .map((w, i) => (
                           <div key={w!.originalIndex} className="space-y-1">
-                            <div className="flex items-center justify-between px-2">
+                            <div className="flex items-center justify-between pl-2 pr-3">
                               {editingCategory?.index === w!.originalIndex ? (
                                 <div className="flex items-center gap-1 flex-1 min-w-0">
                                   <input
@@ -2389,7 +2389,7 @@ export default function Home() {
                               {w!.groups.map((g, gi) => (
                                 <div key={gi} className="space-y-1">
                                   {/* Group Header */}
-                                  <div className="pl-4 flex items-center justify-between group rounded-lg pr-2 transition-colors hover:bg-slate-50">
+                                  <div className="pl-4 flex items-center justify-between group rounded-lg pr-3 transition-colors hover:bg-slate-50">
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
                                       <ChevronRight className="w-4 h-4 text-orange-400 shrink-0" />
                                       {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === -1 ? (
