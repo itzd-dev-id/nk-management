@@ -2134,11 +2134,27 @@ export default function Home() {
                           {allHierarchy.map((h, i) => (
                             <option key={i} value={h.category}>{h.category}</option>
                           ))}
+                          <option value="new_category_custom">+ Create New Category</option>
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                           <ChevronDown className="w-4 h-4" />
                         </div>
                       </div>
+
+                      {/* Manual Category Input */}
+                      {newWorkCat === 'new_category_custom' && (
+                        <input
+                          type="text"
+                          placeholder="Enter New Category Name"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
+                          value={editingCategory?.index === -1 ? editingCategory.name : ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditingCategory({ index: -1, name: val });
+                          }}
+                          autoFocus
+                        />
+                      )}
 
                       {/* Group Select (Dynamic) */}
                       <div className="relative">
@@ -2149,7 +2165,7 @@ export default function Home() {
                           className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:border-orange-500 appearance-none disabled:opacity-50 disabled:bg-slate-100"
                         >
                           <option value="" disabled>Select Group...</option>
-                          {newWorkCat && allHierarchy.find(h => h.category === newWorkCat)?.groups.map((g, i) => (
+                          {newWorkCat && newWorkCat !== 'new_category_custom' && allHierarchy.find(h => h.category === newWorkCat)?.groups.map((g, i) => (
                             <option key={i} value={g.name}>{g.name}</option>
                           ))}
                           <option value="new_group_custom">+ Create New Group</option>
@@ -2159,13 +2175,17 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Manual Group Input (if needed) - For now enforcing existing groups or custom if selected */}
+                      {/* Manual Group Input */}
                       {newWorkGroup === 'new_group_custom' && (
                         <input
                           type="text"
                           placeholder="Enter New Group Name"
                           className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500"
-                          onBlur={(e) => setNewWorkGroup(e.target.value)}
+                          value={editingTask?.catIndex === -1 ? editingTask.name : ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setEditingTask({ catIndex: -1, groupIndex: -1, taskIndex: -1, name: val });
+                          }}
                           autoFocus
                         />
                       )}
@@ -2179,13 +2199,36 @@ export default function Home() {
                       />
                     </div>
                     <button
-                      disabled={isSavingCloud || !newWorkCat || !newWorkGroup || !newWorkTask || newWorkGroup === 'new_group_custom'}
+                      disabled={
+                        isSavingCloud ||
+                        !newWorkCat ||
+                        !newWorkGroup ||
+                        !newWorkTask ||
+                        (newWorkCat === 'new_category_custom' && (!editingCategory || !editingCategory.name)) ||
+                        (newWorkGroup === 'new_group_custom' && (!editingTask || editingTask.catIndex !== -1 || !editingTask.name))
+                      }
                       onClick={() => {
                         if (newWorkCat && newWorkGroup && newWorkTask) {
                           const next = [...allHierarchy];
-                          const catName = newWorkCat.trim();
-                          const groupName = newWorkGroup.trim();
+
+                          // Handle new category name
+                          let catName = newWorkCat.trim();
+                          if (catName === 'new_category_custom') {
+                            catName = (editingCategory?.name || '').trim();
+                          }
+
+                          // Handle new group name
+                          let groupName = newWorkGroup.trim();
+                          if (groupName === 'new_group_custom') {
+                            groupName = (editingTask?.name || '').trim();
+                          }
+
                           const taskName = newWorkTask.trim().replace(/\s+/g, '_');
+
+                          if (!catName || !groupName || !taskName) {
+                            showToast('Mohon isi semua bidang', 'error');
+                            return;
+                          }
 
                           const existingCatIndex = next.findIndex(w => w.category.toLowerCase() === catName.toLowerCase());
 
@@ -2207,7 +2250,7 @@ export default function Home() {
                               existingCat.groups.sort((a, b) => a.name.localeCompare(b.name));
                             }
                           } else {
-                            // Create new Category (Should not happen via select, but safety fallback)
+                            // Create new Category
                             next.push({
                               category: catName,
                               groups: [{ name: groupName, tasks: [taskName] }]
@@ -2217,8 +2260,18 @@ export default function Home() {
                           setAllHierarchy(next);
                           setHasUnsavedChanges(true);
                           showToast(`Pekerjaan "${newWorkTask}" ditambahkan ke ${catName} / ${groupName}`, 'success');
+
+                          // Reset inputs
                           setNewWorkTask('');
-                          // Keep Category and Group selected for rapid entry
+                          if (newWorkCat === 'new_category_custom') {
+                            setNewWorkCat('');
+                            setNewWorkGroup('');
+                            setEditingCategory(null);
+                          }
+                          if (newWorkGroup === 'new_group_custom') {
+                            setNewWorkGroup('');
+                            setEditingTask(null);
+                          }
                         } else {
                           showToast('Mohon isi semua bidang', 'error');
                         }
