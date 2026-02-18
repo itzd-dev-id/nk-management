@@ -2347,13 +2347,13 @@ export default function Home() {
                                     }}
                                     className="text-emerald-500"
                                   >
-                                    <Check className="w-3.5 h-3.5" />
+                                    <Check className="w-4 h-4" />
                                   </button>
                                 </div>
                               ) : (
                                 <>
                                   <div className="flex items-center gap-2">
-                                    <Layers className="w-3.5 h-3.5 text-slate-400" />
+                                    <Layers className="w-4 h-4 text-slate-400" />
                                     <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{w!.category}</span>
                                   </div>
                                   <div className="flex items-center">
@@ -2365,7 +2365,7 @@ export default function Home() {
                                       }}
                                       className="text-slate-300 hover:text-orange-500 px-1"
                                     >
-                                      <Edit3 className="w-3.5 h-3.5" />
+                                      <Edit3 className="w-4 h-4" />
                                     </button>
                                     <button
                                       onClick={() => {
@@ -2379,7 +2379,7 @@ export default function Home() {
                                       }}
                                       className="text-red-400 active:scale-90 px-1 opacity-30 hover:opacity-100 transition-opacity"
                                     >
-                                      <Trash2 className="w-3.5 h-3.5" />
+                                      <Trash2 className="w-4 h-4" />
                                     </button>
                                   </div>
                                 </>
@@ -2391,7 +2391,7 @@ export default function Home() {
                                   {/* Group Header */}
                                   <div className="pl-4 flex items-center justify-between group rounded-lg pr-2 transition-colors hover:bg-slate-50">
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                      <ChevronRight className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+                                      <ChevronRight className="w-4 h-4 text-orange-400 shrink-0" />
                                       {editingTask?.catIndex === w!.originalIndex && editingTask?.groupIndex === gi && editingTask?.taskIndex === -1 ? (
                                         <div className="flex items-center gap-1 flex-1">
                                           <input
@@ -2424,7 +2424,7 @@ export default function Home() {
                                             }}
                                             className="text-emerald-500"
                                           >
-                                            <Check className="w-3.5 h-3.5" />
+                                            <Check className="w-4 h-4" />
                                           </button>
                                         </div>
                                       ) : (
@@ -2436,7 +2436,7 @@ export default function Home() {
                                         onClick={() => setEditingTask({ catIndex: w!.originalIndex, groupIndex: gi, taskIndex: -1, name: g.name })}
                                         className="text-slate-300 hover:text-orange-500 p-1.5"
                                       >
-                                        <Edit3 className="w-3 h-3" />
+                                        <Edit3 className="w-4 h-4" />
                                       </button>
                                       <button
                                         onClick={() => {
@@ -2451,7 +2451,7 @@ export default function Home() {
                                         }}
                                         className="text-red-400 p-1.5"
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-4 h-4" />
                                       </button>
                                     </div>
                                   </div>
