@@ -249,18 +249,28 @@ export function detectWorkFromKeyword(
             // TIE BREAKING: Give bonus if category or group name exists in input
             const catMatch = normalizedInput.includes(item.cat.toLowerCase()) ? 1 : 0;
             const groupMatch = normalizedInput.includes(item.group.toLowerCase()) ? 1 : 0;
-            matches.push({ ...item, index: idx, contextScore: catMatch + groupMatch });
+
+            // Context Position Bonus: Prioritize groups found EARLY in the string (tags)
+            let posBonus = 0;
+            if (groupMatch) {
+                const groupIdx = normalizedInput.indexOf(item.group.toLowerCase());
+                // Bonus = 1 - (index / 10000). Max bonus ~1.0 for index 0.
+                posBonus = 1 - (groupIdx / 10000);
+            }
+
+            matches.push({ ...item, index: idx, contextScore: catMatch + groupMatch + posBonus });
         }
     }
 
     if (matches.length > 0) {
         // Sort matches: 
-        // 1. Earlier index first (prioritize tags at start)
-        // 2. Higher context score (matches group/cat name in input)
-        // 3. Longer length (more specific task name)
+        // 1. Higher context score (prioritize matches backed by early Group Context)
+        // 2. Earlier index (prioritize keywords at start)
+        // 3. Longer length
         matches.sort((a, b) => {
+            // Use epsilon for float comparison safety, though simple subtraction works for sort
+            if (Math.abs(b.contextScore - a.contextScore) > 0.0001) return b.contextScore - a.contextScore;
             if (a.index !== b.index) return a.index - b.index;
-            if (b.contextScore !== a.contextScore) return b.contextScore - a.contextScore;
             return b.priority - a.priority;
         });
 
