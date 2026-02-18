@@ -92,7 +92,9 @@ export function generateNewName(
     extension: string
 ): string {
     // workName format: "Category / Group / Task" or "Category / Task"
-    const workParts = workName.split(' / ');
+    // workName format: "Category / Group / Task" or "Category / Task"
+    // Fix: Use regex split to handle cases where spaces might be missing
+    const workParts = workName.split(/\s*\/\s*/);
     const categoryPart = workParts.length > 0 ? workParts[0].replace(/^\d+\.\s*/, '').trim() : '';
     const groupPart = workParts.length > 2 ? workParts[1].trim() : '';
     const taskPart = workParts[workParts.length - 1].trim();
