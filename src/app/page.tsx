@@ -1060,7 +1060,7 @@ export default function Home() {
         w,
         b.name,
         b.code,
-        progress || '0',
+        progress,
         idx + 1,
         extension
       );
@@ -1073,7 +1073,7 @@ export default function Home() {
         detectedDate: d,
         workName: w,
         building: b,
-        progress: progress || '0',
+        progress,
         sequence: idx + 1,
         status: 'pending' as const
       };
