@@ -91,38 +91,75 @@ export function generateNewName(
     sequence: number,
     extension: string
 ): string {
-    // workName format: "Category / Group / Task" or "Category / Task"
-    // workName format: "Category / Group / Task" or "Category / Task"
-    // Fix: Use regex split to handle cases where spaces might be missing
+    // workName format: "Category / Group / Task"
     const workParts = workName.split(/\s*\/\s*/);
-    const categoryPart = workParts.length > 0 ? workParts[0].replace(/^\d+\.\s*/, '').trim() : '';
-    const groupPart = workParts.length > 2 ? workParts[1].trim() : '';
-    const taskPart = workParts[workParts.length - 1].trim();
 
-    const safeCategory = categoryPart.replace(/\s+/g, '_');
-    const safeGroup = groupPart ? groupPart.replace(/\s+/g, '_') : '';
-    const safeTask = taskPart.replace(/\s+/g, '_').replace(/\//g, '-');
+    // Extract parts (Category, Group, Task)
+    // If only 2 parts, treat as Category / Task. If 3, Category / Group / Task
+    let category = '';
+    let group = '';
+    let task = '';
 
-    // Fix: Token-based deduplication to prevent "K3_K3"
-    // 1. Combine all parts
-    const rawParts = [safeCategory, safeGroup, safeTask].filter(Boolean).join('_');
+    if (workParts.length >= 3) {
+        category = workParts[0];
+        group = workParts[1];
+        task = workParts[2];
+    } else if (workParts.length === 2) {
+        category = workParts[0];
+        task = workParts[1];
+    } else {
+        task = workParts[0] || '';
+    }
 
-    // 2. Split into tokens, remove duplicates, and rejoin
-    const tokens = rawParts.split(/[_-]/).filter(Boolean);
-    const uniqueTokens = tokens.filter((t, index) => {
-        const lowerT = t.toLowerCase();
-        // Keep first occurrence of each word/token only
-        return tokens.findIndex(x => x.toLowerCase() === lowerT) === index;
-    });
+    // Sanitize function: replace spaces/slashes with underscores, remove special chars
+    const sanitize = (str: string) => {
+        return str
+            .replace(/^\d+\.\s*/, '') // Remove leading numbering like "1. "
+            .trim()
+            .replace(/[\/\\]/g, '_')   // Replace slashes
+            .replace(/\s+/g, '_')      // Replace spaces with underscores
+            .replace(/[^a-zA-Z0-9_\-\.]/g, ''); // Remove other special chars
+    };
 
-    const fileWork = uniqueTokens.join('_');
-    const fileBuilding = sanitizePath(buildingName).replace(/\s+/g, '_').replace(/\//g, '-');
-    const fileCode = sanitizePath(buildingCode).replace(/\s+/g, '_');
+    const safeCategory = sanitize(category);
+    const safeGroup = sanitize(group);
+    const safeTask = sanitize(task);
+    const safeBuilding = sanitize(buildingName);
+    const safeCode = sanitize(buildingCode);
+
+    // Assemble parts: Category_Group_Task_Building_Code_Sequence
+    // Filter out empty parts
+    const parts = [safeCategory, safeGroup, safeTask, safeBuilding, safeCode].filter(Boolean);
+
+    // Remove "duplicates" if Group is contained in Task or Category (e.g. Kolom_Pengecoran_Kolom -> Kolom_Pengecoran)
+    // Actually, user wants: Struktur_Kolom_Bekisting...
+    // Let's stick to the explicit parts. If Group is "Kolom" and Task is "Bekisting" -> Kolom_Bekisting.
+    // If Group is "Kolom" and Task is "Pengecoran Kolom" -> Kolom_Pengecoran_Kolom.
+    // The user's example was explicit: Struktur_Kolom_Bekisting...
+
+    // Join with underscores
+    const baseName = parts.join('_');
+
+    // Sequence
     const seqStr = sequence.toString().padStart(3, '0');
 
-    const progressPart = progress ? `${progress}%_` : '';
-    // Fix: Remove dateStr from start of filename as requested
-    return `${fileWork}_${fileBuilding}_${fileCode}_${progressPart}${seqStr}.${extension}`;
+    // Progress (Optional, added only if provided and not empty/0)
+    // User example didn't have it, but usually progress is good.
+    // If progress is provided (e.g. "50"), append it? 
+    // The example "Struktur_Kolom_Bekisting_Rusun_Guru_A_001.JPG" has NO progress.
+    // I will add it ONLY if it's explicitly passed as a non-empty string, just in case.
+    // But based on the request "rekomendasi di preview ... menjadi seperti ini", I should probably omit it if it's not in the example.
+    // However, keeping previous logic: if progress exists, add it.
+
+    // Update: User said "like this result". I will stick to the format.
+    // If progress is needed, user usually asks. 
+    // Let's keep it optional.
+
+    if (progress && progress !== '0') {
+        return `${baseName}_${progress}%_${seqStr}.${extension}`;
+    }
+
+    return `${baseName}_${seqStr}.${extension}`;
 }
 
 export function getFileExtension(filename: string): string {

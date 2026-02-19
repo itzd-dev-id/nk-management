@@ -1,0 +1,3757 @@
+[
+    {
+        "code": "I",
+        "building_name": "Struktur Gedung SMA",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pemadatan Tanah",
+                        "items": []
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Ramp",
+                        "items": [
+                            {
+                                "name": "Pelat Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Ring Balk (Paling Atas)",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Ring Balk",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Lantai Dak",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Plaza",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok Pondasi",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Amphiteater",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Gedung SMP",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "J",
+        "building_name": "Struktur Gedung SMP",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Ramp",
+                        "items": [
+                            {
+                                "name": "Pelat Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Ring Balk",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Ring Balk",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Plaza",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok Pondasi",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Amphiteater",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Gedung SD",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "K",
+        "building_name": "Struktur Gedung SD",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Pondasi Raft",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Ramp",
+                        "items": [
+                            {
+                                "name": "Pelat Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok Ramp",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Ring Balk",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Ring Balk",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Plaza",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok Pondasi",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Amphiteater",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Asrama Putri",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "C",
+        "building_name": "Struktur Asrama Putri",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "B-1a",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1b",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1c",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Dak",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Asrama Putra",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "B",
+        "building_name": "Struktur Asrama Putra",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "B-1a",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1b",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1c",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Dak",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Asrama Rusun Guru",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "A",
+        "building_name": "Struktur Asrama Rusun Guru",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "B-1a",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1b",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "B-1c",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Dak",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gedung Guest House",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "H",
+        "building_name": "Struktur Gedung Guest House",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pembuangan Tanah Galian",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Tangga",
+                        "items": [
+                            {
+                                "name": "Tangga Tipe 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Ring Balk",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Bekisting",
+                                "tasks": [
+                                    "Pekerjaan Rangka Atap Baja Ringan",
+                                    "Pekerjaan Struktur Atap Baja"
+                                ]
+                            },
+                            {
+                                "name": "Masjid",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "L",
+        "building_name": "Struktur Masjid",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gording C.3",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Sagrod",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gereja",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "S",
+        "building_name": "Struktur Gereja",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Timbunan dan Pemadatan Sirtu Secara Manual",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton",
+                                    "Pekerjaan Kolom"
+                                ]
+                            },
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gording C.3",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Bracing Bar",
+                                "tasks": [
+                                    "Turn Buckle"
+                                ]
+                            },
+                            {
+                                "name": "Sagrod",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gedung Ibadah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "S",
+        "building_name": "Struktur Gedung Ibadah",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "B-1 B1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gedung Serbaguna",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "M",
+        "building_name": "Struktur Gedung Serbaguna",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Timbunan dan Pemadatan Sirtu Secara Manual",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Tiang Pancang",
+                        "items": [
+                            {
+                                "name": "Pengadaan Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Penetrasi Tiang Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Pancang",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pemotongan Kepala Tiang Pancang",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pile Cap dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            },
+                            {
+                                "name": "Pile Cap",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai 2",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gording C.3",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Bracing Bar",
+                                "tasks": [
+                                    "Turn Buckle"
+                                ]
+                            },
+                            {
+                                "name": "Sagrod",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Dapur dan Gudang",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "G",
+        "building_name": "Struktur Dapur dan Gudang",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Atap",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Kantin SD",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "F",
+        "building_name": "Struktur Kantin SD",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Pedestal 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gording C.3",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Bracing Bar",
+                                "tasks": [
+                                    "Turn Buckle"
+                                ]
+                            },
+                            {
+                                "name": "Sagrod",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Kantin SMP dan SMA",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "F.1",
+        "building_name": "Struktur Kantin dan SMA",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Pedestal 1",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Kolom Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Balok Baja Profil Wf",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Gording C.3",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Bracing Bar",
+                                "tasks": [
+                                    "Sagrod",
+                                    "Turn Buckle"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Sambung Struktur Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Sambungan Baut",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Sambungan Angkur",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Coating Baja Profil",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Grouting Pelat Tumpu",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Rumah Genset",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "Q",
+        "building_name": "Struktur Rumah Genset",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Atap",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Rumah Pompa",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "P",
+        "building_name": "Struktur Rumah Pompa",
+        "categories": [
+            {
+                "name": "Pekerjaan Tanah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Galian",
+                        "items": [
+                            {
+                                "name": "Pelat Lantai",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Urugan Tanah Kembali",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Urugan Pasir",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Kerja",
+                        "items": [
+                            {
+                                "name": "Footplate",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Tie Beam",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Lantai Dasar",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Pekerjaan Pemadatan Tanah",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Bawah",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Fondasi Tapak dan Tie Beam",
+                        "items": [
+                            {
+                                "name": "Tie Beam",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Struktur Atas",
+                "groups": [
+                    {
+                        "name": "Pekerjaan Lantai 1",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Pelat Lantai 1",
+                        "items": [
+                            {
+                                "name": "Pelat",
+                                "tasks": [
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Kolom",
+                        "items": [
+                            {
+                                "name": "Kolom",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Lantai Atap",
+                        "items": []
+                    },
+                    {
+                        "name": "Pekerjaan Balok",
+                        "items": [
+                            {
+                                "name": "Balok",
+                                "tasks": [
+                                    "Bekisting",
+                                    "Besi Tulangan Ulir",
+                                    "Beton"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Pekerjaan Struktur Atap Baja",
+                        "items": [
+                            {
+                                "name": "Pekerjaan Rangka Atap Baja Ringan",
+                                "tasks": []
+                            },
+                            {
+                                "name": "Dudukan Ground Water Tank Fiber Reinforced Plastic",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "code": "V",
+        "building_name": "Struktur Dudukan Ground Water Tank Fiber Reinforced Plastic",
+        "categories": []
+    },
+    {
+        "code": "GLO",
+        "building_name": "Struktur Dinding Penahan Tanah Kawasan",
+        "categories": [
+            {
+                "name": "Pekerjaan Pengujian",
+                "groups": []
+            },
+            {
+                "name": "Pekerjaan Pengujian Tanah",
+                "groups": [
+                    {
+                        "name": "Umum",
+                        "items": [
+                            {
+                                "name": "Uji Laboratorium",
+                                "tasks": [
+                                    "Sifat Indek Atau Klasifikasi"
+                                ]
+                            },
+                            {
+                                "name": "Sifat Mekanikal",
+                                "tasks": [
+                                    "Uji Direct Shear",
+                                    "Uji Konsolidasi",
+                                    "Uji Triaxial Cu",
+                                    "Uji Triaxial Uu"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pekerjaan Pengujian Fondasi",
+                "groups": []
+            },
+            {
+                "name": "Pekerjaan Groundin Power House",
+                "groups": [
+                    {
+                        "name": "Umum",
+                        "items": [
+                            {
+                                "name": "Pengadaan, Pemasangan dan Pengujian Grounding Lengkap",
+                                "tasks": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

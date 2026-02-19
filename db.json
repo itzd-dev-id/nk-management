@@ -1,0 +1,568 @@
+[
+    {
+        "category": "Persiapan",
+        "_description": "Pekerjaan Persiapan Lahan, Fasilitas Proyek, dan Keselamatan Konstruksi",
+        "groups": [
+            {
+                "name": "Umum",
+                "tasks": [
+                    "Barak Tenaga Dan Barang",
+                    "Barak Tenaga dan Barang",
+                    "Bouwplank",
+                    "Direksi Keet",
+                    "Gudang Material",
+                    "Gudang Sementara",
+                    "Kantin Pekerja",
+                    "Mobilisasi Alat",
+                    "Mushola Pekerja",
+                    "Pagar Proyek",
+                    "Pagar Sementara",
+                    "Papan Nama Proyek",
+                    "Pematangan Lahan",
+                    "Pembersihan Lahan",
+                    "Toilet Pekerja"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "SMKK",
+        "_description": "Sistem Manajemen Keselamatan Konstruksi dan K3",
+        "groups": [
+            {
+                "name": "Keselamatan",
+                "tasks": [
+                    "Audit",
+                    "Audit K3",
+                    "Audit Mingguan",
+                    "Barricade",
+                    "Helmet Area",
+                    "Induction",
+                    "Jaring Pengaman",
+                    "Pagar Pengaman",
+                    "Perancah",
+                    "Rambu Safety",
+                    "Safety Net",
+                    "Safety Sign",
+                    "Scaffolding",
+                    "Toolbox Meeting",
+                    "Toolbox_Talks"
+                ]
+            },
+            {
+                "name": "Umum",
+                "tasks": [
+                    "Papan_Informasi_Gedung"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Struktur",
+        "_description": "Pekerjaan Tanah, Struktur Bawah dan Struktur Atas",
+        "groups": [
+            {
+                "name": "Tanah",
+                "tasks": [
+                    "Batu_Pondasi",
+                    "Bekisting_Pile_Cap",
+                    "Beton_Decking",
+                    "Buis Beton 30Cm",
+                    "Buis Beton 30cm",
+                    "Galian",
+                    "Galian Biasa",
+                    "Galian Tanah",
+                    "Lantai Kerja",
+                    "Mengangkut Tanah",
+                    "Pelepasan_Bekisting",
+                    "Pemadatan Tanah",
+                    "Pemasangan_Pile_Cap",
+                    "Pengecoran Lantai Kerja",
+                    "Urugan Pasir",
+                    "Urugan Split",
+                    "Urugan Tanah",
+                    "Urugan Tanah Biasa"
+                ]
+            },
+            {
+                "name": "Tie Beam",
+                "_description": "Tie Beam Lantai 1",
+                "tasks": [
+                    "Bekisting",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Beton_Decking",
+                    "Galian",
+                    "Lantai Kerja",
+                    "Pelepasan_Bekisting",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Pengecoran Tie Beam",
+                    "Tie Beam"
+                ]
+            },
+            {
+                "name": "Footplate",
+                "_description": "Pekerjaan Pondasi dan Struktur Bawah",
+                "tasks": [
+                    "Bekisting",
+                    "Bekisting_Pile_Cap",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Bored Pile",
+                    "Galian",
+                    "Lantai Kerja",
+                    "Pancang",
+                    "Pelepasan_Bekisting_Pedestal",
+                    "Pembesian",
+                    "Pemotongan Kepala Pancang",
+                    "Penetrasi Tiang Pancang",
+                    "Pengadaan Tiang Pancang",
+                    "Pengecoran",
+                    "Pengecoran Bored Pile",
+                    "Pengecoran Pile Cap",
+                    "Pengecoran Pile Head",
+                    "Pengecoran Pondasi",
+                    "Pile Cap",
+                    "Sambungan Pancang"
+                ]
+            },
+            {
+                "name": "Kolom",
+                "tasks": [
+                    "Angkur",
+                    "Bekisting",
+                    "Bekisting Kolom",
+                    "Bekisting_Pedestal",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Beton_Decking",
+                    "Erection_Besi",
+                    "Galian",
+                    "Kolom Praktis",
+                    "Pabrikasi_Besi",
+                    "Pedestal",
+                    "Pembesian",
+                    "Pembesian Kolom",
+                    "Pengecoran",
+                    "Pengecoran Kolom",
+                    "Pengecoran Kolom Praktis",
+                    "Pengecoran Pedestal"
+                ]
+            },
+            {
+                "name": "Balok",
+                "_description": "Balok Struktur di Lantai 2 dan seterusnya",
+                "tasks": [
+                    "Balok",
+                    "Balok Praktis",
+                    "Bekisting",
+                    "Bekisting Balok",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Pembesian",
+                    "Pembesian Balok",
+                    "Pengecoran",
+                    "Pengecoran Balok",
+                    "Pengecoran Balok Praktis"
+                ]
+            },
+            {
+                "name": "Pelat",
+                "_description": "Pelat Lantai Beton",
+                "tasks": [
+                    "Bekisting",
+                    "Bekisting Plat",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Pekerjaan Kolom",
+                    "Pembesian",
+                    "Pembesian Plat",
+                    "Pengecoran",
+                    "Pengecoran Pelat",
+                    "Pengecoran Plat",
+                    "Pengecoran Plat Lantai",
+                    "Plat Lantai",
+                    "Plat T=120",
+                    "Plat t=120",
+                    "Wiremesh"
+                ]
+            },
+            {
+                "name": "Ring Balok",
+                "_description": "Balok Struktur di level paling atas (Atap)",
+                "tasks": [
+                    "Bekisting",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Pembesian",
+                    "Pengecoran",
+                    "Pengecoran Ring Balok"
+                ]
+            },
+            {
+                "name": "Lainnya",
+                "tasks": [
+                    "Bekisting",
+                    "Bekisting Tangga",
+                    "Besi Tulangan Ulir",
+                    "Beton",
+                    "Buis Beton",
+                    "Finish Trowel",
+                    "Lean_Concrete",
+                    "Lift Shaft",
+                    "Pekerjaan Rangka Atap Baja Ringan",
+                    "Pekerjaan Struktur Atap Baja",
+                    "Pembesian Tangga",
+                    "Pengecoran Lift Shaft",
+                    "Pengecoran Ramp",
+                    "Pengecoran Tangga",
+                    "Penyemprotan Anti Rayap",
+                    "Ramp",
+                    "Sagrod",
+                    "Sifat Indek Atau Klasifikasi",
+                    "Tangga",
+                    "Turn Buckle",
+                    "Uji Direct Shear",
+                    "Uji Konsolidasi",
+                    "Uji Triaxial Cu",
+                    "Uji Triaxial Uu"
+                ]
+            },
+            {
+                "name": "Pabrikasi",
+                "tasks": [
+                    "Pabrikasi Bekisting",
+                    "Pabrikasi Besi"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Arsitektur",
+        "_description": "Pekerjaan Arsitektur Dinding, Lantai, Plafon, Pintu, Jendela dan Sanitasi",
+        "groups": [
+            {
+                "name": "Dinding",
+                "tasks": [
+                    "Acian",
+                    "Bata Ringan",
+                    "Dinding Rooster",
+                    "Finishing Beton Expose",
+                    "Pasangan Bata",
+                    "Pasangan Batako",
+                    "Plesteran",
+                    "Plesteran Dalam",
+                    "Plesteran Luar",
+                    "Plesteran Mortar Siap Pakai"
+                ]
+            },
+            {
+                "name": "Lantai",
+                "tasks": [
+                    "Cat Epoxy",
+                    "Granit Lantai",
+                    "Guiding Block",
+                    "Homogeneous Tile Polish",
+                    "Homogeneous Tile Unpolished",
+                    "Keramik Dinding",
+                    "Keramik Lantai"
+                ]
+            },
+            {
+                "name": "Plafon",
+                "tasks": [
+                    "List Plafond",
+                    "Plafon Gypsum",
+                    "Plafon Kalsiboard",
+                    "Plafond UPVC",
+                    "Plafond Upvc",
+                    "Rangka Metalfuring"
+                ]
+            },
+            {
+                "name": "Pintu & Jendela",
+                "tasks": [
+                    "Daun Jendela",
+                    "Daun Pintu",
+                    "Jendela",
+                    "Kaca Jendela",
+                    "Kaca Pintu",
+                    "Kusen",
+                    "Kusen Jendela",
+                    "Kusen Pintu",
+                    "Pintu"
+                ]
+            },
+            {
+                "name": "Atap",
+                "tasks": [
+                    "Lisplang",
+                    "Metal_Berpasir",
+                    "Nok Atap",
+                    "Penutup Atap",
+                    "Penutup Genteng",
+                    "Penutup Spandek",
+                    "Rangka Atap",
+                    "Rangka Baja",
+                    "Rangka Kayu",
+                    "Talang"
+                ]
+            },
+            {
+                "name": "Sanitasi",
+                "tasks": [
+                    "Closet",
+                    "Floor Drain",
+                    "Sanitary",
+                    "Shower",
+                    "Wastafel"
+                ]
+            },
+            {
+                "name": "Finishing Lainnya",
+                "tasks": [
+                    "Bordes Tangga",
+                    "Cat Eksterior",
+                    "Cat Interior",
+                    "Handrail Tangga",
+                    "Kanopi",
+                    "Railing Balkon",
+                    "Railing Tangga"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "MEP",
+        "_description": "Mechanical, Electrical, and Plumbing",
+        "groups": [
+            {
+                "name": "Listrik",
+                "tasks": [
+                    "Circuit Breaker",
+                    "Cubicle 20KV",
+                    "Cubicle 20Kv",
+                    "Grounding",
+                    "Instalasi Kabel",
+                    "Instalasi Listrik",
+                    "Load Break Switch",
+                    "Panel Listrik",
+                    "Panel Tegangan Menengah",
+                    "Stop Kontak",
+                    "Titik Lampu",
+                    "Trafo Oil Ester"
+                ]
+            },
+            {
+                "name": "Air & Plumbing",
+                "tasks": [
+                    "Instalasi Hydrant",
+                    "Instalasi Pipa Air",
+                    "Instalasi Pipa Limbah",
+                    "Pompa Air",
+                    "Pompa Alkon",
+                    "Tandon Air",
+                    "Tangki Air"
+                ]
+            },
+            {
+                "name": "HVAC",
+                "tasks": [
+                    "Exhaust Fan",
+                    "Instalasi AC",
+                    "Instalasi Ac",
+                    "Instalasi Exhaust Fan",
+                    "Split AC",
+                    "Split Ac",
+                    "VRV AC",
+                    "Vrv Ac"
+                ]
+            },
+            {
+                "name": "Penyelamatan",
+                "tasks": [
+                    "CCTV",
+                    "Cctv",
+                    "Instalasi Fire Alarm",
+                    "Smoke Detector"
+                ]
+            },
+            {
+                "name": "Genset",
+                "tasks": [
+                    "Battery Charger",
+                    "Flow Meter",
+                    "Genset",
+                    "Genset 300KVA Silent",
+                    "Genset 300Kva Silent",
+                    "Knalpot Silencer",
+                    "Panel Genset AMF",
+                    "Panel Genset Amf",
+                    "Tanki Genset"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Pekerjaan Lapangan",
+        "_description": "Pekerjaan Lansekap, Saluran, dan Fasilitas Luar",
+        "groups": [
+            {
+                "name": "Lansekap",
+                "tasks": [
+                    "Geotextil",
+                    "Grow In",
+                    "Land Clearing",
+                    "Leveling Subgrade",
+                    "Media Tanam",
+                    "Pasca Grow In",
+                    "Penanaman Pohon",
+                    "Penanaman Rumput",
+                    "Pratanam",
+                    "Rumput",
+                    "Taman",
+                    "Weed Killer"
+                ]
+            },
+            {
+                "name": "Fasilitas Luar",
+                "tasks": [
+                    "Grass Block",
+                    "Jaring Pengaman Lapangan",
+                    "Marka Lapangan",
+                    "Net Voli",
+                    "Paving Block",
+                    "Paving Jalan",
+                    "Paving Trotoar",
+                    "Ring Basket",
+                    "Saluran",
+                    "Saluran Drainase"
+                ]
+            },
+            {
+                "name": "Jalan Utama",
+                "tasks": [
+                    "Pemadatan"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Logistik & Material",
+        "_description": "Logistik dan Kedatangan Material di Proyek",
+        "groups": [
+            {
+                "name": "Pengiriman",
+                "tasks": [
+                    "Alat_Berat",
+                    "Pengiriman Bata",
+                    "Pengiriman Batu",
+                    "Pengiriman Besi",
+                    "Pengiriman Beton",
+                    "Pengiriman Keramik",
+                    "Pengiriman Material",
+                    "Pengiriman Pancang",
+                    "Pengiriman Pasir",
+                    "Pengiriman Semen",
+                    "Pengiriman Tanah",
+                    "Pengiriman Tiang Pancang"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Furniture",
+        "_description": "Pengadaan dan Instalasi Furniture",
+        "groups": [
+            {
+                "name": "Meja & Kursi",
+                "tasks": [
+                    "Kursi Guru",
+                    "Kursi Kelas",
+                    "Kursi Lab",
+                    "Kursi Nakes",
+                    "Kursi Pasien",
+                    "Kursi Rapat",
+                    "Meja Guru",
+                    "Meja Kelas",
+                    "Meja Lab",
+                    "Meja Rapat",
+                    "Meja Sofa"
+                ]
+            },
+            {
+                "name": "Penyimpanan",
+                "tasks": [
+                    "Almari",
+                    "Kitchen Set",
+                    "Lemari",
+                    "Nakas"
+                ]
+            },
+            {
+                "name": "Lainnya",
+                "tasks": [
+                    "Bed UKS",
+                    "Bed Uks",
+                    "Cleaning",
+                    "Marking Parkir",
+                    "Papan Nama",
+                    "Papan Tulis",
+                    "Pembersihan Akhir",
+                    "Signage",
+                    "Sofa"
+                ]
+            }
+        ]
+    },
+    {
+        "category": "Dokumentasi",
+        "_description": "Laporan dan Dokumentasi Visual Proyek",
+        "groups": [
+            {
+                "name": "Laporan",
+                "tasks": [
+                    "As Built Drawing",
+                    "Progress Bulanan",
+                    "Progress Harian",
+                    "Progress Mingguan"
+                ]
+            },
+            {
+                "name": "Visual",
+                "tasks": [
+                    "Dokumentasi Material",
+                    "Drone View",
+                    "Foto Udara",
+                    "Inspeksi Bersama",
+                    "Joint Inspection"
+                ]
+            },
+            {
+                "name": "Kunjungan",
+                "tasks": [
+                    "PUPR_BKAD_PTPN"
+                ]
+            },
+            {
+                "name": "Penghormatan",
+                "tasks": [
+                    "Pemutaran_Lagu_Kebangsaan"
+                ]
+            },
+            {
+                "name": "Persiapan Pelaksana",
+                "tasks": [
+                    "Coffee_Morning"
+                ]
+            },
+            {
+                "name": "Tes",
+                "tasks": [
+                    "Lateral"
+                ]
+            }
+        ]
+    }
+]
