@@ -607,7 +607,18 @@ export default function Home() {
       const slot = { ...next[slotIndex] };
       const currentTags = [...slot.tags];
 
-      const newTag = tag.includes(' / ') ? tag.split(' / ').pop() || tag : tag;
+      // When tag comes from dropdown as "Category / Group / Task", preserve Group/Task as path
+      // e.g., "Struktur / Kolom / Bekisting" → "Kolom/Bekisting" (keeps group context for detection)
+      let newTag = tag;
+      if (tag.includes(' / ')) {
+        const parts = tag.split(' / ');
+        if (parts.length >= 3) {
+          // Category / Group / Task → Group/Task
+          newTag = `${parts[1]}/${parts[2]}`;
+        } else if (parts.length === 2) {
+          newTag = parts[1]; // Category / Task → Task
+        }
+      }
       if (!slot.tags.includes(newTag)) {
         slot.tags = [...slot.tags, newTag];
 
