@@ -6,7 +6,7 @@ import { DropZone } from '@/components/DropZone';
 import { FileList } from '@/components/FileList';
 import { WorkSelector } from '@/components/WorkSelector';
 import { Building, FileMetadata } from '@/types';
-import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor, detectFileDate } from '@/lib/utils';
+import { generateNewName, getFileExtension, getDefaultDate, detectBuildingFromKeyword, formatDecimalMinutes, getDayNameIndo, detectWorkFromKeyword, getExifData, injectExif, createGpsExif, getBadgeColor, detectFileDate, buildDetectionKeyword } from '@/lib/utils';
 import exifr from 'exifr';
 import { FolderOpen, HardHat, Cog, LayoutDashboard, ChevronRight, ChevronDown, Play, LogIn, LogOut, User, Check, Loader2, Trash2, XCircle, Info, Edit3, Save, Database, PlusCircle, ClipboardList, Zap, FileIcon, UploadCloud, MapPin, Layers, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -611,17 +611,8 @@ export default function Home() {
       if (!slot.tags.includes(newTag)) {
         slot.tags = [...slot.tags, newTag];
 
-        // RE-DETECT for this slot
-        const slotKeywords: string[] = [];
-        slotKeywords.push(...slot.tags);
-        if (slot.file) {
-          const fileName = slot.file.name.split('.')[0];
-          // Only add filename if not already covered by a tag (simple check)
-          if (!slot.tags.some(t => fileName.includes(t))) {
-            slotKeywords.push(fileName);
-          }
-        }
-        const fullKeyword = slotKeywords.join(', ');
+        // RE-DETECT for this slot (tags-only when tags exist, filename as fallback)
+        const fullKeyword = buildDetectionKeyword(slot.tags, slot.file?.name.split('.')[0]);
 
         slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
         const rawT = detectWorkFromKeyword(
@@ -660,16 +651,8 @@ export default function Home() {
       const slot = { ...next[slotIndex] };
       slot.tags = slot.tags.filter((_, i) => i !== tagIndex);
 
-      // RE-DETECT after removal
-      const slotKeywords: string[] = [];
-      slotKeywords.push(...slot.tags);
-      if (slot.file) {
-        const fileName = slot.file.name.split('.')[0];
-        if (!slot.tags.some(t => fileName.includes(t))) {
-          slotKeywords.push(fileName);
-        }
-      }
-      const fullKeyword = slotKeywords.join(', ');
+      // RE-DETECT after removal (tags-only when tags exist, filename as fallback)
+      const fullKeyword = buildDetectionKeyword(slot.tags, slot.file?.name.split('.')[0]);
 
       slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
       const rawT = detectWorkFromKeyword(
@@ -739,24 +722,13 @@ export default function Home() {
   useEffect(() => {
     setSlots(prev => {
       const next = prev.map(slot => {
-        const slotKeywords: string[] = [];
-        // Prioritize tags over filename for detection
-        slotKeywords.push(...slot.tags);
+        // Tags-only when tags exist, filename as fallback
+        const fullKeyword = buildDetectionKeyword(slot.tags, slot.file?.name.split('.')[0]);
 
-        if (slot.file) {
-          const fileName = slot.file.name.split('.')[0];
-          // Only add filename if not already covered by a tag
-          if (!slot.tags.some(t => fileName.includes(t))) {
-            slotKeywords.push(fileName);
-          }
-        }
-
-        if (slotKeywords.length === 0) {
+        if (!fullKeyword) {
           if (slot.detectedBuilding === null && slot.detectedWorkName === '') return slot;
           return { ...slot, detectedBuilding: null, detectedWorkName: '' };
         }
-
-        const fullKeyword = slotKeywords.join(', ');
         const detectedB = detectBuildingFromKeyword(fullKeyword, allBuildings);
         const detectedTRaw = detectWorkFromKeyword(
           fullKeyword,
@@ -1256,9 +1228,8 @@ export default function Home() {
                               detectedDate: date
                             };
 
-                            // RE-DETECT based on first file (or we could combine names, but first file is standard)
-                            const slotKeywords = [...slot.tags, mainFile.name.split('.')[0]];
-                            const fullKeyword = slotKeywords.join(', ');
+                            // RE-DETECT (tags-only when tags exist, filename as fallback)
+                            const fullKeyword = buildDetectionKeyword(slot.tags, mainFile.name.split('.')[0]);
 
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
                             const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
@@ -1293,9 +1264,8 @@ export default function Home() {
                             const next = [...prev];
                             const slot = { ...next[0], file, detectedDate: date };
 
-                            // RE-DETECT
-                            const slotKeywords = [...slot.tags, file.name.split('.')[0]];
-                            const fullKeyword = slotKeywords.join(', ');
+                            // RE-DETECT (tags-only when tags exist, filename as fallback)
+                            const fullKeyword = buildDetectionKeyword(slot.tags, file.name.split('.')[0]);
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
                             const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
                             if (rawT) {
@@ -1386,9 +1356,8 @@ export default function Home() {
                               const next = [...prev];
                               const slot = { ...next[idx], file, detectedDate: date };
 
-                              // RE-DETECT
-                              const slotKeywords = [...slot.tags, file.name.split('.')[0]];
-                              const fullKeyword = slotKeywords.join(', ');
+                              // RE-DETECT (tags-only when tags exist, filename as fallback)
+                              const fullKeyword = buildDetectionKeyword(slot.tags, file.name.split('.')[0]);
                               slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
                               const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
                               if (rawT) {

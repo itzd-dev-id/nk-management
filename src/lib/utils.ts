@@ -6,6 +6,19 @@ export function escapeRegExp(string: string): string {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Build the keyword string for detection functions.
+ * RULE: If the user has added manual tags, ONLY use tags (ignore filename entirely).
+ * Filename is ONLY used as a fallback when there are NO tags.
+ * This prevents long filenames from contaminating detection results.
+ */
+export function buildDetectionKeyword(tags: string[], fileName?: string): string {
+    if (tags.length > 0) {
+        return tags.join(', ');
+    }
+    return fileName || '';
+}
+
 export async function getExifData(file: Blob): Promise<string | null> {
     try {
         const dataUrl = await new Promise<string>((resolve) => {
