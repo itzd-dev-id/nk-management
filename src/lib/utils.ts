@@ -204,48 +204,67 @@ export function extractGDriveId(idOrUrl: string): string {
 export function detectBuildingFromKeyword(keyword: string, buildings: any[]): any | null {
     if (!keyword) return null;
 
-    // Split by comma or semicolon first to get phrases
-    const rawParts = keyword.split(/[,;]/).map(p => p.trim()).filter(Boolean);
-    if (rawParts.length === 0) return null;
+    const phrases = keyword.split(/[,;]/).map(p => p.trim()).filter(Boolean);
+    if (phrases.length === 0) return null;
 
-    // PASS 0: Check each part for [Code] Name format (highest priority)
-    for (const part of rawParts) {
-        const badgeMatch = part.match(/^\[(.*?)\]\s*(.*)$/i);
+    let bestMatch = null;
+    let maxScore = 0;
+
+    for (let pIndex = 0; pIndex < phrases.length; pIndex++) {
+        const phrase = phrases[pIndex];
+        const isTagPhrase = (phrases.length > 1 && pIndex < phrases.length - 1);
+
+        let score = 0;
+        let match = null;
+
+        // PASS 0: [Code] Name format (highest priority)
+        const badgeMatch = phrase.match(/^\[(.*?)\]\s*(.*)$/i);
         if (badgeMatch) {
             const codePart = badgeMatch[1].toLowerCase().trim();
             const b = buildings.find(b => b.code.toLowerCase() === codePart);
-            if (b) return b;
+            if (b) { score += 1000; match = b; }
+        }
+
+        if (!match) {
+            const normalizedPhrase = phrase.toLowerCase().replace(/_/g, ' ').trim();
+            const allTokens = normalizedPhrase.replace(/[\[\]]/g, ' ').split(/[\s]+/).filter(Boolean);
+
+            // PASS 1: Exact Code Match
+            for (const token of allTokens) {
+                const b = buildings.find(b => b.code.toLowerCase() === token);
+                if (b) { score += 500; match = match || b; }
+            }
+
+            // PASS 2: Exact Name Match
+            if (!match) {
+                const b = buildings.find(b => b.name.toLowerCase() === normalizedPhrase);
+                if (b) { score += 300; match = b; }
+            }
+
+            // PASS 3: Partial Name Match (Word Boundary)
+            if (!match) {
+                for (const token of allTokens) {
+                    if (token.length <= 2) continue;
+                    const escapedTerm = escapeRegExp(token);
+                    const regex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
+                    const b = buildings.find(b => regex.test(b.name));
+                    if (b) { score += 100; match = match || b; }
+                }
+            }
+        }
+
+        if (match && score > 0) {
+            // Prioritize manual tags over the filename
+            if (isTagPhrase) score += 10000;
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestMatch = match;
+            }
         }
     }
 
-    // Prepare all tokens for scanning
-    // We treat the whole string as a bag of words/phrases
-    const allTokens = keyword.toLowerCase().replace(/_/g, ' ').replace(/[\[\]]/g, ' ').split(/[,;\s]+/).filter(Boolean);
-
-    // PASS 1: Exact Code Match
-    for (const token of allTokens) {
-        const b = buildings.find(b => b.code.toLowerCase() === token);
-        if (b) return b;
-    }
-
-    // PASS 2: Exact Name Match
-    // We need to check phrases for names with spaces, so we check rawParts again
-    for (const part of rawParts) {
-        const normalizedPart = part.toLowerCase().replace(/_/g, ' ').trim();
-        const b = buildings.find(b => b.name.toLowerCase() === normalizedPart);
-        if (b) return b;
-    }
-
-    // PASS 3: Partial Name Match (Word Boundary)
-    for (const token of allTokens) {
-        if (token.length <= 2) continue; // Skip very short tokens
-        const escapedTerm = escapeRegExp(token);
-        const regex = new RegExp(`\\b${escapedTerm}\\b`, 'i');
-        const b = buildings.find(b => regex.test(b.name));
-        if (b) return b;
-    }
-
-    return null;
+    return bestMatch;
 }
 
 export function detectWorkFromKeyword(
@@ -255,136 +274,114 @@ export function detectWorkFromKeyword(
 ): string {
     if (!keyword) return '';
 
-    // Normalize entire keyword string, splitting by common separators to get tokens
-    // We do NOT stop at the first comma anymore
-    const normalizedInput = keyword.toLowerCase().replace(/_/g, ' ').replace(/[\[\]]/g, ' ');
+    // Split by comma. Early phrases are manual tags, the last phrase is usually the generated filename.
+    const phrases = keyword.split(',').map(s => s.trim()).filter(Boolean);
+
+    const aliases: { [key: string]: string } = {
+        'plat': 'pelat',
+        'plafond': 'plafon',
+        'ac': 'hvac',
+    };
 
     // Filter hierarchy if filter provided
     const filteredHierarchy = categoryFilter
         ? hierarchy.filter(h => h.category.toLowerCase() === categoryFilter.toLowerCase())
         : hierarchy;
 
-    // Flatten hierarchy into a list of { cat, group, task } objects
-    // This allows us to sort by task name length to prioritize specific matches (e.g. "Bekisting Kolom") over generic ones (e.g. "Bekisting")
-    const allTasks: { cat: string; group: string; task: string; priority: number }[] = [];
-
+    const allTasks: { cat: string; group: string; task: string }[] = [];
     for (const cat of filteredHierarchy) {
         for (const group of cat.groups) {
             for (const task of group.tasks) {
-                // Priority Score: longer task name = higher priority
-                // Also give slight boost to exact phrase match potential
                 allTasks.push({
                     cat: cat.category,
                     group: group.name,
-                    task: task,
-                    priority: task.length
+                    task: task
                 });
             }
         }
     }
 
-    // Sort by length of task name (descending)
-    allTasks.sort((a, b) => b.priority - a.priority);
+    let bestMatch: any = null;
+    let maxScore = 0;
 
-    // PASS 1: Exact Task Name Match (Full Phrase Check)
-    const matches: { cat: string; group: string; task: string; priority: number; index: number; contextScore: number }[] = [];
-
-    // Parse explicit path inputs like "group/task" or "category/group/task"
-    const isExplicitPath = keyword.includes('/');
-    const pathSegments = isExplicitPath ? keyword.split('/').map(s => s.trim().toLowerCase().replace(/_/g, ' ')) : [];
-
-    for (const item of allTasks) {
-        const catName = item.cat.toLowerCase().replace(/_/g, ' ');
-        const groupName = item.group.toLowerCase().replace(/_/g, ' ');
-        const taskName = item.task.toLowerCase().replace(/_/g, ' ');
-
-        // Handle explicit paths (e.g., "kolom/bekisting")
-        if (isExplicitPath) {
-            const hasTaskMatch = pathSegments.some(seg => taskName.includes(seg) || seg.includes(taskName));
-            const hasGroupMatch = pathSegments.some(seg => groupName.includes(seg) || seg.includes(groupName));
-            const hasCatMatch = pathSegments.some(seg => catName.includes(seg) || seg.includes(catName));
-
-            if (hasTaskMatch) {
-                // Massive priority boost if the path perfectly aligns with the hierarchy
-                const pathScore = (hasGroupMatch ? 50 : 0) + (hasCatMatch ? 50 : 0);
-                if (pathScore > 0) {
-                    matches.push({ ...item, index: 0, contextScore: pathScore + 100 });
-                }
-            }
+    for (let pIndex = 0; pIndex < phrases.length; pIndex++) {
+        let cleanPhrase = phrases[pIndex].toLowerCase().replace(/_/g, ' ').replace(/[\[\]]/g, ' ');
+        for (const [alias, realName] of Object.entries(aliases)) {
+            cleanPhrase = cleanPhrase.replace(new RegExp(`\\b${alias}\\b`, 'gi'), realName);
         }
 
-        // Use indexOf to find position
-        const idx = normalizedInput.indexOf(taskName);
-        if (idx !== -1) {
-            // TIE BREAKING: Give bonus if category or group name exists in input
-            const catMatch = normalizedInput.includes(item.cat.toLowerCase()) ? 1 : 0;
-            const groupMatch = normalizedInput.includes(item.group.toLowerCase()) ? 1 : 0;
+        const tokens = cleanPhrase.split(/[\s\/]+/).filter(t => t.length > 2 && !['work', 'name', 'select', 'building', 'date', 'jpeg', 'jpg', 'png'].includes(t));
+        if (tokens.length === 0) continue;
 
-            // Context Position Bonus: Prioritize groups found EARLY in the string (tags)
-            let posBonus = 0;
-            if (groupMatch) {
-                const groupIdx = normalizedInput.indexOf(item.group.toLowerCase());
+        // Prioritize manual tags (all phrases except the last one, which is the filename)
+        const isTagPhrase = (phrases.length > 1 && pIndex < phrases.length - 1);
 
-                // NEW: IMPLICIT GROUP. If group word is BEFORE the task word, treat it as a deliberate tag format "Group Task" (e.g. "kolom bekisting")
-                if (groupIdx < idx) {
-                    posBonus = 50; // MASSIVE BOOST
-                } else if (groupIdx === 0) {
-                    posBonus = 10;
-                } else {
-                    // Regular decay for later positions
-                    posBonus = 1 - (groupIdx / 10000);
-                }
-            }
-
-            matches.push({ ...item, index: idx, contextScore: (catMatch * 10) + (groupMatch * 20) + posBonus });
-        }
-    }
-
-    if (matches.length > 0) {
-        // Sort matches: 
-        // 1. Higher context score (prioritize matches backed by early Group Context)
-        // 2. Earlier index (prioritize keywords at start)
-        // 3. Longer length
-        matches.sort((a, b) => {
-            // Use epsilon for float comparison safety, though simple subtraction works for sort
-            if (Math.abs(b.contextScore - a.contextScore) > 0.0001) return b.contextScore - a.contextScore;
-            if (a.index !== b.index) return a.index - b.index;
-            return b.priority - a.priority;
-        });
-
-        return `${matches[0].cat} / ${matches[0].group} / ${matches[0].task}`;
-    }
-
-    // PASS 2: Token-based Matching
-    // We still use tokens for fuzzy matching if full phrase fails, but check sorted tasks first
-    const tokens = normalizedInput.split(/[,;\s]+/).filter(t => t.length > 2 && !['work', 'name', 'select', 'building', 'date'].includes(t)); // Ignore common placeholders
-
-    for (const token of tokens) {
-        const escapedToken = escapeRegExp(token);
-        const regex = new RegExp(`\\b${escapedToken}\\b`, 'i');
-
-        // Check Task Names (Sorted)
         for (const item of allTasks) {
-            if (regex.test(item.task.toLowerCase())) {
-                return `${item.cat} / ${item.group} / ${item.task}`;
-            }
-        }
+            let score = 0;
 
-        // Check Group Names
-        for (const cat of filteredHierarchy) {
-            for (const group of cat.groups) {
-                if (regex.test(group.name.toLowerCase())) {
-                    return `${cat.category} / ${group.name} / ${group.tasks[0] || ''}`; // Default to first task if group matches
+            const catStr = item.cat.toLowerCase();
+            const groupStr = item.group.toLowerCase();
+            const taskStr = item.task.toLowerCase();
+
+            // 1. Explicit path logic (e.g. "kolom/bekisting")
+            if (phrases[pIndex].includes('/')) {
+                const parts = phrases[pIndex].split('/').map(s => s.trim().toLowerCase());
+                if (parts.length >= 2) {
+                    const parent = aliases[parts[parts.length - 2]] || parts[parts.length - 2];
+                    const child = aliases[parts[parts.length - 1]] || parts[parts.length - 1];
+
+                    if ((groupStr === parent || groupStr.includes(parent)) && (taskStr === child || taskStr.includes(child))) {
+                        score += 1000;
+                    }
+                }
+            }
+
+            // 2. Exact Token Matches
+            const catTokens = catStr.split(/[\s\/]+/).filter(Boolean);
+            const groupTokens = groupStr.split(/[\s\/]+/).filter(Boolean);
+            const taskTokens = taskStr.split(/[\s\/]+/).filter(Boolean);
+
+            for (const token of tokens) {
+                if (taskTokens.includes(token)) score += 30;
+                else if (taskTokens.some(t => t.includes(token))) score += 15;
+
+                if (groupTokens.includes(token)) score += 20;
+                else if (groupTokens.some(t => t.includes(token))) score += 10;
+
+                if (catTokens.includes(token)) score += 5;
+            }
+
+            // 3. Implicit Grouping (e.g. "kolom bekisting")
+            const groupIdx = cleanPhrase.indexOf(groupStr);
+            const taskIdx = cleanPhrase.indexOf(taskStr);
+            if (groupIdx !== -1 && taskIdx !== -1 && groupIdx < taskIdx) {
+                score += 500;
+            }
+
+            // 4. Exact phrase match
+            if (cleanPhrase === taskStr) score += 200;
+            if (cleanPhrase === groupStr) score += 100;
+
+            if (score > 0) {
+                // MASSIVE boost if this phrase is a manual tag (not the filename)
+                if (isTagPhrase) {
+                    score += 10000;
+                }
+
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestMatch = item;
+                } else if (score === maxScore && bestMatch) {
+                    if (item.task.length < bestMatch.task.length) {
+                        bestMatch = item;
+                    }
                 }
             }
         }
+    }
 
-        // Check Category Names
-        for (const cat of filteredHierarchy) {
-            if (regex.test(cat.category.toLowerCase())) {
-                return `${cat.category} / ${cat.groups[0]?.name || ''} / ${cat.groups[0]?.tasks[0] || ''}`;
-            }
-        }
+    if (bestMatch) {
+        return `${bestMatch.cat} / ${bestMatch.group} / ${bestMatch.task}`;
     }
 
     return '';
