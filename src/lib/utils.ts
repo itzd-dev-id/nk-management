@@ -118,7 +118,8 @@ export function generateNewName(
             .trim()
             .replace(/[\/\\]/g, '_')   // Replace slashes
             .replace(/\s+/g, '_')      // Replace spaces with underscores
-            .replace(/[^a-zA-Z0-9_\-\.]/g, ''); // Remove other special chars
+            .replace(/[^a-zA-Z0-9_\-\.&]/g, '') // Remove other special chars, allow &
+            .replace(/_+/g, '_');      // Collapse consecutive underscores
     };
 
     const safeCategory = sanitize(category);
