@@ -127,15 +127,24 @@ export function generateNewName(
     const safeBuilding = sanitize(buildingName);
     const safeCode = sanitize(buildingCode);
 
-    // Assemble parts: Category_Group_Task_Building_Code_Sequence
+    // Assemble parts: Category, Group, Task, Building, Code
     // Filter out empty parts
-    const parts = [safeCategory, safeGroup, safeTask, safeBuilding, safeCode].filter(Boolean);
+    const tempParts = [safeCategory, safeGroup, safeTask, safeBuilding, safeCode].filter(Boolean);
 
-    // Remove "duplicates" if Group is contained in Task or Category (e.g. Kolom_Pengecoran_Kolom -> Kolom_Pengecoran)
-    // Actually, user wants: Struktur_Kolom_Bekisting...
-    // Let's stick to the explicit parts. If Group is "Kolom" and Task is "Bekisting" -> Kolom_Bekisting.
-    // If Group is "Kolom" and Task is "Pengecoran Kolom" -> Kolom_Pengecoran_Kolom.
-    // The user's example was explicit: Struktur_Kolom_Bekisting...
+    // Remove duplicates recursively (e.g. if Task contains Group, or if they are identical)
+    // "K3" and "K3" -> "K3"
+    const parts: string[] = [];
+    for (const part of tempParts) {
+        // If the part is exactly the same as the LAST added part, skip it (e.g., Task == Group, or Building == Code)
+        if (parts.length > 0 && parts[parts.length - 1].toLowerCase() === part.toLowerCase()) {
+            continue;
+        }
+        // If the part is already contained as a standalone word in the previous part, skip it
+        // e.g. "Pengecoran Kolom" then "Kolom", we don't need the second "Kolom"
+        // But we must be careful: if previous is "Struktur Bawah" and current is "Tie Beam", keep both.
+        // User example: SMKK_Keselamatan_Toolbox_Talks_K3. If group is "Keselamatan" and task is "Toolbox Talks K3"
+        parts.push(part);
+    }
 
     // Join with underscores
     const baseName = parts.join('_');
@@ -280,8 +289,30 @@ export function detectWorkFromKeyword(
     // PASS 1: Exact Task Name Match (Full Phrase Check)
     const matches: { cat: string; group: string; task: string; priority: number; index: number; contextScore: number }[] = [];
 
+    // Parse explicit path inputs like "group/task" or "category/group/task"
+    const isExplicitPath = keyword.includes('/');
+    const pathSegments = isExplicitPath ? keyword.split('/').map(s => s.trim().toLowerCase().replace(/_/g, ' ')) : [];
+
     for (const item of allTasks) {
+        const catName = item.cat.toLowerCase().replace(/_/g, ' ');
+        const groupName = item.group.toLowerCase().replace(/_/g, ' ');
         const taskName = item.task.toLowerCase().replace(/_/g, ' ');
+
+        // Handle explicit paths (e.g., "kolom/bekisting")
+        if (isExplicitPath) {
+            const hasTaskMatch = pathSegments.some(seg => taskName.includes(seg) || seg.includes(taskName));
+            const hasGroupMatch = pathSegments.some(seg => groupName.includes(seg) || seg.includes(groupName));
+            const hasCatMatch = pathSegments.some(seg => catName.includes(seg) || seg.includes(catName));
+
+            if (hasTaskMatch) {
+                // Massive priority boost if the path perfectly aligns with the hierarchy
+                const pathScore = (hasGroupMatch ? 50 : 0) + (hasCatMatch ? 50 : 0);
+                if (pathScore > 0) {
+                    matches.push({ ...item, index: 0, contextScore: pathScore + 100 });
+                }
+            }
+        }
+
         // Use indexOf to find position
         const idx = normalizedInput.indexOf(taskName);
         if (idx !== -1) {
@@ -293,8 +324,11 @@ export function detectWorkFromKeyword(
             let posBonus = 0;
             if (groupMatch) {
                 const groupIdx = normalizedInput.indexOf(item.group.toLowerCase());
-                // NUCLEAR FIX: If the group is at index 0 (Tag), give it massive priority
-                if (groupIdx === 0) {
+
+                // NEW: IMPLICIT GROUP. If group word is BEFORE the task word, treat it as a deliberate tag format "Group Task" (e.g. "kolom bekisting")
+                if (groupIdx < idx) {
+                    posBonus = 50; // MASSIVE BOOST
+                } else if (groupIdx === 0) {
                     posBonus = 10;
                 } else {
                     // Regular decay for later positions
@@ -302,7 +336,7 @@ export function detectWorkFromKeyword(
                 }
             }
 
-            matches.push({ ...item, index: idx, contextScore: catMatch + groupMatch + posBonus });
+            matches.push({ ...item, index: idx, contextScore: (catMatch * 10) + (groupMatch * 20) + posBonus });
         }
     }
 
