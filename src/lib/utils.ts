@@ -284,9 +284,17 @@ export function detectBuildingFromKeyword(keyword: string, buildings: any[]): an
 export function detectWorkFromKeyword(
     keyword: string,
     hierarchy: { category: string; groups: { name: string; tasks: string[] }[] }[],
-    categoryFilter?: string
+    categoryFilter?: string,
+    buildingExclude?: { name: string; code: string } | null
 ): string {
     if (!keyword) return '';
+
+    // Build a set of words to EXCLUDE (building name & code words)
+    const excludeWords = new Set<string>();
+    if (buildingExclude) {
+        buildingExclude.name.toLowerCase().split(/[\s_]+/).forEach(w => { if (w.length > 1) excludeWords.add(w); });
+        if (buildingExclude.code) excludeWords.add(buildingExclude.code.toLowerCase());
+    }
 
     // Split by comma. Early phrases are manual tags, the last phrase is usually the generated filename.
     const phrases = keyword.split(',').map(s => s.trim()).filter(Boolean);
@@ -324,7 +332,11 @@ export function detectWorkFromKeyword(
             cleanPhrase = cleanPhrase.replace(new RegExp(`\\b${alias}\\b`, 'gi'), realName);
         }
 
-        const tokens = cleanPhrase.split(/[\s\/]+/).filter(t => t.length > 2 && !['work', 'name', 'select', 'building', 'date', 'jpeg', 'jpg', 'png'].includes(t));
+        const tokens = cleanPhrase.split(/[\s\/]+/).filter(t =>
+            t.length > 2 &&
+            !['work', 'name', 'select', 'building', 'date', 'jpeg', 'jpg', 'png'].includes(t) &&
+            !excludeWords.has(t) // Exclude building name words
+        );
         if (tokens.length === 0) continue;
 
         // Prioritize manual tags (all phrases except the last one, which is the filename)

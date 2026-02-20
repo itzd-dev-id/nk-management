@@ -618,7 +618,8 @@ export default function Home() {
         const rawT = detectWorkFromKeyword(
           fullKeyword,
           allHierarchy,
-          (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
+          (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined,
+          slot.detectedBuilding
         );
         if (rawT) {
           if (rawT.includes(' / ')) {
@@ -658,7 +659,8 @@ export default function Home() {
       const rawT = detectWorkFromKeyword(
         fullKeyword,
         allHierarchy,
-        (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined
+        (slot.detectedBuilding?.code === 'GL' || slot.detectedBuilding?.code === 'GLO') ? '10. Logistik & Material' : undefined,
+        slot.detectedBuilding
       );
 
       if (rawT) {
@@ -733,7 +735,8 @@ export default function Home() {
         const detectedTRaw = detectWorkFromKeyword(
           fullKeyword,
           allHierarchy,
-          (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined
+          (detectedB?.code === 'GL' || detectedB?.code === 'GLO') ? '10. Logistik & Material' : undefined,
+          detectedB
         );
 
         let detectedT = '';
@@ -1232,7 +1235,7 @@ export default function Home() {
                             const fullKeyword = buildDetectionKeyword(slot.tags, mainFile.name.split('.')[0]);
 
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy, undefined, slot.detectedBuilding);
 
                             if (rawT) {
                               if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
@@ -1267,7 +1270,7 @@ export default function Home() {
                             // RE-DETECT (tags-only when tags exist, filename as fallback)
                             const fullKeyword = buildDetectionKeyword(slot.tags, file.name.split('.')[0]);
                             slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                            const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy, undefined, slot.detectedBuilding);
                             if (rawT) {
                               if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
                               else {
@@ -1359,7 +1362,7 @@ export default function Home() {
                               // RE-DETECT (tags-only when tags exist, filename as fallback)
                               const fullKeyword = buildDetectionKeyword(slot.tags, file.name.split('.')[0]);
                               slot.detectedBuilding = detectBuildingFromKeyword(fullKeyword, allBuildings);
-                              const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy);
+                              const rawT = detectWorkFromKeyword(fullKeyword, allHierarchy, undefined, slot.detectedBuilding);
                               if (rawT) {
                                 if (rawT.includes(' / ')) slot.detectedWorkName = rawT;
                                 else {
