@@ -1222,6 +1222,7 @@ export default function Home() {
                     <input
                       type="file"
                       multiple={isBatchMode}
+                      accept="image/*,video/mp4,video/quicktime,video/x-msvideo,application/pdf"
                       className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
                       onChange={async (e) => {
                         const fileList = e.target.files;
@@ -1361,6 +1362,7 @@ export default function Home() {
                       <div key={idx} className="relative aspect-square group">
                         <input
                           type="file"
+                          accept="image/*,video/mp4,video/quicktime,video/x-msvideo,application/pdf"
                           className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];

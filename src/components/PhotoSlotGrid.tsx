@@ -56,6 +56,8 @@ function PhotoSlot({ slot, onUpdate, onRemove, allHierarchy, allBuildings }: { s
         },
         accept: {
             'image/*': ['.jpeg', '.jpg', '.png', '.webp'],
+            'video/*': ['.mp4', '.mov', '.avi'],
+            'application/pdf': ['.pdf'],
         },
         multiple: false
     });
