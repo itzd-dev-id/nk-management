@@ -1033,9 +1033,10 @@ export default function Home() {
     }
 
     const previews = activeSlots.map((slot, idx) => {
-      const file = slot.file!;
-      const isVideo = file.type.startsWith('video/');
-      const extension = isVideo ? 'mp4' : getFileExtension(file.name);
+      const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'];
+      const fileExt = getFileExtension(file.name).toLowerCase();
+      const isVideo = file.type.startsWith('video/') || videoExtensions.includes(fileExt);
+      const extension = isVideo ? 'mp4' : fileExt;
 
       // Use detected values or fallbacks
       const b = slot.detectedBuilding || selectedBuilding || { code: '?-?', name: 'Select Building' };
@@ -1073,8 +1074,10 @@ export default function Home() {
     setFiles((prev) =>
       prev.map((f) => {
         if (f.id === id) {
-          const isVideo = f.file.type.startsWith('video/');
-          const extension = isVideo ? 'mp4' : getFileExtension(f.originalName);
+          const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'];
+          const fileExt = getFileExtension(f.originalName).toLowerCase();
+          const isVideo = f.file.type.startsWith('video/') || videoExtensions.includes(fileExt);
+          const extension = isVideo ? 'mp4' : fileExt;
           return {
             ...f,
             detectedDate: newDate,
@@ -1673,12 +1676,20 @@ export default function Home() {
 
                           // 0. Metadata logic
                           let originalExif = null;
-                          const isImage = file.type.startsWith('image/');
+                          const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'];
+                          const fileExt = getFileExtension(file.name).toLowerCase();
+                          const isVideo = file.type.startsWith('video/') || videoExtensions.includes(fileExt);
+                          const isImage = file.type.startsWith('image/') && !isVideo;
 
                           if (isImage) {
                             originalExif = await getExifData(file);
-                            const buffer = await file.arrayBuffer();
-                            const existingExif = await exifr.parse(buffer, { gps: true });
+                            let existingExif = null;
+                            try {
+                              const buffer = await file.arrayBuffer();
+                              existingExif = await exifr.parse(buffer, { gps: true });
+                            } catch (exifrErr: any) {
+                              addLog(`[WARN] Gagal membaca metadata GPS: ${exifrErr.message}`);
+                            }
                             const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
 
                             if (!hasGps && navigator.geolocation) {
