@@ -1033,6 +1033,7 @@ export default function Home() {
     }
 
     const previews = activeSlots.map((slot, idx) => {
+      const file = slot.file!;
       const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'];
       const fileExt = getFileExtension(file.name).toLowerCase();
       const isVideo = file.type.startsWith('video/') || videoExtensions.includes(fileExt);
