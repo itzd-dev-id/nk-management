@@ -1670,33 +1670,44 @@ export default function Home() {
                           };
 
                           // 0. Metadata logic
-                          let originalExif = await getExifData(file);
-                          const buffer = await file.arrayBuffer();
-                          const existingExif = await exifr.parse(buffer, { gps: true });
-                          const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+                          let originalExif = null;
+                          const isImage = file.type.startsWith('image/');
 
-                          if (!hasGps && navigator.geolocation) {
-                            addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
-                            try {
-                              const pos = await new Promise<GeolocationPosition>((res, rej) => {
-                                navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
-                              });
-                              addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
-                              originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
-                              file = await injectExif(file, originalExif, file.name, file.type);
-                            } catch (gpsErr: any) {
-                              addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                          if (isImage) {
+                            originalExif = await getExifData(file);
+                            const buffer = await file.arrayBuffer();
+                            const existingExif = await exifr.parse(buffer, { gps: true });
+                            const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+
+                            if (!hasGps && navigator.geolocation) {
+                              addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
+                              try {
+                                const pos = await new Promise<GeolocationPosition>((res, rej) => {
+                                  navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
+                                });
+                                addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
+                                originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
+                                file = await injectExif(file, originalExif, file.name, file.type);
+                              } catch (gpsErr: any) {
+                                addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                              }
                             }
                           }
 
                           // 1. Process and Upload Original (Clean)
-                          addLog(`[INFO] Compressing original...`);
-                          const compressedBlob = await imageCompression(file, options);
                           let finalOriginal: File;
-                          if (originalExif) {
-                            finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
+
+                          if (isImage) {
+                            addLog(`[INFO] Compressing original image...`);
+                            const compressedBlob = await imageCompression(file, options);
+                            if (originalExif) {
+                              finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
+                            } else {
+                              finalOriginal = new File([compressedBlob], file.name, { type: file.type });
+                            }
                           } else {
-                            finalOriginal = new File([compressedBlob], file.name, { type: file.type });
+                            addLog(`[INFO] Using original file (no compression for non-image)...`);
+                            finalOriginal = file;
                           }
 
                           addLog(`[INFO] Uploading original version...`);
