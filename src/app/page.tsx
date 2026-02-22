@@ -1237,7 +1237,10 @@ export default function Home() {
                         if (isBatchMode) {
                           const filesToProcess = Array.from(fileList); // No limit for stack mode (or reasonable limit like 50)
                           const mainFile = filesToProcess[0];
-                          const date = await detectFileDate(mainFile);
+                          let date = null;
+                          if (mainFile.type.startsWith('image/')) {
+                            date = await detectFileDate(mainFile);
+                          }
 
                           setSlots(prev => {
                             const next = [...prev];
@@ -1280,7 +1283,10 @@ export default function Home() {
                         } else {
                           // Single file logic (Original)
                           const file = fileList[0];
-                          const date = await detectFileDate(file);
+                          let date = null;
+                          if (file.type.startsWith('image/')) {
+                            date = await detectFileDate(file);
+                          }
                           setSlots(prev => {
                             const next = [...prev];
                             const slot = { ...next[0], file, detectedDate: date };
@@ -1373,7 +1379,10 @@ export default function Home() {
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
-                            const date = await detectFileDate(file);
+                            let date = null;
+                            if (file.type.startsWith('image/')) {
+                              date = await detectFileDate(file);
+                            }
                             setSlots(prev => {
                               const next = [...prev];
                               const slot = { ...next[idx], file, detectedDate: date };
@@ -1646,7 +1655,7 @@ export default function Home() {
                           let timestampDate = slot.detectedDate || getDefaultDate();
 
                           // If it's a stack member (not the primary preview), re-detect date to be safe
-                          if (filesToProcess.length > 1 && fileToProcess !== slot.file) {
+                          if (filesToProcess.length > 1 && fileToProcess !== slot.file && fileToProcess.type.startsWith('image/')) {
                             const d = await detectFileDate(fileToProcess);
                             if (d) timestampDate = d;
                           }
@@ -1681,11 +1690,14 @@ export default function Home() {
                           const fileExt = getFileExtension(file.name).toLowerCase();
                           const isVideo = file.type.startsWith('video/') || videoExtensions.includes(fileExt);
                           const isImage = file.type.startsWith('image/') && !isVideo;
+                          const isPdf = file.type === 'application/pdf' || fileExt === 'pdf';
 
                           if (isImage) {
+                            addLog(`[DEBUG] Attempting getExifData for ${file.name}`);
                             originalExif = await getExifData(file);
                             let existingExif = null;
                             try {
+                              addLog(`[DEBUG] Attempting exifr.parse for ${file.name}`);
                               const buffer = await file.arrayBuffer();
                               existingExif = await exifr.parse(buffer, { gps: true });
                             } catch (exifrErr: any) {
@@ -1701,6 +1713,7 @@ export default function Home() {
                                 });
                                 addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
                                 originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
+                                addLog(`[DEBUG] Attempting injectExif (GPS) for ${file.name}`);
                                 file = await injectExif(file, originalExif, file.name, file.type);
                               } catch (gpsErr: any) {
                                 addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
@@ -1712,9 +1725,10 @@ export default function Home() {
                           let finalOriginal: File;
 
                           if (isImage) {
-                            addLog(`[INFO] Compressing original image...`);
+                            addLog(`[DEBUG] Attempting imageCompression for ${file.name}`);
                             const compressedBlob = await imageCompression(file, options);
                             if (originalExif) {
+                              addLog(`[DEBUG] Attempting injectExif (Original) for ${file.name}`);
                               finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
                             } else {
                               finalOriginal = new File([compressedBlob], file.name, { type: file.type });
@@ -1734,7 +1748,7 @@ export default function Home() {
                           }
 
                           // 2. Process and Upload Timestamp (if enabled)
-                          if (useTimestamp && file.type.startsWith('image/')) {
+                          if (useTimestamp && isImage) {
                             addLog(`[INFO] Processing timestamped version...`);
 
                             // Use projectLocation if available, otherwise pass callback to set it
@@ -1750,9 +1764,11 @@ export default function Home() {
                               },
                               timestampDate
                             );
+                            addLog(`[DEBUG] Attempting imageCompression (Timestamp) for ${file.name}`);
                             const compressedTsBlob = await imageCompression(timestampedFile, options);
                             let finalTs: File;
                             if (originalExif) {
+                              addLog(`[DEBUG] Attempting injectExif (Timestamp) for ${file.name}`);
                               finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
                             } else {
                               finalTs = new File([compressedTsBlob], file.name, { type: file.type });
