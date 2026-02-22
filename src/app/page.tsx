@@ -1034,7 +1034,8 @@ export default function Home() {
 
     const previews = activeSlots.map((slot, idx) => {
       const file = slot.file!;
-      const extension = getFileExtension(file.name);
+      const isVideo = file.type.startsWith('video/');
+      const extension = isVideo ? 'mp4' : getFileExtension(file.name);
 
       // Use detected values or fallbacks
       const b = slot.detectedBuilding || selectedBuilding || { code: '?-?', name: 'Select Building' };
@@ -1072,7 +1073,8 @@ export default function Home() {
     setFiles((prev) =>
       prev.map((f) => {
         if (f.id === id) {
-          const extension = getFileExtension(f.originalName);
+          const isVideo = f.file.type.startsWith('video/');
+          const extension = isVideo ? 'mp4' : getFileExtension(f.originalName);
           return {
             ...f,
             detectedDate: newDate,
