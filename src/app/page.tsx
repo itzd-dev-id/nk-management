@@ -1693,17 +1693,15 @@ export default function Home() {
                           const isPdf = file.type === 'application/pdf' || fileExt === 'pdf';
 
                           if (isImage) {
-                            addLog(`[DEBUG] Attempting getExifData for ${file.name}`);
-                            originalExif = await getExifData(file);
-                            let existingExif = null;
+                            addLog(`[DEBUG] Membaca metadata asli: ${file.name}`);
+                            let existingTags = null;
                             try {
-                              addLog(`[DEBUG] Attempting exifr.parse for ${file.name}`);
-                              const buffer = await file.arrayBuffer();
-                              existingExif = await exifr.parse(buffer, { gps: true });
-                            } catch (exifrErr: any) {
-                              addLog(`[WARN] Gagal membaca metadata GPS: ${exifrErr.message}`);
+                              existingTags = await exifr.parse(file, { gps: true });
+                            } catch (e) {
+                              addLog(`[WARN] Gagal parse metadata awal: ${file.name}`);
                             }
-                            const hasGps = !!(existingExif?.latitude && existingExif?.longitude);
+
+                            const hasGps = !!(existingTags?.latitude && existingTags?.longitude);
 
                             if (!hasGps && navigator.geolocation) {
                               addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
@@ -1712,12 +1710,13 @@ export default function Home() {
                                   navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
                                 });
                                 addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
-                                originalExif = createGpsExif(pos.coords.latitude, pos.coords.longitude);
-                                addLog(`[DEBUG] Attempting injectExif (GPS) for ${file.name}`);
-                                file = await injectExif(file, originalExif, file.name, file.type);
+                                originalExif = await getExifData(file, { lat: pos.coords.latitude, lon: pos.coords.longitude });
                               } catch (gpsErr: any) {
                                 addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
+                                originalExif = await getExifData(file);
                               }
+                            } else {
+                              originalExif = await getExifData(file);
                             }
                           }
 
@@ -1725,16 +1724,16 @@ export default function Home() {
                           let finalOriginal: File;
 
                           if (isImage) {
-                            addLog(`[DEBUG] Attempting imageCompression for ${file.name}`);
+                            addLog(`[DEBUG] Mengompres gambar...`);
                             const compressedBlob = await imageCompression(file, options);
                             if (originalExif) {
-                              addLog(`[DEBUG] Attempting injectExif (Original) for ${file.name}`);
-                              finalOriginal = await injectExif(compressedBlob, originalExif, file.name, file.type);
+                              addLog(`[DEBUG] Menyuntikkan EXIF ke hasil kompresi...`);
+                              finalOriginal = await injectExif(compressedBlob, originalExif, file.name, "image/jpeg");
                             } else {
-                              finalOriginal = new File([compressedBlob], file.name, { type: file.type });
+                              finalOriginal = new File([compressedBlob], file.name, { type: "image/jpeg" });
                             }
                           } else {
-                            addLog(`[INFO] Using original file (no compression for non-image)...`);
+                            addLog(`[INFO] Menggunakan file asli (non-image)...`);
                             finalOriginal = file;
                           }
 
@@ -1749,9 +1748,8 @@ export default function Home() {
 
                           // 2. Process and Upload Timestamp (if enabled)
                           if (useTimestamp && isImage) {
-                            addLog(`[INFO] Processing timestamped version...`);
+                            addLog(`[INFO] Membuat file dengan timestamp...`);
 
-                            // Use projectLocation if available, otherwise pass callback to set it
                             const timestampedFile = await processTimestampImage(
                               file,
                               addLog,
@@ -1759,23 +1757,24 @@ export default function Home() {
                               (loc: string) => {
                                 if (!projectLocation) {
                                   setProjectLocation(loc);
-                                  addLog(`[INFO] Lokasi project disimpan: ${loc}`);
+                                  addLog(`[INFO] Lokasi proyek didapat: ${loc}`);
                                 }
                               },
                               timestampDate
                             );
-                            addLog(`[DEBUG] Attempting imageCompression (Timestamp) for ${file.name}`);
+
+                            addLog(`[DEBUG] Mengompres file timestamp...`);
                             const compressedTsBlob = await imageCompression(timestampedFile, options);
                             let finalTs: File;
                             if (originalExif) {
-                              addLog(`[DEBUG] Attempting injectExif (Timestamp) for ${file.name}`);
-                              finalTs = await injectExif(compressedTsBlob, originalExif, file.name, file.type);
+                              addLog(`[DEBUG] Menyuntikkan EXIF ke file timestamp...`);
+                              finalTs = await injectExif(compressedTsBlob, originalExif, file.name, "image/jpeg");
                             } else {
-                              finalTs = new File([compressedTsBlob], file.name, { type: file.type });
+                              finalTs = new File([compressedTsBlob], file.name, { type: "image/jpeg" });
                             }
                             const tsRes = await uploadToApi(finalTs, true);
                             if (tsRes.success) {
-                              addLog(`[SUCCESS] Timestamped: ${tsRes.finalName}`);
+                              addLog(`[SUCCESS] Berhasil: ${tsRes.finalName}`);
                             }
                           }
                         }

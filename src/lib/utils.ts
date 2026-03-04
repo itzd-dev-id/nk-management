@@ -19,86 +19,127 @@ export function buildDetectionKeyword(tags: string[], fileName?: string): string
     return fileName || '';
 }
 
-export async function getExifData(file: Blob): Promise<string | null> {
+/**
+ * Robustly extract EXIF tags using exifr and convert them to a piexif-compatible string.
+ * Supports HEIC, JPEG, TIFF via exifr.
+ */
+export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: number }): Promise<string | null> {
     try {
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target?.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
+        const tags = await exifr.parse(file, {
+            tiff: true,
+            exif: true,
+            gps: true,
+            reviveValues: true,
+            sanitize: true
+        }) || {};
 
-        // Ensure it's a JPEG, as piexifjs only supports JPEG data properly
-        if (!dataUrl.startsWith("data:image/jpeg")) {
-            return null;
+        if (gpsOverride) {
+            tags.latitude = gpsOverride.lat;
+            tags.longitude = gpsOverride.lon;
         }
 
-        const exifObj = piexif.load(dataUrl);
+        if (Object.keys(tags).length === 0) return null;
 
-        // Delete problematic fields that often cause piexif.dump to fail (corrupted or too large)
-        if (exifObj["thumbnail"]) delete exifObj["thumbnail"];
-        if (exifObj["Interop"]) delete exifObj["Interop"];
+        const zeroth: any = {};
+        const exif: any = {};
+        const gps: any = {};
 
-        return piexif.dump(exifObj);
+        if (tags.Make) zeroth[piexif.ImageIFD.Make] = tags.Make;
+        if (tags.Model) zeroth[piexif.ImageIFD.Model] = tags.Model;
+        if (tags.Software) zeroth[piexif.ImageIFD.Software] = tags.Software;
+        if (tags.Orientation) zeroth[piexif.ImageIFD.Orientation] = tags.Orientation;
+        if (tags.DateTime) zeroth[piexif.ImageIFD.DateTime] = tags.DateTime;
+
+        if (tags.DateTimeOriginal) {
+            const d = tags.DateTimeOriginal instanceof Date ? tags.DateTimeOriginal : new Date(tags.DateTimeOriginal);
+            if (!isNaN(d.getTime())) {
+                const formatted = format(d, 'yyyy:MM:dd HH:mm:ss');
+                exif[piexif.ExifIFD.DateTimeOriginal] = formatted;
+            }
+        }
+
+        if (tags.ExposureTime) exif[piexif.ExifIFD.ExposureTime] = [Math.round(tags.ExposureTime * 1000000), 1000000];
+        if (tags.FNumber) exif[piexif.ExifIFD.FNumber] = [Math.round(tags.FNumber * 100), 100];
+
+        if (tags.latitude !== undefined && tags.longitude !== undefined) {
+            const lat = Math.abs(tags.latitude);
+            const lon = Math.abs(tags.longitude);
+            gps[piexif.GPSIFD.GPSVersionID] = [2, 2, 0, 0];
+            gps[piexif.GPSIFD.GPSLatitudeRef] = tags.latitude >= 0 ? 'N' : 'S';
+            gps[piexif.GPSIFD.GPSLatitude] = [
+                [Math.floor(lat), 1],
+                [Math.floor((lat % 1) * 60), 1],
+                [Math.round(((lat % 1) * 60 % 1) * 6000), 100]
+            ];
+            gps[piexif.GPSIFD.GPSLongitudeRef] = tags.longitude >= 0 ? 'E' : 'W';
+            gps[piexif.GPSIFD.GPSLongitude] = [
+                [Math.floor(lon), 1],
+                [Math.floor((lon % 1) * 60), 1],
+                [Math.round(((lon % 1) * 60 % 1) * 6000), 100]
+            ];
+            if (tags.altitude !== undefined) {
+                gps[piexif.GPSIFD.GPSAltitudeRef] = tags.altitude >= 0 ? 0 : 1;
+                gps[piexif.GPSIFD.GPSAltitude] = [Math.round(Math.abs(tags.altitude) * 100), 100];
+            }
+        }
+
+        const exifDict = { "0th": zeroth, "Exif": exif, "GPS": gps, "Interop": {}, "1st": {}, "thumbnail": null };
+        return piexif.dump(exifDict as any);
     } catch (e) {
-        console.warn("Failed to extract EXIF:", e);
+        console.warn("getExifData failed:", e);
         return null;
     }
 }
 
-
 export async function detectFileDate(file: File): Promise<string> {
     try {
-        // 1. Try to read EXIF DateTimeOriginal using exifr (Robust, supports HEIC/JPG)
-        const output = await exifr.parse(file, { tiff: true, exif: true });
+        const output = await exifr.parse(file, { exif: true });
         const dateTimeOriginal = output?.DateTimeOriginal;
 
         if (dateTimeOriginal) {
-            // Robust Parsing for "YYYY:MM:DD HH:MM:SS" or Date object
             let dateObj: Date | null = null;
-
             if (dateTimeOriginal instanceof Date) {
                 dateObj = dateTimeOriginal;
             } else if (typeof dateTimeOriginal === 'string') {
-                // Handle "YYYY:MM:DD HH:MM:SS"
                 const [datePart, timePart] = dateTimeOriginal.split(' ');
                 const cleanDate = datePart.replace(/:/g, '-');
                 const dateString = timePart ? `${cleanDate}T${timePart}` : cleanDate;
                 const parsed = new Date(dateString);
-                if (!isNaN(parsed.getTime())) {
-                    dateObj = parsed;
-                }
+                if (!isNaN(parsed.getTime())) dateObj = parsed;
             }
 
-            if (dateObj) {
-                return format(dateObj, 'yyyy-MM-dd');
-            }
+            if (dateObj) return format(dateObj, 'yyyy-MM-dd');
         }
     } catch (e) {
-        console.warn("Failed to extract EXIF date via exifr:", e);
+        console.warn("detectFileDate failed:", e);
     }
-
-    // 2. Fallback to Last Modified
     return format(new Date(file.lastModified), 'yyyy-MM-dd');
 }
 
 export async function injectExif(destBlob: Blob, exifStr: string, fileName: string, mimeType: string): Promise<File> {
     try {
-        const destDataUrl = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
             reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onerror = reject;
             reader.readAsDataURL(destBlob);
         });
 
-        const inserted = piexif.insert(exifStr, destDataUrl);
+        // piexif only works on JPEG. imageCompression should have converted it.
+        if (!dataUrl.startsWith("data:image/jpeg")) {
+            console.warn("injectExif: Not a JPEG, skipping.");
+            return new File([destBlob], fileName, { type: mimeType });
+        }
+
+        const inserted = piexif.insert(exifStr, dataUrl);
         const res = await fetch(inserted);
         const blob = await res.blob();
 
-        return new File([blob], fileName, { type: mimeType, lastModified: Date.now() });
+        // Always use original extension in name but ensure type is JPEG if injected
+        return new File([blob], fileName, { type: "image/jpeg", lastModified: Date.now() });
     } catch (e) {
-        console.error("EXIF injection error:", e);
-        // Fallback to converting Blob to File
-        return new File([destBlob], fileName, { type: mimeType, lastModified: Date.now() });
+        console.error("injectExif failed:", e);
+        return new File([destBlob], fileName, { type: mimeType });
     }
 }
 
