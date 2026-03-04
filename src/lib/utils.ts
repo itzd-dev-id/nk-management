@@ -441,8 +441,8 @@ export function createGpsExif(lat: number, lon: number): string {
     gpsIfd[piexif.GPSIFD.GPSLongitudeRef] = lon >= 0 ? "E" : "W";
     gpsIfd[piexif.GPSIFD.GPSLongitude] = [[lonDeg, 1], [lonMin, 1], [Math.round(lonSec * 100), 100]];
 
-    const exifObj = { "0th": {}, "Exif": {}, "GPS": gpsIfd, "1st": {}, "Interop": {}, "thumbnail": null };
-    return piexif.dump(exifObj);
+    const exifObj = { "0th": {}, "Exif": {}, "GPS": gpsIfd, "1st": {}, "Interop": {} };
+    return piexif.dump(exifObj as any);
 }
 export function getBadgeColor(groupName: string, isSelected?: boolean): string {
     if (isSelected) return 'bg-white/20 border-white/20 text-white';
