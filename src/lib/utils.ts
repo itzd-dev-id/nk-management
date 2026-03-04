@@ -21,12 +21,24 @@ export function buildDetectionKeyword(tags: string[], fileName?: string): string
 
 export async function getExifData(file: Blob): Promise<string | null> {
     try {
-        const dataUrl = await new Promise<string>((resolve) => {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target?.result as string);
+            reader.onerror = reject;
             reader.readAsDataURL(file);
         });
+
+        // Ensure it's a JPEG, as piexifjs only supports JPEG data properly
+        if (!dataUrl.startsWith("data:image/jpeg")) {
+            return null;
+        }
+
         const exifObj = piexif.load(dataUrl);
+
+        // Delete problematic fields that often cause piexif.dump to fail (corrupted or too large)
+        if (exifObj["thumbnail"]) delete exifObj["thumbnail"];
+        if (exifObj["Interop"]) delete exifObj["Interop"];
+
         return piexif.dump(exifObj);
     } catch (e) {
         console.warn("Failed to extract EXIF:", e);
@@ -429,7 +441,7 @@ export function createGpsExif(lat: number, lon: number): string {
     gpsIfd[piexif.GPSIFD.GPSLongitudeRef] = lon >= 0 ? "E" : "W";
     gpsIfd[piexif.GPSIFD.GPSLongitude] = [[lonDeg, 1], [lonMin, 1], [Math.round(lonSec * 100), 100]];
 
-    const exifObj = { "GPS": gpsIfd };
+    const exifObj = { "0th": {}, "Exif": {}, "GPS": gpsIfd, "1st": {}, "Interop": {}, "thumbnail": null };
     return piexif.dump(exifObj);
 }
 export function getBadgeColor(groupName: string, isSelected?: boolean): string {

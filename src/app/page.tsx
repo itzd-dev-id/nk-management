@@ -1663,7 +1663,7 @@ export default function Home() {
                           addLog(`[INFO] Processing: ${fileToProcess.name} (Folder: ${folderDate}, TS: ${timestampDate})`);
 
                           let file = fileToProcess;
-                          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true };
+                          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: false, fileType: "image/jpeg" as const };
 
                           const uploadToApi = async (f: File | Blob, isTs: boolean) => {
                             const formData = new FormData();
