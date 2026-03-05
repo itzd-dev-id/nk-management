@@ -100,7 +100,7 @@ export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: 
             }
         }
 
-        const exifDict = { "0th": zeroth, "Exif": exif, "GPS": gps };
+        const exifDict = { "0th": zeroth, "Exif": exif, "GPS": gps, "Interop": {}, "1st": {} };
         return piexif.dump(exifDict as any);
     } catch (e) {
         console.warn("getExifData failed:", e);
@@ -133,7 +133,7 @@ export async function detectFileDate(file: File): Promise<string> {
     return format(new Date(file.lastModified), 'yyyy-MM-dd');
 }
 
-export async function injectExif(destBlob: Blob, exifStr: string, fileName: string, mimeType: string): Promise<File> {
+export async function injectExif(destBlob: Blob, exifStr: string, fileName: string, mimeType: string, log?: (msg: string) => void): Promise<File> {
     try {
         const reader = new FileReader();
         const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -144,22 +144,31 @@ export async function injectExif(destBlob: Blob, exifStr: string, fileName: stri
 
         // piexif only works on JPEG. imageCompression should have converted it.
         if (!dataUrl.startsWith("data:image/jpeg")) {
-            console.warn("injectExif: Not a JPEG, skipping.");
+            if (log) log("injectExif: Not a JPEG, skipping.");
             return new File([destBlob], fileName, { type: mimeType });
         }
 
+        if (log) log(`injectExif: Injecting ${exifStr.length} bytes of EXIF...`);
         const inserted = piexif.insert(exifStr, dataUrl);
-        const res = await fetch(inserted);
-        const blob = await res.blob();
+
+        // Manual conversion from base64 to Blob (more robust than fetch() on mobile)
+        const parts = inserted.split(",");
+        const byteString = atob(parts[1]);
+        const ia = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ia], { type: "image/jpeg" });
 
         // Ensure filename ends in .jpg to match JPEG content
         let finalName = fileName;
         if (!finalName.toLowerCase().endsWith('.jpg') && !finalName.toLowerCase().endsWith('.jpeg')) {
             finalName = (finalName.substring(0, finalName.lastIndexOf('.')) || finalName) + '.jpg';
         }
+        if (log) log(`injectExif: Final file ready: ${finalName}`);
         return new File([blob], finalName, { type: "image/jpeg", lastModified: Date.now() });
     } catch (e) {
-        console.error("injectExif failed:", e);
+        if (log) log(`injectExif failed: ${e instanceof Error ? e.message : String(e)}`);
         return new File([destBlob], fileName, { type: mimeType });
     }
 }

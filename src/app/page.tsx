@@ -1731,9 +1731,11 @@ export default function Home() {
                             addLog(`[DEBUG] Mengompres gambar...`);
                             const compressedBlob = await imageCompression(file, options);
                             if (originalExif) {
-                              addLog(`[DEBUG] Menyuntikkan EXIF ke hasil kompresi...`);
-                              finalOriginal = await injectExif(compressedBlob, originalExif, file.name, "image/jpeg");
+                              addLog(`[DEBUG] Menyuntikkan EXIF (${originalExif.length} b)...`);
+                              finalOriginal = await injectExif(compressedBlob, originalExif, file.name, "image/jpeg", addLog);
+                              addLog(`[DEBUG] Injeksi selesai: ${finalOriginal.name}`);
                             } else {
+                              addLog(`[DEBUG] Tidak ada metadata EXIF untuk disuntikkan.`);
                               finalOriginal = new File([compressedBlob], file.name, { type: "image/jpeg" });
                             }
                           } else {
@@ -1772,7 +1774,7 @@ export default function Home() {
                             let finalTs: File;
                             if (originalExif) {
                               addLog(`[DEBUG] Menyuntikkan EXIF ke file timestamp...`);
-                              finalTs = await injectExif(compressedTsBlob, originalExif, file.name, "image/jpeg");
+                              finalTs = await injectExif(compressedTsBlob, originalExif, file.name, "image/jpeg", addLog);
                             } else {
                               finalTs = new File([compressedTsBlob], file.name, { type: "image/jpeg" });
                             }
