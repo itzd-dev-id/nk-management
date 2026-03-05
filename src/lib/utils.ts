@@ -23,7 +23,7 @@ export function buildDetectionKeyword(tags: string[], fileName?: string): string
  * Robustly extract EXIF tags using exifr and convert them to a piexif-compatible string.
  * Supports HEIC, JPEG, TIFF via exifr.
  */
-export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: number }): Promise<string | null> {
+export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: number }, description?: string): Promise<string | null> {
     try {
         const tags = await exifr.parse(file, {
             tiff: true,
@@ -45,9 +45,12 @@ export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: 
         const gps: any = {};
 
         // Device info — defaults ensure Safari captures always have identity
-        zeroth[piexif.ImageIFD.Make] = tags.Make || 'Mobile Device';
+        zeroth[piexif.ImageIFD.Make] = tags.Make || 'Nindya Karya';
         zeroth[piexif.ImageIFD.Model] = tags.Model || 'Browser Camera';
-        zeroth[piexif.ImageIFD.Software] = tags.Software || 'NK Management';
+        zeroth[piexif.ImageIFD.Software] = 'NK Management System';
+        if (description) {
+            zeroth[piexif.ImageIFD.ImageDescription] = description;
+        }
         if (tags.Orientation) zeroth[piexif.ImageIFD.Orientation] = tags.Orientation;
         zeroth[piexif.ImageIFD.XResolution] = [72, 1];
         zeroth[piexif.ImageIFD.YResolution] = [72, 1];

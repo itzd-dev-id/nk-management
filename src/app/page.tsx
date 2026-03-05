@@ -1703,6 +1703,8 @@ export default function Home() {
                               addLog(`[WARN] Gagal parse metadata awal: ${file.name}`);
                             }
 
+                            const imgDescription = `Proyek: ${b.name}, Pekerjaan: ${w}, Progress: ${progress || '0'}%`;
+
                             const hasGps = !!(existingTags?.latitude && existingTags?.longitude);
 
                             if (!hasGps && navigator.geolocation) {
@@ -1712,13 +1714,13 @@ export default function Home() {
                                   navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
                                 });
                                 addLog(`[INFO] Lokasi HP didapat (Safari workaround): ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
-                                originalExif = await getExifData(file, { lat: pos.coords.latitude, lon: pos.coords.longitude });
+                                originalExif = await getExifData(file, { lat: pos.coords.latitude, lon: pos.coords.longitude }, imgDescription);
                               } catch (gpsErr: any) {
                                 addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);
-                                originalExif = await getExifData(file);
+                                originalExif = await getExifData(file, undefined, imgDescription);
                               }
                             } else {
-                              originalExif = await getExifData(file);
+                              originalExif = await getExifData(file, undefined, imgDescription);
                             }
                           }
 
