@@ -1663,11 +1663,13 @@ export default function Home() {
                           addLog(`[INFO] Processing: ${fileToProcess.name} (Folder: ${folderDate}, TS: ${timestampDate})`);
 
                           let file = fileToProcess;
-                          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: false, fileType: "image/jpeg" as const };
+                          const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, preserveExif: true, fileType: "image/jpeg" as const };
 
                           const uploadToApi = async (f: File | Blob, isTs: boolean) => {
+                            const actualFile = f as File;
+                            const uploadName = actualFile.name || fileToProcess.name;
                             const formData = new FormData();
-                            formData.append('file', f, fileToProcess.name);
+                            formData.append('file', f, uploadName);
                             formData.append('metadata', JSON.stringify({
                               detectedDate: folderDate,
                               workName: w,
@@ -1704,12 +1706,12 @@ export default function Home() {
                             const hasGps = !!(existingTags?.latitude && existingTags?.longitude);
 
                             if (!hasGps && navigator.geolocation) {
-                              addLog(`[INFO] GPS tidak ditemukan. Mencoba Live Injection...`);
+                              addLog(`[INFO] GPS tidak ditemukan (Safari mungkin menghapusnya). Mencoba Live Injection...`);
                               try {
                                 const pos = await new Promise<GeolocationPosition>((res, rej) => {
                                   navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 8000 });
                                 });
-                                addLog(`[INFO] Lokasi HP didapat: ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
+                                addLog(`[INFO] Lokasi HP didapat (Safari workaround): ${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
                                 originalExif = await getExifData(file, { lat: pos.coords.latitude, lon: pos.coords.longitude });
                               } catch (gpsErr: any) {
                                 addLog(`[WARN] Gagal mengambil GPS HP: ${gpsErr.message}`);

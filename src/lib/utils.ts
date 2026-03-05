@@ -44,22 +44,36 @@ export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: 
         const exif: any = {};
         const gps: any = {};
 
-        if (tags.Make) zeroth[piexif.ImageIFD.Make] = tags.Make;
-        if (tags.Model) zeroth[piexif.ImageIFD.Model] = tags.Model;
-        if (tags.Software) zeroth[piexif.ImageIFD.Software] = tags.Software;
+        // Device info — defaults ensure Safari captures always have identity
+        zeroth[piexif.ImageIFD.Make] = tags.Make || 'Mobile Device';
+        zeroth[piexif.ImageIFD.Model] = tags.Model || 'Browser Camera';
+        zeroth[piexif.ImageIFD.Software] = tags.Software || 'NK Management';
         if (tags.Orientation) zeroth[piexif.ImageIFD.Orientation] = tags.Orientation;
-        if (tags.DateTime) zeroth[piexif.ImageIFD.DateTime] = tags.DateTime;
+        zeroth[piexif.ImageIFD.XResolution] = [72, 1];
+        zeroth[piexif.ImageIFD.YResolution] = [72, 1];
+        zeroth[piexif.ImageIFD.ResolutionUnit] = 2;
 
-        if (tags.DateTimeOriginal) {
-            const d = tags.DateTimeOriginal instanceof Date ? tags.DateTimeOriginal : new Date(tags.DateTimeOriginal);
+        // DateTime — always present, fallback to now
+        const dateSource = tags.DateTimeOriginal || tags.DateTime;
+        if (dateSource) {
+            const d = dateSource instanceof Date ? dateSource : new Date(dateSource);
             if (!isNaN(d.getTime())) {
                 const formatted = format(d, 'yyyy:MM:dd HH:mm:ss');
                 exif[piexif.ExifIFD.DateTimeOriginal] = formatted;
+                exif[piexif.ExifIFD.DateTimeDigitized] = formatted;
             }
+        } else {
+            const now = format(new Date(), 'yyyy:MM:dd HH:mm:ss');
+            exif[piexif.ExifIFD.DateTimeOriginal] = now;
         }
 
+        // Exposure info
         if (tags.ExposureTime) exif[piexif.ExifIFD.ExposureTime] = [Math.round(tags.ExposureTime * 1000000), 1000000];
         if (tags.FNumber) exif[piexif.ExifIFD.FNumber] = [Math.round(tags.FNumber * 100), 100];
+        if (tags.ISOSpeedRatings) exif[piexif.ExifIFD.ISOSpeedRatings] = tags.ISOSpeedRatings;
+        if (tags.FocalLength) exif[piexif.ExifIFD.FocalLength] = [Math.round(tags.FocalLength * 100), 100];
+        if (tags.LensMake) exif[piexif.ExifIFD.LensMake] = tags.LensMake;
+        if (tags.LensModel) exif[piexif.ExifIFD.LensModel] = tags.LensModel;
 
         if (tags.latitude !== undefined && tags.longitude !== undefined) {
             const lat = Math.abs(tags.latitude);
@@ -83,7 +97,7 @@ export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: 
             }
         }
 
-        const exifDict = { "0th": zeroth, "Exif": exif, "GPS": gps, "Interop": {}, "1st": {}, "thumbnail": null };
+        const exifDict = { "0th": zeroth, "Exif": exif, "GPS": gps };
         return piexif.dump(exifDict as any);
     } catch (e) {
         console.warn("getExifData failed:", e);
@@ -135,8 +149,12 @@ export async function injectExif(destBlob: Blob, exifStr: string, fileName: stri
         const res = await fetch(inserted);
         const blob = await res.blob();
 
-        // Always use original extension in name but ensure type is JPEG if injected
-        return new File([blob], fileName, { type: "image/jpeg", lastModified: Date.now() });
+        // Ensure filename ends in .jpg to match JPEG content
+        let finalName = fileName;
+        if (!finalName.toLowerCase().endsWith('.jpg') && !finalName.toLowerCase().endsWith('.jpeg')) {
+            finalName = (finalName.substring(0, finalName.lastIndexOf('.')) || finalName) + '.jpg';
+        }
+        return new File([blob], finalName, { type: "image/jpeg", lastModified: Date.now() });
     } catch (e) {
         console.error("injectExif failed:", e);
         return new File([destBlob], fileName, { type: mimeType });

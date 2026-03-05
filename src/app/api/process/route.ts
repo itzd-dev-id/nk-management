@@ -44,11 +44,17 @@ export async function POST(req: NextRequest) {
         const sanitizedBuildingCode = sanitizePath(buildingCode);
         const buildingFolder = `${sanitizedBuildingName} (${sanitizedBuildingCode})`;
 
-        // User requested to remove indices from building folder name
+        // Determine extension reliably based on MIME type to prevent false extensions
         const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm'];
-        const fileExt = (file.name.split('.').pop() || '').toLowerCase();
-        const isVideo = file.type.startsWith('video/') || videoExtensions.includes(fileExt);
-        const extension = isVideo ? 'mp4' : fileExt;
+        const originalExt = (file.name.split('.').pop() || '').toLowerCase();
+        const isVideo = file.type.startsWith('video/') || videoExtensions.includes(originalExt);
+
+        let extension = originalExt;
+        if (isVideo) {
+            extension = 'mp4';
+        } else if (file.type === 'image/jpeg') {
+            extension = 'jpg';
+        }
 
         const folderId = extractGDriveId(outputPath);
         console.log('API: Preparing GDrive upload under Folder ID:', folderId);
