@@ -37,8 +37,8 @@ export async function getExifData(file: Blob, gpsOverride?: { lat: number, lon: 
             tags.latitude = gpsOverride.lat;
             tags.longitude = gpsOverride.lon;
         }
-
-        if (Object.keys(tags).length === 0) return null;
+        // Removed early return allowing forced injection of Nindya Karya template
+        // if (Object.keys(tags).length === 0) return null;
 
         const zeroth: any = {};
         const exif: any = {};
